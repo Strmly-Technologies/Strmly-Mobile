@@ -26,6 +26,7 @@ export const Signinstyles = StyleSheet.create({
     textAlign:"center"
   },
   Container:{
+    height:"100%",
     display:"flex",
     gap:25,
     alignItems:"center",
