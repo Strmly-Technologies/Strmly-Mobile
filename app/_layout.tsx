@@ -12,6 +12,7 @@ export default function RootLayout() {
       <Stack screenOptions={{
         headerStyle: { backgroundColor: theme.navBackground },
         headerTintColor: theme.title,
+        headerShown: false,
       }}>
 
         {/* Groups */}
