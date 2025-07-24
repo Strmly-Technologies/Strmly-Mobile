@@ -18,6 +18,12 @@ export const CreateProfileStyles = StyleSheet.create({
         right: 0,
         textAlign: 'center',
     },
+    Heading:{
+        fontSize: 20,
+        fontFamily: 'Poppins-Medium',
+        color: 'white',
+        paddingBottom:12
+    },
     BackIcon: {
         width: 24,
         height: 24,
@@ -55,6 +61,19 @@ export const CreateProfileStyles = StyleSheet.create({
         alignItems:"center",
         justifyContent: "flex-start",
     },
+    Centered: {
+        flex: 1,
+        display: "flex",
+        gap: 10,
+        alignContent:"center",
+        alignItems:"center",
+        justifyContent: "center",
+    },
+    CardGrid:{
+        display:"flex",
+        flexDirection:"row",
+        gap:42
+    },
     button: {
         marginTop: 16,
         width: 333,
@@ -67,5 +86,29 @@ export const CreateProfileStyles = StyleSheet.create({
         backgroundColor: "white",
         color: "black",
         borderRadius: 100
+    },
+    InterestCard:{
+        fontFamily:'Poppins-Light',
+        width:150,
+        height:150,
+        borderRadius:"0.75em",
+        gap:"0.75em",
+        backgroundColor:"grey",
+        display:"flex",
+        justifyContent:"center",
+        textAlign:"center",
+        alignItems:"center",
+        paddingTop:20,
+        paddingBottom:20,
+        paddingLeft:2,
+        paddingRight:2
+    },
+    CardContent:{
+        fontFamily:'Poppins-Light',
+        fontSize:11,
+        display:"flex",
+        justifyContent:"center",
+        textAlign:"center",
+        alignItems:"center"
     }
 })

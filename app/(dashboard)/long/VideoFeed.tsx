@@ -26,7 +26,7 @@ const VideoFeed = () => {
   return (
     <View style={{ flex: 1, backgroundColor: "black", position: "relative" }}>
 
-      <FlatList
+      {/*<FlatList
         data={videoData}
         keyExtractor={(item) => item.id}
           // Pass only the necessary props to VideoItem
@@ -42,7 +42,7 @@ const VideoFeed = () => {
         viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
         showsVerticalScrollIndicator={false}
         bounces={false}
-      />
+      />*/}
     </View>
 
   );
