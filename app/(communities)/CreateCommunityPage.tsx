@@ -85,6 +85,33 @@ const CreateCommunityPage: React.FC = () => {
                         </TouchableOpacity>
                     </Modal>
                 </View>
+
+                
+                <View style={CreateCommunityStyle.InfoFrame}>
+                    <Modal transparent animationType="fade" visible={visible}>
+                        <TouchableOpacity style={CreateCommunityStyle.overlay} onPress={() => setVisible(false)}>
+                            <View style={CreateCommunityStyle.dropdownBox}>
+                                {options.map((item) => (
+                                    <TouchableOpacity
+                                        key={item}
+                                        style={CreateCommunityStyle.dropdownItem}
+                                        onPress={() => handleSelect(item)}
+                                    >
+                                        <ThemedText style={CreateCommunityStyle.dropdownItemText}>{item}</ThemedText>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        </TouchableOpacity>
+                    </Modal>
+                </View>
+                
+                {selected === 'Paid' && (<View style={CreateCommunityStyle.InfoFrame}><View>
+                    <ThemedText style={CreateCommunityStyle.InfoLabel}>Creator Strength</ThemedText>
+                    <TextInput placeholder="500" placeholderTextColor="#B0B0B0" style={CreateCommunityStyle.TextLabel} /></View>
+                    <View>
+                    <ThemedText style={CreateCommunityStyle.InfoLabel}>Community fee</ThemedText>
+                    <TextInput placeholder="₹29/m" placeholderTextColor="#B0B0B0" style={CreateCommunityStyle.TextLabel} /></View>
+                </View>)}
             </View>
 
             <ThemedView style={CreateCommunityStyle.container}>
