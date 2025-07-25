@@ -24,6 +24,7 @@ export const CreateProfileStyles = StyleSheet.create({
         color: 'white',
         paddingBottom:12
     },
+
     BackIcon: {
         width: 24,
         height: 24,

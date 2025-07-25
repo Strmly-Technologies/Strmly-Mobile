@@ -3,7 +3,9 @@ import ThemedView from '@/components/ThemedView'
 import React, { useState } from 'react'
 import { useFonts } from 'expo-font';
 import { CreateProfileStyles } from '@/styles/createprofile'
+
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
 
 const CreateProfile = () => {
   const [Step, setStep] = useState(1)
@@ -104,6 +106,7 @@ const CreateProfile = () => {
         </View>
         <br />
         <ThemedText style={CreateProfileStyles.Text}>Enter the confirmation code that we sent<br /> to {email}</ThemedText>
+
         <TextInput style={CreateProfileStyles.Input} placeholder='Confirmation Code' value={confirmationCode} onChangeText={setConfirmationCode} />
         <TouchableOpacity onPress={() => HandleStep(true)} style={CreateProfileStyles.button}>Finish</TouchableOpacity>
         <TouchableOpacity><ThemedText style={CreateProfileStyles.ExtraBold}>Resend Code</ThemedText></TouchableOpacity>

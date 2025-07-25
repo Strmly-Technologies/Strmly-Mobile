@@ -2,7 +2,13 @@ import { Image, Pressable, Text, View } from "react-native";
 import React, { useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 
-const InteractOptions = () => {
+
+// Define props type for InteractOptions
+type InteractOptionsProps = {
+  onCommentPress: () => void; // Callback function for comment button press
+};
+
+const InteractOptions = ({ onCommentPress }: InteractOptionsProps) => { // Destructure onCommentPress from props
   const [liked, setLiked] = useState(false);
 
   return (
@@ -21,10 +27,14 @@ const InteractOptions = () => {
         </View>
 
         <View className="items-center gap-1">
-          <Image
-            className="size-7"
-            source={require("../../../../assets/images/comments.png")}
-          />
+          {/* Add Pressable around the comment icon */}
+          <Pressable onPress={onCommentPress}>
+            <Image
+              className="size-7"
+              source={require("../../../../assets/images/comments.png")}
+            />
+          </Pressable>
+        
           <Text className="text-white text-sm">120K</Text>
         </View>
 

@@ -7,7 +7,8 @@ const WalletButtons = () => {
   }
 
   return (
-    <View className="gap-3 mb-10">
+    <View className="gap-3 mb-36">
+
       <Pressable
         onPress={handlePress}
         className="bg-white rounded-3xl h-[45px] justify-center items-center"

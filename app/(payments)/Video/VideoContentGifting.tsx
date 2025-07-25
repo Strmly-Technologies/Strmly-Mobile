@@ -1,5 +1,5 @@
 import ThemedView from "@/components/ThemedView";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   TextInput,
@@ -10,15 +10,20 @@ import {
   Pressable,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
-  ScrollView,
+  Animated,
+  EmitterSubscription,
+  KeyboardEvent,
 } from "react-native";
 import CreatorInfo from "./_components/CreatorInfo";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 
 type CreatorData = {
   creatorProfile: string;
   creatorName: string;
   creatorUsername: string;
 };
+
 
 const VideoContentGifting = ({
   creatorProfile,
@@ -27,6 +32,12 @@ const VideoContentGifting = ({
 }: CreatorData) => {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const keyboardHeight = useRef(new Animated.Value(0)).current;
+
+  const insets = useSafeAreaInsets();
+  const animatedBottom = useRef(new Animated.Value(insets.bottom)).current;
+  
 
   const handleAmountChange = (text: string) => {
     const filtered = text.replace(/[^0-9]/g, "");
@@ -39,6 +50,39 @@ const VideoContentGifting = ({
     setLoading(false);
     Keyboard.dismiss();
   };
+
+  useEffect(() => {
+    const keyboardShow = (e: KeyboardEvent) => {
+      Animated.timing(keyboardHeight, {
+        toValue: e.endCoordinates.height,
+        duration: 250,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const keyboardHide = () => {
+      Animated.timing(keyboardHeight, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const showSub: EmitterSubscription =
+      Platform.OS === "ios"
+        ? Keyboard.addListener("keyboardWillShow", keyboardShow)
+        : Keyboard.addListener("keyboardDidShow", keyboardShow);
+    const hideSub: EmitterSubscription =
+      Platform.OS === "ios"
+        ? Keyboard.addListener("keyboardWillHide", keyboardHide)
+        : Keyboard.addListener("keyboardDidHide", keyboardHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
 
   return (
     <ThemedView className="flex-1 bg-black">
@@ -71,14 +115,25 @@ const VideoContentGifting = ({
               />
             </View>
 
-            {/* Bottom section - This will move up with keyboard */}
-            <View className="gap-2 justify-end">
+            <View></View>
+            {/* Animated Bottom section */}
+            <Animated.View
+              style={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: Animated.add(new Animated.Value(5), animatedBottom),
+                paddingBottom: insets.bottom,
+              }}
+              className="gap-2 justify-end"
+            >
+
               <Pressable disabled={loading || !amount} onPress={handleProceed}>
                 <View className="bg-[#008A3C] p-4 rounded-lg items-center justify-center">
                   {loading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text style={{ color: "#fff", fontSize: 18 }}>Proceed</Text>
+                    <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>Proceed</Text>
                   )}
                 </View>
               </Pressable>
@@ -86,7 +141,8 @@ const VideoContentGifting = ({
               <View className="items-center justify-center mt-1">
                 <Text className="text-white text-sm">Total balance ₹10</Text>
               </View>
-            </View>
+            </Animated.View>
+
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
