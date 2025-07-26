@@ -365,7 +365,6 @@ export const useSeriesManagement = () => {
   // Navigate to series analytics (now just a placeholder)
   const navigateToAnalytics = useCallback(() => {
     // Navigation handled by parent component
-    console.log('Navigate to analytics for series:', state.selectedSeriesId);
   }, [state.selectedSeriesId]);
 
   // Navigate back to selection (now just clears selection)

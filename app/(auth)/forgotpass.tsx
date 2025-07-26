@@ -33,6 +33,41 @@ const ForgotPassword = () => {
 
   }
 
+  const sendVerificationCode = async (email: string): Promise<boolean> => {
+    try {
+      const res = await fetch("https://your-api.com/api/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+      return data.success;
+    } catch (err) {
+      console.error("Failed to send verification code:", err);
+      return false;
+    }
+  };
+
+  const verifyEmailCode = async (
+    email: string,
+    code: string
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch("https://your-api.com/api/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code }),
+      });
+
+      const data = await res.json();
+      return data.verified;
+    } catch (err) {
+      console.error("Verification failed:", err);
+      return false;
+    }
+  };
+
 
   if (!fontsLoaded) return null;
 

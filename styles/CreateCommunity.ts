@@ -6,12 +6,12 @@ export const CreateCommunityStyle = StyleSheet.create({
         backgroundColor: "#000",
         paddingTop: 40,
         width: '100%',
-        alignItems: 'center'
+        alignItems:'center'
     },
     CreateCommunityTopBar: {
         width: '100%',
         height: 60,
-        paddingHorizontal: 8,
+        paddingHorizontal:8,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',

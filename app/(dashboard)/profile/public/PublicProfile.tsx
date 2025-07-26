@@ -28,7 +28,7 @@ import { LinearGradient } from "expo-linear-gradient"; // For the gradient borde
 // No need for mockPosts, as you're fetching real data now.
 
 export default function PublicProfilePage() {
-  const [activeTab, setActiveTab] = useState("posts");
+  const [activeTab, setActiveTab] = useState("long");
   const [userData, setUserData] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
 
@@ -52,10 +52,10 @@ export default function PublicProfilePage() {
 
   useEffect(() => {
     // Re-enabled login check as it's crucial for protected routes
-    // if (!isLoggedIn) {
-    //   router.push("/login");
-    //   return;
-    // }
+    if (!isLoggedIn) {
+      router.push('/(auth)/Sign-in');
+      return;
+    }
 
     const fetchUserVideos = async () => {
       setIsLoadingVideos(true);
@@ -64,7 +64,7 @@ export default function PublicProfilePage() {
         queryParams.append("type", activeTab);
 
         const response = await fetch(
-          `/api/user/profile/videos?${queryParams.toString()}`,
+          `${process.env.BACKEND_API_URL}/user/profile/videos?${queryParams.toString()}`,
           {
             method: "GET",
             headers: {
@@ -100,14 +100,14 @@ export default function PublicProfilePage() {
   }, [isLoggedIn, router, token, activeTab]);
 
   useEffect(() => {
-    // if (!isLoggedIn) {
-    //   router.push("/login");
-    //   return;
-    // }
+    if (!isLoggedIn) {
+      router.push('/(auth)/Sign-in');
+      return;
+    }
 
     const fetchUserData = async () => {
       try {
-        const response = await fetch("/api/user/profile", {
+        const response = await fetch(`${process.env.BACKEND_API_URL}/user/profile`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

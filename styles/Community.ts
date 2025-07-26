@@ -155,9 +155,7 @@ export const CommunitiesStyles = StyleSheet.create({
     },
 
     followerStatsContainer: {
-        alignItems: 'center',
-        marginLeft:10,
-
+        alignItems: 'flex-end',
     },
 
     followerCount: {

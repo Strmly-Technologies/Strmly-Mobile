@@ -58,10 +58,10 @@ export default function PublicCommunityPage() {
   );
 
   useEffect(() => {
-    // if (!isLoggedIn) {
-    //   router.push("/login"); // Use router.push for navigation in Expo Router
-    //   return;
-    // }
+    if (!isLoggedIn) {
+      router.push('/(auth)/Sign-in'); // Use router.push for navigation in Expo Router
+      return;
+    }
 
     const fetchUserVideos = async () => {
       setIsLoadingVideos(true);
@@ -69,10 +69,8 @@ export default function PublicCommunityPage() {
         const queryParams = new URLSearchParams();
         queryParams.append("type", activeTab);
 
-        // Adjust API endpoint to include community ID if videos are community-specific
-        // Assuming your backend expects a communityId for video fetching
         const response = await fetch(
-          `/api/communities/${id}/video-by-id?${queryParams.toString()}`, // Modified URL
+          `/api/communities/${id}/video-by-id?${queryParams.toString()}`,
           {
             method: "GET",
             headers: {
@@ -115,16 +113,15 @@ export default function PublicCommunityPage() {
     };
 
     if (token && id) {
-      // Ensure id is available for fetching videos
       fetchUserVideos();
     }
-  }, [isLoggedIn, activeTab, router, token, id]); // Add 'id' to dependency array
+  }, [isLoggedIn, activeTab, router, token, id]);
 
   useEffect(() => {
-    // if (!isLoggedIn) {
-    //   router.push("/login");
-    //   return;
-    // }
+    if (!isLoggedIn) {
+      router.push('/(auth)/Sign-in');
+      return;
+    }
 
     const fetchCommunityData = async () => {
       try {
