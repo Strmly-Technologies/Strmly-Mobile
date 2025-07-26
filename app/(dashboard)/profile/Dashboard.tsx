@@ -12,6 +12,9 @@ import { ChevronLeft, ChevronDown } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useDashboard } from './_components/useDashboard';
+import { testApiConnection } from '@/utils/apiTest';
+import { testUserEndpoints } from '@/utils/endpointTester';
 
 interface DashboardStats {
     totalViews: number;
@@ -49,13 +52,35 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState<'non-revenue' | 'revenue'>('non-revenue');
     const [timeFilter, setTimeFilter] = useState('Last 30 Days');
     const [showTimeDropdown, setShowTimeDropdown] = useState(false);
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [revenueBreakdown, setRevenueBreakdown] = useState<RevenueBreakdown | null>(null);
     const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
-    const [loading, setLoading] = useState(true);
 
     const router = useRouter();
     const { token } = useAuthStore();
+
+    // Use the custom dashboard hook
+    const { stats, revenueBreakdown, loading, error } = useDashboard(token || '', activeTab);
+
+    // Test API connection on mount
+    useEffect(() => {
+        console.log('=== DASHBOARD TOKEN CHECK ===');
+        console.log('Token from auth store:', token);
+        console.log('Token length:', token?.length);
+        console.log('Token type:', typeof token);
+        console.log('Is logged in:', useAuthStore.getState().isLoggedIn);
+        console.log('User:', useAuthStore.getState().user);
+        console.log('Full auth state:', useAuthStore.getState());
+        console.log('============================');
+
+        if (token) {
+            console.log('✅ Token available, testing API connection...');
+            testApiConnection(token);
+
+            // Test which endpoints actually exist
+            testUserEndpoints(token);
+        } else {
+            console.log('❌ No token available - user needs to sign in');
+        }
+    }, [token]);
 
     const timeFilterOptions = [
         'Last 7 Days',
@@ -64,143 +89,53 @@ const Dashboard = () => {
         'Last Year'
     ];
 
+    // Mock recent activity since there's no specific API endpoint for this
     useEffect(() => {
-        fetchDashboardData();
-    }, [activeTab, timeFilter]);
-
-    const fetchDashboardData = async () => {
-        setLoading(true);
-        try {
-            // Fetch dashboard stats
-            const statsResponse = await fetch(`/api/dashboard/stats?type=${activeTab}&period=${timeFilter}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+        if (activeTab === 'non-revenue') {
+            setRecentActivity([
+                {
+                    id: '1',
+                    user: { name: 'User', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user1' },
+                    action: 'comment',
+                    content: 'commented on your post',
+                    timestamp: new Date().toLocaleDateString()
                 },
-            });
-
-            if (statsResponse.ok) {
-                const statsData = await statsResponse.json();
-                setStats(statsData);
-            }
-
-            // Fetch recent activity
-            const activityResponse = await fetch('/api/dashboard/recent-activity', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+                {
+                    id: '2',
+                    user: { name: 'User', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user2' },
+                    action: 'like',
+                    content: 'liked your post',
+                    timestamp: new Date().toLocaleDateString()
                 },
-            });
-
-            if (activityResponse.ok) {
-                const activityData = await activityResponse.json();
-                setRecentActivity(activityData.activities || []);
-            }
-
-        } catch (error) {
-            console.error('Error fetching dashboard data:', error);
-            Alert.alert('Error', 'Failed to load dashboard data');
-
-            // Mock data for development
-            setStats({
-                totalViews: 450000,
-                totalLikes: 23000,
-                totalComments: 23000,
-                totalReposts: 23000,
-                totalWatchTime: 23000,
-                totalFollowers: 23000,
-                revenue: activeTab === 'revenue' ? 15000 : undefined
-            });
-
-            setRevenueBreakdown({
-                estimateRevenue: 345.5,
-                contentSubscription: 32,
-                creatorPass: 32,
-                commentEarning: 32,
-                giftingEarning: 32,
-                communityFee: 32,
-                strmlyAds: 32
-            });
-
-            if (activeTab === 'revenue') {
-                setRecentActivity([
-                    {
-                        id: '1',
-                        user: { name: 'Rishab raj', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rishab' },
-                        action: 'gift',
-                        content: 'gift to your comment',
-                        timestamp: '13 June 2025',
-                        amount: 5.0
-                    },
-                    {
-                        id: '2',
-                        user: { name: 'Rishab raj', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rishab' },
-                        action: 'gift',
-                        content: 'gift to your content',
-                        timestamp: '13 June 2025',
-                        amount: 5.0
-                    },
-                    {
-                        id: '3',
-                        user: { name: 'Rishab raj', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rishab' },
-                        action: 'creator_pass',
-                        content: 'purchase your creator pass',
-                        timestamp: '13 June 2025',
-                        amount: 5.0
-                    },
-                    {
-                        id: '4',
-                        user: { name: 'Rishab raj', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rishab' },
-                        action: 'community_join',
-                        content: 'join your community',
-                        timestamp: '13 June 2025',
-                        amount: 5.0
-                    },
-                    {
-                        id: '5',
-                        user: { name: 'Rishab raj', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rishab' },
-                        action: 'gift',
-                        content: 'gift to your comment',
-                        timestamp: '13 June 2025',
-                        amount: 5.0
-                    }
-                ]);
-            } else {
-                setRecentActivity([
-                    {
-                        id: '1',
-                        user: { name: 'Rishab raj', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rishab' },
-                        action: 'comment',
-                        content: 'comment on you post',
-                        timestamp: '13 June 2025'
-                    },
-                    {
-                        id: '2',
-                        user: { name: 'Rishab raj', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rishab' },
-                        action: 'like',
-                        content: 'like you post',
-                        timestamp: '13 June 2025'
-                    },
-                    {
-                        id: '3',
-                        user: { name: 'Rishab raj', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rishab' },
-                        action: 'follow',
-                        content: 'follow you',
-                        timestamp: '13 June 2025'
-                    },
-                    {
-                        id: '4',
-                        user: { name: 'Rishab raj', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=rishab' },
-                        action: 'repost',
-                        content: 'repost your post',
-                        timestamp: '13 June 2025'
-                    }
-                ]);
-            }
-        } finally {
-            setLoading(false);
+                {
+                    id: '3',
+                    user: { name: 'User', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user3' },
+                    action: 'follow',
+                    content: 'started following you',
+                    timestamp: new Date().toLocaleDateString()
+                }
+            ]);
+        } else {
+            setRecentActivity([
+                {
+                    id: '1',
+                    user: { name: 'User', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=revenue1' },
+                    action: 'gift',
+                    content: 'sent you a gift',
+                    timestamp: new Date().toLocaleDateString(),
+                    amount: 5.0
+                },
+                {
+                    id: '2',
+                    user: { name: 'User', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=revenue2' },
+                    action: 'creator_pass',
+                    content: 'purchased your creator pass',
+                    timestamp: new Date().toLocaleDateString(),
+                    amount: 10.0
+                }
+            ]);
         }
-    };
+    }, [activeTab]);
 
     const formatNumber = (num: number): string => {
         if (num >= 1000000) {
@@ -352,6 +287,10 @@ const Dashboard = () => {
                                     <View className="flex-row justify-between items-center">
                                         <Text className="text-gray-400 text-base" style={{ fontFamily: 'Inter' }}>Total followers</Text>
                                         <Text className="text-white text-base" style={{ fontFamily: 'Inter' }}>{stats ? formatNumber(stats.totalFollowers) : '0'}</Text>
+                                    </View>
+                                    <View className="flex-row justify-between items-center">
+                                        <Text className="text-gray-400 text-base" style={{ fontFamily: 'Inter' }}>Total videos</Text>
+                                        <Text className="text-white text-base" style={{ fontFamily: 'Inter' }}>{stats ? formatNumber((stats as any).totalVideos || 0) : '0'}</Text>
                                     </View>
                                 </View>
                             )}

@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
+import { CONFIG } from "@/Constants/config";
 
 const CreateProfile = () => {
   const [Step, setStep] = useState(1);
@@ -45,13 +46,36 @@ const CreateProfile = () => {
   const checkUsername = useCallback(
     throttle(async (uname: string) => {
       try {
+        console.log(`Checking username: ${uname} at ${CONFIG.API_BASE_URL}/api/v1/auth/check-username/${uname}`);
+
         const res = await fetch(
-          `${process.env.BACKEND_API_URL}/auth/check-username/${uname}`
+          `${CONFIG.API_BASE_URL}/api/v1/auth/check-username/${uname}`
         );
-        const data = await res.json();
+
+        console.log(`Response status: ${res.status}`);
+        console.log(`Response headers:`, res.headers);
+
+        if (!res.ok) {
+          console.error(`HTTP error! status: ${res.status}`);
+          setUsernameExists(null);
+          return;
+        }
+
+        const responseText = await res.text();
+        console.log(`Raw response: ${responseText}`);
+
+        if (!responseText) {
+          console.error("Empty response from server");
+          setUsernameExists(null);
+          return;
+        }
+
+        const data = JSON.parse(responseText);
+        console.log(`Parsed data:`, data);
         setUsernameExists(data.exists);
       } catch (err) {
         console.error("Username check failed", err);
+        setUsernameExists(null);
       }
     }, 1000),
     []
@@ -60,13 +84,35 @@ const CreateProfile = () => {
   const checkEmail = useCallback(
     throttle(async (emailVal: string) => {
       try {
+        console.log(`Checking email: ${emailVal} at ${CONFIG.API_BASE_URL}/api/v1/auth/check-email/${emailVal}`);
+
         const res = await fetch(
-          `${process.env.BACKEND_API_URL}/auth/check-email/${emailVal}`
+          `${CONFIG.API_BASE_URL}/api/v1/auth/check-email/${emailVal}`
         );
-        const data = await res.json();
+
+        console.log(`Email check response status: ${res.status}`);
+
+        if (!res.ok) {
+          console.error(`HTTP error! status: ${res.status}`);
+          setEmailExists(null);
+          return;
+        }
+
+        const responseText = await res.text();
+        console.log(`Email check raw response: ${responseText}`);
+
+        if (!responseText) {
+          console.error("Empty response from server");
+          setEmailExists(null);
+          return;
+        }
+
+        const data = JSON.parse(responseText);
+        console.log(`Email check parsed data:`, data);
         setEmailExists(data.exists);
       } catch (err) {
         console.error("Email check failed", err);
+        setEmailExists(null);
       }
     }, 1000),
     []
@@ -82,7 +128,7 @@ const CreateProfile = () => {
 
   const handleRegisterUser = async () => {
     try {
-      const res = await fetch(`${process.env.BACKEND_API_URL}/auth/register`, {
+      const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -97,6 +143,10 @@ const CreateProfile = () => {
       const data = await res.json();
 
       if (!res.ok) {
+        // Handle specific error messages
+        if (data?.message?.includes("email")) {
+          throw new Error("Failed to send verification email. Please check your email address and try again.");
+        }
         throw new Error(data?.message || "Registration failed");
       }
 
@@ -105,18 +155,32 @@ const CreateProfile = () => {
       // Save token and partially registered user
       await useAuthStore.getState().login(data.token, data.user);
 
-      alert("OTP sent to your email.");
+      // Debug: Log the token that was saved
+      console.log('=== REGISTRATION SUCCESS ===');
+      console.log('Token received:', data.token);
+      console.log('Token length:', data.token?.length);
+      console.log('User data:', data.user);
+      console.log('Auth store state after login:', useAuthStore.getState());
+      console.log('===========================');
+
+      alert("OTP sent to your email. Please check your inbox and spam folder.");
       setTimeout(() => setStep(4), 1000);
     } catch (err: any) {
       console.error("Registration error:", err);
-      alert(err.message || "Something went wrong");
+
+      // Show user-friendly error messages
+      if (err.message.includes("email")) {
+        alert("Email service is currently unavailable. Please try again later or contact support.");
+      } else {
+        alert(err.message || "Registration failed. Please try again.");
+      }
     }
   };
 
   const handleVerifyOTP = async () => {
     try {
       const res = await fetch(
-        `${process.env.BACKEND_API_URL}/auth/verify-email`,
+        `${CONFIG.API_BASE_URL}/api/v1/auth/verify-email`,
         {
           method: "POST",
           headers: {
@@ -154,7 +218,7 @@ const CreateProfile = () => {
       setIsLoading(true);
 
       const res = await fetch(
-        `${process.env.BACKEND_API_URL}/auth/resend-verification`,
+        `${CONFIG.API_BASE_URL}/api/v1/auth/resend-verification`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
