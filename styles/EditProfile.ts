@@ -1,17 +1,17 @@
 import { StyleSheet } from "react-native";
 
-export const CreateCommunityStyle = StyleSheet.create({
+export const EditProfile = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#000",
         paddingTop: 40,
         width: '100%',
-        alignItems:'center'
+        alignItems: 'center'
     },
     CreateCommunityTopBar: {
         width: '100%',
         height: 60,
-        paddingHorizontal:8,
+        paddingHorizontal: 8,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -34,7 +34,8 @@ export const CreateCommunityStyle = StyleSheet.create({
     InfoLabel: {
         fontFamily: 'Poppins-Regular',
         fontSize: 14,
-        marginTop: 10
+        marginTop: 10,
+        marginBottom:2,
     },
     TextLabel: {
         fontFamily: 'Poppins-Regular',
@@ -73,10 +74,11 @@ export const CreateCommunityStyle = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        borderColor: "#333",
+        borderColor: "white",
         borderWidth: 1,
         borderRadius: 8,
         marginTop: 20,
+        marginHorizontal:10,
         paddingHorizontal: 12,
         paddingVertical: 10,
         backgroundColor: "#000",
@@ -107,7 +109,7 @@ export const CreateCommunityStyle = StyleSheet.create({
         paddingHorizontal: 16,
     },
     dropdownItemText: {
-        color: "#fff",
+        color: "#B0B0B0",
         fontFamily: "Poppins-Medium",
         fontSize: 14,
     },
@@ -132,5 +134,39 @@ export const CreateCommunityStyle = StyleSheet.create({
         fontSize: 14,
         color: '#fff',
         marginBottom: 8,
+    },
+    TopBarTitle: {
+        fontFamily: "Poppins-SemiBold",
+        fontSize: 16,
+        color: "#fff",
+        textAlign: "center",
+    },
+    SaveText: {
+        fontFamily: "Poppins-Medium",
+        fontSize: 14,
+        color: "#2196F3",
+    },
+    EditProfilePicText: {
+        fontFamily: 'Poppins-Medium',
+        fontSize: 14,
+        color: '#2196F3',
+        marginBottom: 10,
+    },
+    TwoFieldRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 12,
+        paddingHorizontal: 20,
+        marginTop: 10,
+    },
+    HalfField: {
+        flex: 1,
+    },
+    CreatorPassText: {
+        fontFamily: 'Poppins-Medium',
+        fontSize: 14,
+        color: '#fff',
+        textAlign: 'center',
+        width: '100%',
     },
 });

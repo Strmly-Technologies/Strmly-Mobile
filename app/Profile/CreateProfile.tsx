@@ -328,7 +328,7 @@ const CreateProfile = () => {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
         <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
-          <TouchableOpacity onPress={() => router.push("/(auth)/Sign-up")}>
+          <TouchableOpacity onPress={() => router.push("/(auth)/signin")}>
             <Image
               className="w-5 h-5 mt-1"
               source={require("../../assets/images/back.png")}
@@ -475,7 +475,11 @@ const CreateProfile = () => {
     );
   }
 
-  return "Internal Error, Try restarting the app.";
-};
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Internal Error, Try restarting the app.</Text>
+    </View>);
+}
 
-export default CreateProfile;
+
+export default CreateProfile

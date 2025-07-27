@@ -61,29 +61,29 @@ const CommunitiesPage: React.FC = () => {
                             {label}
                         </ThemedText></TouchableOpacity>))}
             </View>*/}<View style={CommunitiesStyles.SelectionTab}>
-  <ScrollView 
-    horizontal={true} 
-    showsHorizontalScrollIndicator={false}
-    contentContainerStyle={{ flexDirection: 'row', paddingHorizontal: 8 }}
-  >
-    {tabs.map((label, index) => (
-      <TouchableOpacity
-        style={[CommunitiesStyles.SelectionButton]}
-        key={index}
-        onPress={() => setSelectedTab(index)}
-      >
-        <ThemedText
-          style={[
-            CommunitiesStyles.Tab,
-            ...(selectedTab === index ? [CommunitiesStyles.SelectedText] : [])
-          ]}
-        >
-          {label}
-        </ThemedText>
-      </TouchableOpacity>
-    ))}
-  </ScrollView>
-</View>
+                <ScrollView
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ flexDirection: 'row', paddingHorizontal: 8 }}
+                >
+                    {tabs.map((label, index) => (
+                        <TouchableOpacity
+                            style={[CommunitiesStyles.SelectionButton]}
+                            key={index}
+                            onPress={() => setSelectedTab(index)}
+                        >
+                            <ThemedText
+                                style={[
+                                    CommunitiesStyles.Tab,
+                                    ...(selectedTab === index ? [CommunitiesStyles.SelectedText] : [])
+                                ]}
+                            >
+                                {label}
+                            </ThemedText>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </View>
             <TextInput
                 placeholder="Search"
                 placeholderTextColor="#ccc"
