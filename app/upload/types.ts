@@ -17,12 +17,13 @@ export interface FinalStageData {
 }
 
 export interface UploadFlowState {
-  currentStep: 'file-select' | 'format-select' | 'details-1' | 'details-2' | 'details-3' | 'final' | 'progress';
+  currentStep: 'file-select' | 'format-select' | 'series-selection' | 'series-creation' | 'details-1' | 'details-2' | 'details-3' | 'final' | 'progress';
   uploadProgress: number;
   videoDetails: VideoFormData;
   finalStageData: FinalStageData;
   selectedFile: any; // Video file object
   videoFormat: 'episode' | 'single' | null;
+  selectedSeries: any | null; // Series object for episodes
   isUploading: boolean;
   errors: Record<string, string>;
 }
@@ -45,6 +46,8 @@ export interface VideoDetailProps {
   onFormChange: (data: VideoFormData) => void;
   onContinue: () => void;
   onBack: () => void;
+  selectedSeries?: any | null;
+  videoFormat?: 'episode' | 'single' | null;
 }
 
 export interface FinalStageProps {
@@ -53,6 +56,8 @@ export interface FinalStageProps {
   onFormChange: (data: FinalStageData) => void;
   onUpload: () => void;
   onBack: () => void;
+  selectedSeries?: any | null;
+  videoFormat?: 'episode' | 'single' | null;
 }
 
 export interface DropdownProps {

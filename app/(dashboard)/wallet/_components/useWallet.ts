@@ -18,10 +18,7 @@ import {
 } from '@/api/wallet/walletActions';
 
 export const useWallet = (token: string) => {
-  const [walletData, setWalletData] = useState<{
-    balance: number;
-    recentTransfers: any[];
-  } | null>(null);
+  const [walletData, setWalletData] = useState<WalletBalance | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,10 +29,13 @@ export const useWallet = (token: string) => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log('Fetching wallet details with token:', token?.substring(0, 10) + '...');
       const response = await getWalletDetails(token);
+      console.log('Wallet details response:', response);
       setWalletData(response.wallet);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error fetching wallet details:', err);
+      setError(`Wallet Details Error: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -102,8 +102,8 @@ export const useWallet = (token: string) => {
     } finally {
       setIsLoading(false);
     }
-  }; 
- // Fetch transaction history
+  };
+  // Fetch transaction history
   const fetchTransactions = async (page: number = 1, limit: number = 10) => {
     try {
       setIsLoading(true);
@@ -175,12 +175,16 @@ export const useWallet = (token: string) => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log('Fetching withdrawal history with token:', token?.substring(0, 10) + '...');
       const response = await getWithdrawalHistory(token, page, limit);
-      setWithdrawals(response.withdrawals);
+      console.log('Withdrawal history response:', response);
+      setWithdrawals(response.withdrawals || []);
       return response;
     } catch (err: any) {
-      setError(err.message);
-      throw err;
+      console.error('Error fetching withdrawal history:', err);
+      setError(`Withdrawal History Error: ${err.message}`);
+      // Don't throw error for withdrawal history as it's not critical
+      setWithdrawals([]);
     } finally {
       setIsLoading(false);
     }
@@ -205,7 +209,8 @@ export const useWallet = (token: string) => {
   useEffect(() => {
     if (token) {
       fetchWalletDetails();
-      fetchWithdrawals();
+      // Skip withdrawal history as endpoint doesn't exist
+      // fetchWithdrawals();
     }
   }, [token]);
 
@@ -216,7 +221,7 @@ export const useWallet = (token: string) => {
     withdrawals,
     isLoading,
     error,
-    
+
     // Actions
     fetchWalletDetails,
     createLoadOrder,
@@ -229,7 +234,7 @@ export const useWallet = (token: string) => {
     requestWithdrawal,
     fetchWithdrawals,
     checkWithdrawalStatus,
-    
+
     // Utilities
     clearError: () => setError(null)
   };

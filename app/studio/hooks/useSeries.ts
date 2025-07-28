@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
-import { CONFIG } from '@/Constants/config';
 
 interface SeriesAnalytics {
   total_likes: number;
@@ -83,22 +81,16 @@ export const useSeries = () => {
   const [series, setSeries] = useState<TransformedSeries[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuthStore();
 
   const fetchSeries = async () => {
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/series/all`, {
+      const response = await fetch('http://192.168.1.36:3001/api/v1/series/all/', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg0Yzc0YWU3M2Q4ZDRlZjY3YjAyZTQiLCJpYXQiOjE3NTM1MzIyMzYsImV4cCI6MTc1NjEyNDIzNn0._pqT9psCN1nR5DJpB60HyA1L1pp327o1fxfZPO4BY3M',
           'Content-Type': 'application/json',
         },
       });
@@ -139,7 +131,7 @@ export const useSeries = () => {
 
   useEffect(() => {
     fetchSeries();
-  }, [token]);
+  }, []);
 
   const refetch = () => {
     fetchSeries();

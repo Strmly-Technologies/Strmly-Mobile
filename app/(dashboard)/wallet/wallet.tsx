@@ -35,7 +35,7 @@ const WalletPage = () => {
     console.log('Auth state:', useAuthStore.getState());
     console.log('=========================');
   }, [token]);
-  
+
   const {
     walletData,
     withdrawals,
@@ -129,24 +129,30 @@ const WalletPage = () => {
               {/* Card 2 */}
               <Pressable
                 onPress={() => setIsOpenWalletBalance(!isOpenWBalance)}
+                className="flex-1"
               >
-                <View className="bg-[#B0B0B033] flex-grow justify-center gap-2 rounded-xl h-full items-center p-4">
-                  <Text className="text-[14px] text-white">Wallet balance</Text>
+                <View className="bg-[#B0B0B033] justify-center gap-2 rounded-xl h-full items-center p-4">
+                  <Text className="text-[14px] text-white">Total Spending</Text>
                   {isLoading ? (
                     <ActivityIndicator size="small" color="#fff" />
                   ) : (
                     <Text className="text-[28px] text-white">
-                      ₹ {walletData?.balance?.toFixed(2) || "0.00"}
+                      ₹ {walletData?.totalSpent?.toFixed(2) || "0.00"}
                     </Text>
                   )}
                 </View>
               </Pressable>
 
               {/* Card 3 */}
-
-              <View className="bg-[#B0B0B033] flex-grow justify-center gap-2 items-center h-full rounded-xl py-4 px-6">
+              <View className="bg-[#B0B0B033] flex-1 justify-center gap-2 items-center h-full rounded-xl p-4">
                 <Text className="text-[14px] text-white">Revenue</Text>
-                <Text className="text-[28px] text-white">₹ 120.00</Text>
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text className="text-[28px] text-white">
+                    ₹ {walletData?.totalReceived?.toFixed(2) || "0.00"}
+                  </Text>
+                )}
               </View>
             </View>
 

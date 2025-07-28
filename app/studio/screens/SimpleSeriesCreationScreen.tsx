@@ -7,10 +7,25 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Series } from '../types';
+
+// Genre options based on the backend enum
+const genreOptions = [
+  { label: 'Action', value: 'Action' },
+  { label: 'Comedy', value: 'Comedy' },
+  { label: 'Drama', value: 'Drama' },
+  { label: 'Horror', value: 'Horror' },
+  { label: 'Sci-Fi', value: 'Sci-Fi' },
+  { label: 'Romance', value: 'Romance' },
+  { label: 'Documentary', value: 'Documentary' },
+  { label: 'Thriller', value: 'Thriller' },
+  { label: 'Fantasy', value: 'Fantasy' },
+  { label: 'Animation', value: 'Animation' }
+];
 
 interface SimpleSeriesCreationScreenProps {
   onBack: () => void;
@@ -25,12 +40,25 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
   onBack,
   onSeriesCreated
 }) => {
+  // Series creation form state
   const [title, setTitle] = useState('');
   const [type, setType] = useState<'free' | 'paid' | null>(null);
   const [price, setPrice] = useState<number | undefined>(undefined);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Two-step flow state
+  const [currentStep, setCurrentStep] = useState<'creation' | 'details'>('creation');
+
+  // Video detail form state
+  const [videoDetails, setVideoDetails] = useState({
+    description: '',
+    genre: null as string | null,
+    language: 'english' // Default language
+  });
+
+  const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
 
   const handleClose = () => {
     onBack();
@@ -66,26 +94,79 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
 
     setLoading(true);
 
-    // Simulate API call
+    // Move to details step
     setTimeout(() => {
-      const newSeries: Series = {
-        id: Date.now().toString(),
+      setLoading(false);
+      setCurrentStep('details');
+    }, 500);
+  };
+
+  const handleContinue = async () => {
+    if (!isVideoDetailsValid()) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const seriesData = {
         title: title.trim(),
-        description: '',
-        totalEpisodes: 0,
-        accessType: type!,
-        price: type === 'paid' ? price : undefined,
-        launchDate: new Date().toISOString(),
-        totalViews: 0,
-        totalEarnings: 0,
-        episodes: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        description: videoDetails.description.trim(),
+        genre: videoDetails.genre!,
+        language: videoDetails.language,
+        type: type === 'free' ? 'Free' : 'Paid',
+        price: type === 'paid' ? price : 0
       };
 
+      console.log("Creating series with data:", seriesData);
+
+      const response = await fetch('http://192.168.1.36:3001/api/v1/series/create/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if needed
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg0Yzc0YWU3M2Q4ZDRlZjY3YjAyZTQiLCJpYXQiOjE3NTM1MzIyMzYsImV4cCI6MTc1NjEyNDIzNn0._pqT9psCN1nR5DJpB60HyA1L1pp327o1fxfZPO4BY3M'
+        },
+        body: JSON.stringify(seriesData)
+      });
+
+      const result = await response.json();
+      console.log("API Response:", result);
+
+      if (response.ok && result.data) {
+        // Convert backend response to frontend Series format
+        const newSeries: Series = {
+          id: result.data._id,
+          title: result.data.title,
+          description: result.data.description,
+          totalEpisodes: result.data.total_episodes || 0,
+          accessType: result.data.type.toLowerCase() as 'free' | 'paid',
+          price: result.data.price,
+          launchDate: result.data.release_date || result.data.createdAt,
+          totalViews: result.data.views || 0,
+          totalEarnings: result.data.total_earned || 0,
+          episodes: [],
+          createdAt: result.data.createdAt,
+          updatedAt: result.data.updatedAt
+        };
+
+        console.log("Series created successfully:", newSeries);
+        setLoading(false);
+        onSeriesCreated(newSeries);
+      } else {
+        console.error("API Error:", result);
+        setLoading(false);
+        setErrors({ general: result.error || 'Failed to create series' });
+      }
+    } catch (error) {
+      console.error("Network Error:", error);
       setLoading(false);
-      onSeriesCreated(newSeries);
-    }, 1000);
+      setErrors({ general: 'Network error occurred' });
+    }
+  };
+
+  const handleBackFromDetails = () => {
+    setCurrentStep('creation');
   };
 
   const handleTypeSelect = (selectedType: 'free' | 'paid') => {
@@ -99,7 +180,123 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
     return type === 'free' ? 'Free' : 'Paid';
   };
 
-  return (
+  // Handle video detail form changes
+  const handleVideoDetailChange = (field: string, value: string) => {
+    setVideoDetails(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Check if video details form is valid
+  const isVideoDetailsValid = () => {
+    return videoDetails.description.trim() !== '' &&
+      videoDetails.genre !== null;
+  };
+
+  // Render video details step
+  const renderVideoDetailsStep = () => (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
+    >
+      <View className="flex-1 bg-black">
+        <StatusBar barStyle="light-content" backgroundColor="#000" />
+
+        {/* Header */}
+        <View className="flex-row items-center justify-between px-4 py-3 mt-12">
+          <TouchableOpacity onPress={handleBackFromDetails}>
+            <Ionicons name="chevron-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text className="text-white text-xl font-medium">Video detail</Text>
+          <View className="w-6" />
+        </View>
+
+        <ScrollView className="flex-1 px-4 pt-6">
+          {/* Description Field */}
+          <View className="mb-8">
+            <Text className="text-white text-lg font-medium mb-3">Description</Text>
+            <TextInput
+              value={videoDetails.description}
+              onChangeText={(description) => handleVideoDetailChange('description', description)}
+              placeholder="Enter series description..."
+              placeholderTextColor="#9CA3AF"
+              className="bg-black border border-gray-600 text-white px-4 py-4 rounded-xl text-base"
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+              maxLength={1000}
+            />
+          </View>
+
+          {/* Genre Dropdown */}
+          <View className="mb-8">
+            <Text className="text-white text-lg font-medium mb-3">Genre</Text>
+            <TouchableOpacity
+              onPress={() => setGenreDropdownOpen(!genreDropdownOpen)}
+              className="bg-black border border-gray-600 rounded-xl px-4 py-4 flex-row items-center justify-between"
+            >
+              <Text className={`text-base ${videoDetails.genre ? 'text-white' : 'text-gray-400'}`}>
+                {videoDetails.genre || 'Select Genre'}
+              </Text>
+              <Ionicons
+                name={genreDropdownOpen ? "chevron-up" : "chevron-down"}
+                size={20}
+                color="#9CA3AF"
+              />
+            </TouchableOpacity>
+
+            {genreDropdownOpen && (
+              <View className="bg-gray-800 border border-gray-600 rounded-xl mt-2 max-h-48">
+                <ScrollView>
+                  {genreOptions.map((option) => (
+                    <TouchableOpacity
+                      key={option.value}
+                      onPress={() => {
+                        handleVideoDetailChange('genre', option.value);
+                        setGenreDropdownOpen(false);
+                      }}
+                      className="px-4 py-3 border-b border-gray-600"
+                    >
+                      <Text className="text-white text-base">{option.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+          </View>
+
+          {/* Add some bottom padding for better scrolling */}
+          <View className="h-20" />
+        </ScrollView>
+
+        {/* Continue Button */}
+        <View className="px-4 pb-8 pt-4">
+          <TouchableOpacity
+            onPress={handleContinue}
+            disabled={!isVideoDetailsValid() || loading}
+            className="bg-gray-200 rounded-full py-4 items-center"
+            style={{
+              backgroundColor: (!isVideoDetailsValid() || loading) ? '#6B7280' : '#E5E7EB'
+            }}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="black" />
+            ) : (
+              <Text className="text-black text-lg font-medium">Continue</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        {/* General Error */}
+        {errors.general && (
+          <View className="px-4 pb-4">
+            <Text className="text-red-400 text-sm text-center">{errors.general}</Text>
+          </View>
+        )}
+      </View>
+    </KeyboardAvoidingView>
+  );
+
+  // Render series creation step
+  const renderSeriesCreationStep = () => (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1"
@@ -253,6 +450,9 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
       </View>
     </KeyboardAvoidingView>
   );
+
+  // Main render - show appropriate step
+  return currentStep === 'creation' ? renderSeriesCreationStep() : renderVideoDetailsStep();
 };
 
 export default SimpleSeriesCreationScreen;

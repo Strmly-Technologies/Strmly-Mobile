@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StatusBar, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// import * as DocumentPicker from 'expo-document-picker'; // Commented out for now
+import * as DocumentPicker from 'expo-document-picker';
 import ContinueButton from '../components/ContinueButton';
 
 interface FileSelectScreenProps {
@@ -30,10 +30,8 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<any>(null);
 
-  // Handle file selection - COMMENTED OUT FOR NOW
+  // Handle file selection
   const handleFileSelect = async () => {
-    // TODO: Uncomment when ready to use actual file picker
-    /*
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'video/*',
@@ -50,22 +48,13 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
           return;
         }
 
+        console.log('Selected file:', file);
         setSelectedFile(file);
       }
     } catch (error) {
       Alert.alert('Error', 'Failed to select file. Please try again.');
       console.error('File selection error:', error);
     }
-    */
-    
-    // For now, just simulate file selection
-    const mockFile = {
-      name: 'sample-video.mp4',
-      size: 50 * 1024 * 1024, // 50MB
-      uri: 'mock://video.mp4',
-      type: 'video/mp4'
-    };
-    setSelectedFile(mockFile);
   };
 
   // Handle continue with selected file
@@ -129,7 +118,7 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
             onPress={handleFileSelect}
             className="bg-gray-200 rounded-full py-4 items-center mb-6"
           >
-            <Text className="text-black text-lg font-medium">Upload file (Mock)</Text>
+            <Text className="text-black text-lg font-medium">Upload file</Text>
           </TouchableOpacity>
         )}
 

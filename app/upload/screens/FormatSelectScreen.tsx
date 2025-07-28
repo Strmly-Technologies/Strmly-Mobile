@@ -92,7 +92,7 @@ const FormatSelectScreen: React.FC<FormatSelectScreenProps> = ({
 
         {/* Description */}
         <Text className="text-gray-400 text-center text-base leading-6 px-4">
-          Select "Episode" for series or "Single" for one-time content.
+          Select &quot;Episode&quot; for series or &quot;Single&quot; for one-time content.
         </Text>
       </View>
 

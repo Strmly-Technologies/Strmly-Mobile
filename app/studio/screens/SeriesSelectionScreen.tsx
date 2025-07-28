@@ -114,7 +114,7 @@ const SeriesSelectionScreen: React.FC<SeriesSelectionScreenProps> = ({
     return (
       <View className="flex-1 bg-black">
         <StatusBar barStyle="light-content" backgroundColor="#000" />
-        
+
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 mt-12">
           <TouchableOpacity onPress={onBack}>
@@ -135,7 +135,7 @@ const SeriesSelectionScreen: React.FC<SeriesSelectionScreenProps> = ({
   return (
     <View className="flex-1 bg-black">
       <StatusBar barStyle="light-content" backgroundColor="#000" />
-      
+
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 mt-12">
         <TouchableOpacity onPress={onBack}>

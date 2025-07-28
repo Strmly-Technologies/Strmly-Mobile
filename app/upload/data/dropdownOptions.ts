@@ -62,56 +62,48 @@ export const videoTypeOptions: DropdownOption[] = [
   },
 ];
 
-// Genre options for video classification
+// Genre options for video classification - matching Draft model enum values
 // Backend: GET /api/genres
 export const genreOptions: DropdownOption[] = [
   {
     label: 'Action',
-    value: 'action',
+    value: 'Action',
   },
   {
     label: 'Comedy',
-    value: 'comedy',
+    value: 'Comedy',
   },
   {
     label: 'Drama',
-    value: 'drama',
-  },
-  {
-    label: 'Documentary',
-    value: 'documentary',
-  },
-  {
-    label: 'Educational',
-    value: 'educational',
-  },
-  {
-    label: 'Entertainment',
-    value: 'entertainment',
+    value: 'Drama',
   },
   {
     label: 'Horror',
-    value: 'horror',
+    value: 'Horror',
   },
   {
-    label: 'Music',
-    value: 'music',
+    label: 'Sci-Fi',
+    value: 'Sci-Fi',
   },
   {
-    label: 'News',
-    value: 'news',
+    label: 'Romance',
+    value: 'Romance',
   },
   {
-    label: 'Sports',
-    value: 'sports',
+    label: 'Documentary',
+    value: 'Documentary',
   },
   {
-    label: 'Technology',
-    value: 'technology',
+    label: 'Thriller',
+    value: 'Thriller',
   },
   {
-    label: 'Travel',
-    value: 'travel',
+    label: 'Fantasy',
+    value: 'Fantasy',
+  },
+  {
+    label: 'Animation',
+    value: 'Animation',
   },
 ];
 

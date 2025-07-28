@@ -5,6 +5,9 @@ import FormatSelectScreen from './screens/FormatSelectScreen';
 import VideoDetailScreen from './screens/VideoDetailScreen';
 import FinalStageScreen from './screens/FinalStageScreen';
 import UploadProgressScreen from './screens/UploadProgressScreen';
+import { SeriesSelectionScreen } from '../studio/screens';
+import SimpleSeriesCreationScreen from '../studio/screens/SimpleSeriesCreationScreen';
+import { Series } from '../studio/types';
 
 interface VideoUploadFlowProps {
   onComplete: () => void;
@@ -33,13 +36,14 @@ const VideoUploadFlow: React.FC<VideoUploadFlowProps> = ({
 }) => {
   const {
     state,
-    startUpload,
     goToNextStep,
     goToPreviousStep,
+    goToDetailsStep,
     updateVideoDetails,
     updateFinalStageData,
     setSelectedFile,
     setVideoFormat,
+    setSelectedSeries,
     validateCurrentStep,
     submitUpload,
     resetFlow,
@@ -70,7 +74,13 @@ const VideoUploadFlow: React.FC<VideoUploadFlowProps> = ({
   // Handle format selection
   const handleFormatSelected = (format: 'episode' | 'single') => {
     setVideoFormat(format);
-    goToNextStep();
+    if (format === 'episode') {
+      // Go to series selection for episodes
+      goToNextStep(); // This will go to 'series-selection'
+    } else {
+      // Skip series selection for single videos and go directly to details
+      goToNextStep(); // This will go to 'details-1'
+    }
   };
 
   // Handle continue from video details
@@ -78,6 +88,25 @@ const VideoUploadFlow: React.FC<VideoUploadFlowProps> = ({
     if (validateCurrentStep()) {
       goToNextStep();
     }
+  };
+
+  // Handle series selection
+  const handleSeriesSelected = (series: Series) => {
+    setSelectedSeries(series);
+    // Skip series creation and go directly to details
+    goToDetailsStep();
+  };
+
+  // Handle add new series from series selection
+  const handleAddNewSeries = () => {
+    goToNextStep(); // Go to series-creation
+  };
+
+  // Handle series creation completion
+  const handleSeriesCreated = (series: Series) => {
+    setSelectedSeries(series);
+    // After creating series, go to details
+    goToDetailsStep();
   };
 
   // Handle final upload submission
@@ -107,6 +136,23 @@ const VideoUploadFlow: React.FC<VideoUploadFlowProps> = ({
           />
         );
 
+      case 'series-selection':
+        return (
+          <SeriesSelectionScreen
+            onBack={handleBack}
+            onSeriesSelected={handleSeriesSelected}
+            onAddNewSeries={handleAddNewSeries}
+          />
+        );
+
+      case 'series-creation':
+        return (
+          <SimpleSeriesCreationScreen
+            onBack={handleBack}
+            onSeriesCreated={handleSeriesCreated}
+          />
+        );
+
       case 'details-1':
         return (
           <VideoDetailScreen
@@ -115,6 +161,8 @@ const VideoUploadFlow: React.FC<VideoUploadFlowProps> = ({
             onFormChange={updateVideoDetails}
             onContinue={handleContinue}
             onBack={handleBack}
+            selectedSeries={state.selectedSeries}
+            videoFormat={state.videoFormat}
           />
         );
 
@@ -126,6 +174,8 @@ const VideoUploadFlow: React.FC<VideoUploadFlowProps> = ({
             onFormChange={updateVideoDetails}
             onContinue={handleContinue}
             onBack={handleBack}
+            selectedSeries={state.selectedSeries}
+            videoFormat={state.videoFormat}
           />
         );
 
@@ -137,6 +187,8 @@ const VideoUploadFlow: React.FC<VideoUploadFlowProps> = ({
             onFormChange={updateVideoDetails}
             onContinue={handleContinue}
             onBack={handleBack}
+            selectedSeries={state.selectedSeries}
+            videoFormat={state.videoFormat}
           />
         );
 
@@ -148,6 +200,8 @@ const VideoUploadFlow: React.FC<VideoUploadFlowProps> = ({
             onFormChange={updateFinalStageData}
             onUpload={handleFinalUpload}
             onBack={handleBack}
+            selectedSeries={state.selectedSeries}
+            videoFormat={state.videoFormat}
           />
         );
 

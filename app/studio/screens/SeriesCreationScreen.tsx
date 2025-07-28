@@ -11,7 +11,8 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSeriesManagement } from '../hooks/useSeriesManagement';
+import Dropdown from '../../upload/components/Dropdown';
+import { communityOptions, formatOptions } from '../../upload/data/dropdownOptions';
 
 interface SeriesCreationScreenProps {
   onBack: () => void;
@@ -20,49 +21,227 @@ interface SeriesCreationScreenProps {
 
 /**
  * Series Creation Screen
- * Full screen for creating new series with title, type, and price configuration
+ * Two-step process: Series creation followed by video details
  */
 const SeriesCreationScreen: React.FC<SeriesCreationScreenProps> = ({
   onBack,
   onSeriesCreated
 }) => {
-  const {
-    state,
-    updateFormData,
-    createSeries,
-    clearErrors
-  } = useSeriesManagement();
+  // Series creation form state
+  const [seriesForm, setSeriesForm] = useState({
+    title: '',
+    type: null as 'free' | 'paid' | null,
+    price: undefined as number | undefined
+  });
 
+  // Video detail form state
+  const [videoDetails, setVideoDetails] = useState({
+    title: '',
+    community: null as string | null,
+    format: null as string | null
+  });
+
+  const [currentStep, setCurrentStep] = useState<'creation' | 'details'>('creation');
+  const [createdSeries, setCreatedSeries] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Dropdown states
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const [communityDropdownOpen, setCommunityDropdownOpen] = useState(false);
+  const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
 
   const handleClose = () => {
-    clearErrors();
     onBack();
   };
 
+  const validateSeriesForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!seriesForm.title.trim()) {
+      newErrors.title = 'Series title is required';
+    }
+
+    if (!seriesForm.type) {
+      newErrors.type = 'Series type is required';
+    }
+
+    if (seriesForm.type === 'paid' && (!seriesForm.price || seriesForm.price <= 0)) {
+      newErrors.price = 'Price must be greater than 0 for paid series';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleCreate = async () => {
-    const success = await createSeries();
-    if (success && state.series.length > 0) {
-      // Get the newly created series (last one in the array)
-      const newSeries = state.series[state.series.length - 1];
-      onSeriesCreated(newSeries);
+    console.log('Creating series...');
+    console.log('Series form:', seriesForm);
+
+    if (!validateSeriesForm()) {
+      console.log('Form validation failed');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Create series object
+      const newSeries = {
+        id: Date.now().toString(),
+        title: seriesForm.title.trim(),
+        description: '',
+        totalEpisodes: 0,
+        accessType: seriesForm.type!,
+        price: seriesForm.type === 'paid' ? seriesForm.price : undefined,
+        launchDate: new Date().toISOString(),
+        totalViews: 0,
+        totalEarnings: 0,
+        episodes: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      console.log('Series created successfully:', newSeries);
+      setCreatedSeries(newSeries);
+      setLoading(false);
+
+      // Move to video details step
+      console.log('Moving to details step');
+      setCurrentStep('details');
+
+    } catch (error) {
+      console.log('Error creating series:', error);
+      setLoading(false);
+      setErrors({ general: 'Failed to create series' });
     }
   };
 
+  const handleContinue = () => {
+    console.log('Continuing with series:', createdSeries);
+    // Navigate back to studio with the created series
+    onSeriesCreated(createdSeries);
+  };
+
+  const handleBackFromDetails = () => {
+    setCurrentStep('creation');
+  };
+
   const handleTypeSelect = (type: 'free' | 'paid') => {
-    updateFormData({
+    setSeriesForm(prev => ({
+      ...prev,
       type,
-      price: type === 'free' ? undefined : state.formData.price
-    });
+      price: type === 'free' ? undefined : prev.price
+    }));
     setShowTypeDropdown(false);
   };
 
   const getTypeDisplayText = () => {
-    if (!state.formData.type) return 'Select';
-    return state.formData.type === 'free' ? 'Free' : 'Paid';
+    if (!seriesForm.type) return 'Select';
+    return seriesForm.type === 'free' ? 'Free' : 'Paid';
   };
 
-  return (
+  // Handle video detail form changes
+  const handleVideoDetailChange = (field: string, value: string) => {
+    setVideoDetails(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Check if video details form is valid
+  const isVideoDetailsValid = () => {
+    return videoDetails.title.trim() !== '' &&
+      videoDetails.community !== null &&
+      videoDetails.format !== null;
+  };
+
+  // Render video details step
+  const renderVideoDetailsStep = () => (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
+    >
+      <View className="flex-1 bg-black">
+        <StatusBar barStyle="light-content" backgroundColor="#000" />
+
+        {/* Header */}
+        <View className="flex-row items-center justify-between px-4 py-3 mt-12">
+          <TouchableOpacity onPress={handleBackFromDetails}>
+            <Ionicons name="chevron-back" size={24} color="white" />
+          </TouchableOpacity>
+          <Text className="text-white text-xl font-medium">Video detail</Text>
+          <View className="w-6" />
+        </View>
+
+        <ScrollView className="flex-1 px-4 pt-6">
+          {/* Title Field */}
+          <View className="mb-8">
+            <Text className="text-white text-lg font-medium mb-3">Title</Text>
+            <TextInput
+              value={videoDetails.title}
+              onChangeText={(title) => handleVideoDetailChange('title', title)}
+              placeholder="Bank name"
+              placeholderTextColor="#9CA3AF"
+              className="bg-black border border-gray-600 text-white px-4 py-4 rounded-xl text-base"
+            />
+          </View>
+
+          {/* Community Dropdown */}
+          <View className="mb-8">
+            <Text className="text-white text-lg font-medium mb-3">Community</Text>
+            <Dropdown
+              value={videoDetails.community}
+              placeholder="Select"
+              options={communityOptions}
+              onSelect={(community) => {
+                handleVideoDetailChange('community', community);
+                setCommunityDropdownOpen(false);
+              }}
+              isOpen={communityDropdownOpen}
+              onToggle={() => setCommunityDropdownOpen(!communityDropdownOpen)}
+            />
+          </View>
+
+          {/* Format Dropdown */}
+          <View className="mb-8">
+            <Text className="text-white text-lg font-medium mb-3">Format That Fits Your Content</Text>
+            <Dropdown
+              value={videoDetails.format}
+              placeholder="Select"
+              options={formatOptions}
+              onSelect={(format) => {
+                handleVideoDetailChange('format', format);
+                setFormatDropdownOpen(false);
+              }}
+              isOpen={formatDropdownOpen}
+              onToggle={() => setFormatDropdownOpen(!formatDropdownOpen)}
+            />
+          </View>
+
+          {/* Add some bottom padding for better scrolling */}
+          <View className="h-20" />
+        </ScrollView>
+
+        {/* Continue Button */}
+        <View className="px-4 pb-8 pt-4">
+          <TouchableOpacity
+            onPress={handleContinue}
+            disabled={!isVideoDetailsValid()}
+            className="bg-gray-200 rounded-full py-4 items-center"
+            style={{
+              backgroundColor: !isVideoDetailsValid() ? '#6B7280' : '#E5E7EB'
+            }}
+          >
+            <Text className="text-black text-lg font-medium">Continue</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
+  );
+
+  // Render series creation step
+  const renderSeriesCreationStep = () => (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1"
@@ -86,16 +265,16 @@ const SeriesCreationScreen: React.FC<SeriesCreationScreenProps> = ({
             {/* Series Name Input */}
             <View className="w-full max-w-xs">
               <TextInput
-                value={state.formData.title}
-                onChangeText={(title) => updateFormData({ title })}
+                value={seriesForm.title}
+                onChangeText={(title) => setSeriesForm(prev => ({ ...prev, title }))}
                 placeholder="Series 1"
                 placeholderTextColor="#9CA3AF"
                 className="text-white text-2xl font-medium text-center border-b border-gray-600 pb-2 mb-2"
                 maxLength={100}
                 autoFocus
               />
-              {state.errors.title && (
-                <Text className="text-red-400 text-sm text-center mt-2">{state.errors.title}</Text>
+              {errors.title && (
+                <Text className="text-red-400 text-sm text-center mt-2">{errors.title}</Text>
               )}
             </View>
           </View>
@@ -109,7 +288,7 @@ const SeriesCreationScreen: React.FC<SeriesCreationScreenProps> = ({
               onPress={() => setShowTypeDropdown(!showTypeDropdown)}
               className="bg-gray-800 border border-gray-600 rounded-xl px-4 py-4 flex-row items-center justify-between"
             >
-              <Text className={`text-base ${state.formData.type ? 'text-white' : 'text-gray-400'}`}>
+              <Text className={`text-base ${seriesForm.type ? 'text-white' : 'text-gray-400'}`}>
                 {getTypeDisplayText()}
               </Text>
               <Ionicons
@@ -137,33 +316,36 @@ const SeriesCreationScreen: React.FC<SeriesCreationScreenProps> = ({
               </View>
             )}
 
-            {state.errors.type && (
-              <Text className="text-red-400 text-sm mt-2">{state.errors.type}</Text>
+            {errors.type && (
+              <Text className="text-red-400 text-sm mt-2">{errors.type}</Text>
             )}
           </View>
 
           {/* Price Input - Only show for paid series */}
-          {state.formData.type === 'paid' && (
+          {seriesForm.type === 'paid' && (
             <View className="mb-8">
               <Text className="text-white text-base font-medium mb-4">Price</Text>
               <TextInput
-                value={state.formData.price?.toString() || ''}
-                onChangeText={(price) => updateFormData({ price: price ? parseInt(price) : undefined })}
+                value={seriesForm.price?.toString() || ''}
+                onChangeText={(price) => setSeriesForm(prev => ({
+                  ...prev,
+                  price: price ? parseInt(price) : undefined
+                }))}
                 placeholder="₹30"
                 placeholderTextColor="#9CA3AF"
                 className="bg-gray-800 border border-gray-600 text-white px-4 py-4 rounded-xl text-base"
                 keyboardType="numeric"
               />
-              {state.errors.price && (
-                <Text className="text-red-400 text-sm mt-2">{state.errors.price}</Text>
+              {errors.price && (
+                <Text className="text-red-400 text-sm mt-2">{errors.price}</Text>
               )}
             </View>
           )}
 
           {/* General Error */}
-          {state.errors.general && (
+          {errors.general && (
             <View className="mb-6">
-              <Text className="text-red-400 text-sm text-center">{state.errors.general}</Text>
+              <Text className="text-red-400 text-sm text-center">{errors.general}</Text>
             </View>
           )}
         </ScrollView>
@@ -172,13 +354,13 @@ const SeriesCreationScreen: React.FC<SeriesCreationScreenProps> = ({
         <View className="px-4 pb-8 pt-4">
           <TouchableOpacity
             onPress={handleCreate}
-            disabled={state.loading}
+            disabled={loading}
             className="bg-gray-200 rounded-full py-4 items-center"
             style={{
-              backgroundColor: state.loading ? '#6B7280' : '#E5E7EB'
+              backgroundColor: loading ? '#6B7280' : '#E5E7EB'
             }}
           >
-            {state.loading ? (
+            {loading ? (
               <ActivityIndicator size="small" color="black" />
             ) : (
               <Text className="text-black text-lg font-medium">Create</Text>
@@ -188,6 +370,10 @@ const SeriesCreationScreen: React.FC<SeriesCreationScreenProps> = ({
       </View>
     </KeyboardAvoidingView>
   );
+
+  // Main render - show appropriate step
+  console.log('Rendering step:', currentStep);
+  return currentStep === 'creation' ? renderSeriesCreationStep() : renderVideoDetailsStep();
 };
 
 export default SeriesCreationScreen;

@@ -57,12 +57,13 @@ const StrmlyStudio = () => {
         setShowSeriesSelection(true); // Go back to series selection
     };
 
-    // Handle series creation completion - navigate to analytics
+    // Handle series creation completion - go back to series tab
     const handleSeriesCreatedFromScreen = (series: Series) => {
         setShowSeriesCreationScreen(false);
-        setSelectedSeriesForAnalytics(series);
-        setShowSeriesAnalytics(true);
-
+        // Refresh series list to show the new series
+        refetchSeries();
+        // Make sure we're on the series tab
+        setActiveTab('series');
     };
 
     // Handle back from series selection
@@ -223,8 +224,12 @@ const StrmlyStudio = () => {
                                                 resizeMode="cover"
                                             />
                                         ) : (
-                                            <View className="w-full h-full bg-gray-700 items-center justify-center">
-                                                <Ionicons name="videocam-outline" size={20} color="#9CA3AF" />
+                                            <View className="w-full h-full items-center justify-center">
+                                                <Image
+                                                    source={require('../../assets/drafts-icon.png')}
+                                                    style={{ width: 50, height: 50 }}
+                                                    resizeMode="contain"
+                                                />
                                             </View>
                                         )}
                                     </View>
@@ -370,8 +375,8 @@ const StrmlyStudio = () => {
                         if (activeTab === 'draft') {
                             setShowUploadFlow(true);
                         } else {
-                            // Show series selection screen
-                            setShowSeriesSelection(true);
+                            // Go directly to series creation screen
+                            setShowSeriesCreationScreen(true);
                         }
                     }}
                 >
