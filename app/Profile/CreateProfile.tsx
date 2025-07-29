@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
-import { CONFIG } from "@/Constants/config";
+import Constants from "expo-constants";
 
 const CreateProfile = () => {
   const [Step, setStep] = useState(1);
@@ -43,39 +43,18 @@ const CreateProfile = () => {
     "Inter-ExtraBold": require("../../assets/fonts/inter/Inter-ExtraBold.ttf"),
   });
 
+  const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
+
   const checkUsername = useCallback(
     throttle(async (uname: string) => {
       try {
-        console.log(`Checking username: ${uname} at ${CONFIG.API_BASE_URL}/api/v1/auth/check-username/${uname}`);
-
         const res = await fetch(
-          `${CONFIG.API_BASE_URL}/api/v1/auth/check-username/${uname}`
+          `${BACKEND_API_URL}/auth/check-username/${uname}`
         );
-
-        console.log(`Response status: ${res.status}`);
-        console.log(`Response headers:`, res.headers);
-
-        if (!res.ok) {
-          console.error(`HTTP error! status: ${res.status}`);
-          setUsernameExists(null);
-          return;
-        }
-
-        const responseText = await res.text();
-        console.log(`Raw response: ${responseText}`);
-
-        if (!responseText) {
-          console.error("Empty response from server");
-          setUsernameExists(null);
-          return;
-        }
-
-        const data = JSON.parse(responseText);
-        console.log(`Parsed data:`, data);
+        const data = await res.json();
         setUsernameExists(data.exists);
       } catch (err) {
         console.error("Username check failed", err);
-        setUsernameExists(null);
       }
     }, 1000),
     []
@@ -84,35 +63,13 @@ const CreateProfile = () => {
   const checkEmail = useCallback(
     throttle(async (emailVal: string) => {
       try {
-        console.log(`Checking email: ${emailVal} at ${CONFIG.API_BASE_URL}/api/v1/auth/check-email/${emailVal}`);
-
         const res = await fetch(
-          `${CONFIG.API_BASE_URL}/api/v1/auth/check-email/${emailVal}`
+          `${BACKEND_API_URL}/auth/check-email/${emailVal}`
         );
-
-        console.log(`Email check response status: ${res.status}`);
-
-        if (!res.ok) {
-          console.error(`HTTP error! status: ${res.status}`);
-          setEmailExists(null);
-          return;
-        }
-
-        const responseText = await res.text();
-        console.log(`Email check raw response: ${responseText}`);
-
-        if (!responseText) {
-          console.error("Empty response from server");
-          setEmailExists(null);
-          return;
-        }
-
-        const data = JSON.parse(responseText);
-        console.log(`Email check parsed data:`, data);
+        const data = await res.json();
         setEmailExists(data.exists);
       } catch (err) {
         console.error("Email check failed", err);
-        setEmailExists(null);
       }
     }, 1000),
     []
@@ -128,7 +85,7 @@ const CreateProfile = () => {
 
   const handleRegisterUser = async () => {
     try {
-      const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/auth/register`, {
+      const res = await fetch(`${BACKEND_API_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -143,10 +100,6 @@ const CreateProfile = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        // Handle specific error messages
-        if (data?.message?.includes("email")) {
-          throw new Error("Failed to send verification email. Please check your email address and try again.");
-        }
         throw new Error(data?.message || "Registration failed");
       }
 
@@ -155,32 +108,18 @@ const CreateProfile = () => {
       // Save token and partially registered user
       await useAuthStore.getState().login(data.token, data.user);
 
-      // Debug: Log the token that was saved
-      console.log('=== REGISTRATION SUCCESS ===');
-      console.log('Token received:', data.token);
-      console.log('Token length:', data.token?.length);
-      console.log('User data:', data.user);
-      console.log('Auth store state after login:', useAuthStore.getState());
-      console.log('===========================');
-
-      alert("OTP sent to your email. Please check your inbox and spam folder.");
+      alert("OTP sent to your email.");
       setTimeout(() => setStep(4), 1000);
     } catch (err: any) {
       console.error("Registration error:", err);
-
-      // Show user-friendly error messages
-      if (err.message.includes("email")) {
-        alert("Email service is currently unavailable. Please try again later or contact support.");
-      } else {
-        alert(err.message || "Registration failed. Please try again.");
-      }
+      alert(err.message || "Something went wrong");
     }
   };
 
   const handleVerifyOTP = async () => {
     try {
       const res = await fetch(
-        `${CONFIG.API_BASE_URL}/api/v1/auth/verify-email`,
+        `${BACKEND_API_URL}/auth/verify-email`,
         {
           method: "POST",
           headers: {
@@ -218,7 +157,7 @@ const CreateProfile = () => {
       setIsLoading(true);
 
       const res = await fetch(
-        `${CONFIG.API_BASE_URL}/api/v1/auth/resend-verification`,
+        `${BACKEND_API_URL}/auth/resend-verification`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -328,7 +267,7 @@ const CreateProfile = () => {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
         <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
-          <TouchableOpacity onPress={() => router.push("/(auth)/signin")}>
+          <TouchableOpacity onPress={() => router.push("/(auth)/Sign-up")}>
             <Image
               className="w-5 h-5 mt-1"
               source={require("../../assets/images/back.png")}
@@ -475,11 +414,7 @@ const CreateProfile = () => {
     );
   }
 
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Internal Error, Try restarting the app.</Text>
-    </View>);
-}
+  return "Internal Error, Try restarting the app.";
+};
 
-
-export default CreateProfile
+export default CreateProfile;

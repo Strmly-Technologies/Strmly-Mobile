@@ -22,10 +22,18 @@ export const EditProfile = StyleSheet.create({
         height: 24,
     },
     CommunityAvatar: {
+        borderWidth: 1,
+        borderColor: 'white',
         width: 80,
         height: 80,
         borderRadius: 40,
         marginBottom: 10
+    },
+    RightTab: {
+        // textAlign: 'right',
+        fontFamily: 'Poppins-Medium',
+        fontSize: 16,
+        color:'#0088FF'
     },
     InfoContainer: {
         width: '100%',
@@ -38,11 +46,15 @@ export const EditProfile = StyleSheet.create({
         marginBottom:2,
     },
     TextLabel: {
+        width: '100%',
+        borderBottomWidth: 0.5,
+        borderColor: '#FFFFFF33',
         fontFamily: 'Poppins-Regular',
         fontSize: 14,
         marginTop: 10,
     },
     InfoFrame: {
+        alignItems: 'center',
         marginTop: 20,
         marginLeft: 20,
         display: 'flex',
@@ -60,11 +72,12 @@ export const EditProfile = StyleSheet.create({
         marginBottom: 5,
     },
     dropdownTrigger: {
+        width: '80%',
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         borderColor: "#333",
-        borderWidth: 1,
+        borderBottomWidth: 1,
         borderRadius: 8,
         paddingHorizontal: 12,
         paddingVertical: 10,
@@ -115,6 +128,7 @@ export const EditProfile = StyleSheet.create({
     },
     ExtraInfo: {
         fontFamily: 'Poppins-ExtraLight',
+        textAlign: 'center',
         fontSize: 12,
         opacity: 0.6
     },

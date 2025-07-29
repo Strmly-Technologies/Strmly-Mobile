@@ -1,4 +1,6 @@
-{
+import 'dotenv/config';
+
+export default {
   "expo": {
     "name": "native-movie",
     "slug": "native-movie",
@@ -8,6 +10,9 @@
     "scheme": "movies",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    extra: {
+      BACKEND_API_URL: process.env.BACKEND_API_URL,
+    },
     "ios": {
       "supportsTablet": true
     },

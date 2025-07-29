@@ -19,7 +19,7 @@ import TotalWalletHistory from "./_components/TotalWalletHistory";
 import { useWallet } from "./_components/useWallet";
 import { useAuthStore } from "@/store/useAuthStore";
 
-const { height } = Dimensions.get("window");
+const { height } = Dimensions.get('screen');
 
 const WalletPage = () => {
   // Get token from auth store

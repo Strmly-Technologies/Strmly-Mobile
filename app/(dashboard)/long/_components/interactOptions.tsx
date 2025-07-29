@@ -6,9 +6,11 @@ import { FontAwesome } from "@expo/vector-icons";
 // Define props type for InteractOptions
 type InteractOptionsProps = {
   onCommentPress: () => void; // Callback function for comment button press
+  likes: number;
+  comments?: number;
 };
 
-const InteractOptions = ({ onCommentPress }: InteractOptionsProps) => { // Destructure onCommentPress from props
+const InteractOptions = ({ onCommentPress, likes, comments }: InteractOptionsProps) => { // Destructure onCommentPress from props
   const [liked, setLiked] = useState(false);
 
   return (
@@ -18,12 +20,12 @@ const InteractOptions = ({ onCommentPress }: InteractOptionsProps) => { // Destr
           <Pressable onPress={() => setLiked(!liked)}>
             <FontAwesome
               name={liked ? "heart" : "heart-o"}
-              size={28}
+              size={27}
               color={liked ? "red" : "white"}
             />
           </Pressable>
 
-          <Text className="text-white text-sm">10K</Text>
+          <Text className="text-white text-sm">{likes}</Text>
         </View>
 
         <View className="items-center gap-1">
@@ -35,7 +37,7 @@ const InteractOptions = ({ onCommentPress }: InteractOptionsProps) => { // Destr
             />
           </Pressable>
         
-          <Text className="text-white text-sm">120K</Text>
+          <Text className="text-white text-sm">{comments}</Text>
         </View>
 
         <View className="items-center gap-1">

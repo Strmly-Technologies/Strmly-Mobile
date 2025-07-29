@@ -1,141 +1,139 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet } from "react-native";
 
 export const CreatorPassStyles = StyleSheet.create({
-    TopBar: {
-        width: '100%',
-        height: 60,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-    },
-    Title: {
-        fontSize: 20,
-        fontFamily: 'Inter-SemiBold',
-        color: 'white',
-        textAlign: 'center',
-    },
-    Heading:{
-        fontSize: 20,
-        fontFamily: 'Poppins-Medium',
-        color: 'white',
-        paddingBottom:12
-    },
-    BackIcon: {
-        width: 24,
-        height: 24,
-        position: 'absolute',
-        left: 20,
-        right:20
-    },
-    Text: {
-        fontSize: 12,
-        fontFamily: 'Inter-ExtraLight',
-        color: "#B0B0B0",
-        textAlign: "center"
-    },
-    ExtraBold: {
-        fontSize: 16,
-        fontFamily: 'Inter-ExtraBold',
-        color: "#ffffffff",
-        textAlign: "center"
-    },
-    Input: {
-        borderColor: "#B0B0B0",
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: 10,
-        width: 337,
-        height: 55,
-        color: "#B0B0B0",
-        fontFamily: "Inter-Light",
-        fontSize: 16
-    },
-    Container: {
-        flex: 1,
-        display: "flex",
-        gap: 10,
-        alignContent:"center",
-        alignItems:"center"
-    },
-    Centered: {
-        flex: 1,
-        display: "flex",
-        gap: 10,
-        alignContent:"center",
-        alignItems:"center",
-        justifyContent: "center",
-    },
-    CardGrid:{
-        display:"flex",
-        flexDirection:"row",
-        gap:42
-    },
-    button: {
-        marginTop: 16,
-        width: 234,
-        height: 55,
-        fontSize: 18,
-        fontFamily: 'Inter-SemiBold',
-        display: "flex",
-        justifyContent: 'center',
-        alignItems: "center",
-        backgroundColor: "white",
-        color: "black",
-        borderRadius: 100
-    },
-    InterestCard:{
-        fontFamily:'Poppins-Light',
-        width:150,
-        height:150,
-        borderRadius:"0.75em",
-        gap:"0.75em",
-        backgroundColor:"grey",
-        display:"flex",
-        justifyContent:"center",
-        textAlign:"center",
-        alignItems:"center",
-        paddingTop:20,
-        paddingBottom:20,
-        paddingLeft:2,
-        paddingRight:2
-    },
-    CardContent:{
-        fontFamily:'Poppins-Light',
-        fontSize:11,
-        display:"flex",
-        justifyContent:"center",
-        textAlign:"center",
-        alignItems:"center"
-    },
-    PriceRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  borderBottomWidth: 1,
-  borderBottomColor: '#B0B0B0',
-  paddingBottom: 8,
-  marginVertical: 12,
-},
+  TopBar: {
+    width: "100%",
+    height: 60,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  Title: {
+    fontSize: 20,
+    fontFamily: "Inter-SemiBold",
+    color: "white",
+    textAlign: "center",
+  },
+  Heading: {
+    fontSize: 20,
+    fontFamily: "Poppins-Medium",
+    color: "white",
+    paddingBottom: 12,
+  },
+  BackIcon: {
+    width: 24,
+    height: 24,
+    position: "absolute",
+    left: 20,
+    right: 20,
+  },
+  Text: {
+    fontSize: 12,
+    fontFamily: "Inter-ExtraLight",
+    color: "#B0B0B0",
+    textAlign: "center",
+  },
+  ExtraBold: {
+    fontSize: 16,
+    fontFamily: "Inter-ExtraBold",
+    color: "#ffffffff",
+    textAlign: "center",
+  },
+  Input: {
+    borderColor: "#B0B0B0",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 10,
+    width: 337,
+    height: 55,
+    color: "#B0B0B0",
+    fontFamily: "Inter-Light",
+    fontSize: 16,
+  },
+  Container: {
+    flex: 1,
+    display: "flex",
+    gap: 10,
+    alignContent: "center",
+    alignItems: "center",
+  },
+  Centered: {
+    flex: 1,
+    display: "flex",
+    gap: 10,
+    alignContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  CardGrid: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 42,
+  },
+  button: {
+    marginVertical: 5,
+    width: 234,
+    height: 55,
+    fontSize: 18,
+    fontFamily: "Inter-SemiBold",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+    color: "black",
+    borderRadius: 100,
+  },
+  InterestCard: {
+    fontFamily: "Poppins-Light",
+    width: 150,
+    height: 150,
+    borderRadius: "0.75em",
+    gap: "0.75em",
+    backgroundColor: "grey",
+    display: "flex",
+    justifyContent: "center",
+    textAlign: "center",
+    alignItems: "center",
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingLeft: 2,
+    paddingRight: 2,
+  },
+  CardContent: {
+    fontFamily: "Poppins-Light",
+    fontSize: 11,
+    display: "flex",
+    justifyContent: "center",
+    textAlign: "center",
+    alignItems: "center",
+  },
+  PriceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#B0B0B0",
+    paddingBottom: 8,
+    marginTop: 12,
+  },
 
-RupeeSymbol: {
-  fontSize: 24,
-  fontFamily: 'Inter-ExtraBold',
-  color: '#ffffff',
-},
+  RupeeSymbol: {
+    fontSize: 24,
+    fontFamily: "Inter-ExtraBold",
+    color: "#ffffff",
+  },
 
-PriceInput: {
-  fontSize: 24,
-  fontFamily: 'Inter-ExtraBold',
-  color: '#ffffff',
-  marginLeft: 4,
-  width: 60,
-  padding: 0,
-},
+  PriceInput: {
+    fontSize: 24,
+    fontFamily: "Inter-ExtraBold",
+    color: "#ffffff",
+    marginLeft: 4,
+    padding: 0,
+  },
 
-PerMonth: {
-  fontSize: 18,
-  fontFamily: 'Inter-SemiBold',
-  color: '#ffffff',
-  marginLeft: 8,
-}
-})
+  PerMonth: {
+    fontSize: 18,
+    fontFamily: "Inter-SemiBold",
+    color: "#ffffff",
+  },
+});

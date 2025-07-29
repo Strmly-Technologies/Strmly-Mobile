@@ -24,6 +24,7 @@ import { useThumbnailsGenerate } from "@/utils/useThumbnailGenerator"; // Ensure
 import ThemedView from "@/components/ThemedView"; // Assuming this is a basic wrapper for styling
 import ProfileTopbar from "@/components/profileTopbar"; // Assuming this is the converted ProfileTopbar
 import { LinearGradient } from "expo-linear-gradient"; // For the gradient border
+import Constants from "expo-constants";
 
 // No need for mockPosts, as you're fetching real data now.
 
@@ -37,6 +38,8 @@ export default function PublicProfilePage() {
   const [isLoadingVideos, setIsLoadingVideos] = useState(false);
   const { user, isLoggedIn, token, logout } = useAuthStore();
   const router = useRouter();
+
+  const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 
   // Access the current user's ID if this profile page is for the logged-in user
   // If this page can display OTHER users' profiles, you'd use useLocalSearchParams for `id`
@@ -52,10 +55,10 @@ export default function PublicProfilePage() {
 
   useEffect(() => {
     // Re-enabled login check as it's crucial for protected routes
-    if (!isLoggedIn) {
-      router.push('/(auth)/Sign-in');
-      return;
-    }
+    // if (!isLoggedIn) {
+    //   router.push('/(auth)/Sign-in');
+    //   return;
+    // }
 
     const fetchUserVideos = async () => {
       setIsLoadingVideos(true);
@@ -64,7 +67,7 @@ export default function PublicProfilePage() {
         queryParams.append("type", activeTab);
 
         const response = await fetch(
-          `${process.env.BACKEND_API_URL}/user/profile/videos?${queryParams.toString()}`,
+          `${BACKEND_API_URL}/user/profile/videos?${queryParams.toString()}`,
           {
             method: "GET",
             headers: {
@@ -100,14 +103,14 @@ export default function PublicProfilePage() {
   }, [isLoggedIn, router, token, activeTab]);
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      router.push('/(auth)/Sign-in');
-      return;
-    }
+    // if (!isLoggedIn) {
+    //   router.push('/(auth)/Sign-in');
+    //   return;
+    // }
 
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`${process.env.BACKEND_API_URL}/user/profile`, {
+        const response = await fetch(`${BACKEND_API_URL}/user/profile`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -211,10 +214,10 @@ export default function PublicProfilePage() {
             </View>
 
             {/* Stats */}
-            <View className="mt-6 flex-row justify-between gap-2 items-center">
+            <View className={`mt-6 flex-row justify-evenly items-center ${currentProfileData.creatorPassPrice !== 0 && "gap-4" }`}>
               <TouchableOpacity
-                className="flex-col flex-1 text-center items-center"
-                // onPress={() => router.push("/communities?type=followers")} // Adjust route if needed
+                className="text-center items-center"
+                // onPress={() => router.push("/communities?type=followers")}
               >
                 <Text className="font-semibold text-lg text-white">
                   {currentProfileData.followers}M
@@ -225,7 +228,7 @@ export default function PublicProfilePage() {
               </TouchableOpacity>
 
               {/* Follow Button */}
-              <TouchableOpacity className="h-9 px-4 py-2 rounded-lg border border-white">
+              <TouchableOpacity className="h-9 px-7 py-2 rounded-lg border border-white">
                 <Text className="text-white text-center font-semibold">
                   Follow
                 </Text>
@@ -233,7 +236,7 @@ export default function PublicProfilePage() {
 
               {/* Access Button with Gradient Border */}
               <TouchableOpacity
-                className={`${currentProfileData.creatorPassPrice !== 0 && "flex-grow"} h-10 rounded-lg overflow-hidden`}
+                className={`${currentProfileData.creatorPassPrice !== 0 && "flex-grow" } h-10 rounded-lg overflow-hidden`}
               >
                 <LinearGradient
                   colors={["#4400FFA6", "#FFFFFF", "#FF00004D", "#FFFFFF"]}
@@ -242,7 +245,7 @@ export default function PublicProfilePage() {
                   className="p-[1px] rounded-lg flex-1"
                 >
                   <View
-                    className={`flex-1 ${currentProfileData.creatorPassPrice == 0 && "px-2"} rounded-lg bg-black items-center justify-center`}
+                    className={`flex-1 ${currentProfileData.creatorPassPrice == 0 && "px-4"} rounded-lg bg-black items-center justify-center`}
                   >
                     {currentProfileData.creatorPassPrice === 0 ? (
                       <Text className="text-white text-center">
@@ -251,7 +254,7 @@ export default function PublicProfilePage() {
                     ) : (
                       <View className="flex-row items-center justify-center">
                         <Text className="text-white text-center">
-                          Access at{" "}
+                          Access at
                         </Text>
                         <IndianRupee color={"white"} size={13} />
                         <Text className="text-white text-center ml-0.5">
@@ -266,10 +269,10 @@ export default function PublicProfilePage() {
 
             {/* Tags/Edit Buttons */}
             <View className="flex flex-row flex-wrap w-full items-center justify-center gap-2 mt-5">
-              <TouchableOpacity className="px-4 py-2 border border-gray-400 rounded-md">
+              <TouchableOpacity className="px-4 py-2 border border-gray-400 rounded-[8px]">
                 <Text className="text-white">#Edit</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="px-4 py-2 border border-gray-400 rounded-md">
+              <TouchableOpacity className="px-4 py-2 border border-gray-400 rounded-[8px]">
                 <Text className="text-white">#Fun</Text>
               </TouchableOpacity>
             </View>
@@ -330,7 +333,7 @@ export default function PublicProfilePage() {
               onPress={() => setActiveTab("likes")}
             >
               <HeartIcon
-                color={"white"}
+                color={activeTab === "likes" ? "white" : "gray"}
                 fill={activeTab === "likes" ? "white" : ""}
               />
             </TouchableOpacity>

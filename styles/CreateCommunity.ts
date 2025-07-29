@@ -22,6 +22,8 @@ export const CreateCommunityStyle = StyleSheet.create({
         height: 24,
     },
     CommunityAvatar: {
+        borderWidth: 1,
+        borderColor:'white',
         width: 80,
         height: 80,
         borderRadius: 40,
@@ -37,11 +39,15 @@ export const CreateCommunityStyle = StyleSheet.create({
         marginTop: 10
     },
     TextLabel: {
+        borderBottomWidth: 1,
+        borderColor: '#FFFFFF33',
+        width: '100%',
         fontFamily: 'Poppins-Regular',
         fontSize: 14,
         marginTop: 10,
     },
     InfoFrame: {
+        alignItems: 'center',
         marginTop: 20,
         marginLeft: 20,
         display: 'flex',
@@ -92,24 +98,25 @@ export const CreateCommunityStyle = StyleSheet.create({
     },
     overlay: {
         flex: 1,
+        position: 'absolute',
+        top: '51%',
+        left: '22%',
         backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "center",
-        alignItems: "center",
     },
     dropdownBox: {
         backgroundColor: "#111",
         borderRadius: 10,
         paddingVertical: 10,
-        width: 200,
+        width: 150,
     },
     dropdownItem: {
         paddingVertical: 12,
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
     },
     dropdownItemText: {
         color: "#fff",
         fontFamily: "Poppins-Medium",
-        fontSize: 14,
+        fontSize: 16,
     },
     ExtraInfo: {
         fontFamily: 'Poppins-ExtraLight',

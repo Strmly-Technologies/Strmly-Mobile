@@ -5,7 +5,8 @@ import {
   useWindowDimensions,
   ActivityIndicator,
   Pressable,
-  LayoutChangeEvent, // Import LayoutChangeEvent for onLayout
+  LayoutChangeEvent,
+  Dimensions, // Import LayoutChangeEvent for onLayout
 } from "react-native";
 import { useVideoPlayer, VideoView, type VideoPlayerStatus } from "expo-video";
 import InteractOptions from "./_components/interactOptions";
@@ -13,19 +14,20 @@ import VideoDetails from "./_components/VideoDetails";
 import { Play } from "lucide-react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
 import CommentsSection from "./_components/CommentSection";
-
+import { VideoItemType } from "@/types/VideosType";
 
 type Props = {
   uri: string;
   isActive: boolean;
+  videoData: VideoItemType;
 };
 
 // Define constants for layout to avoid magic numbers and make adjustments easier
 const PROGRESS_BAR_HEIGHT = 2; // Keep your original height for the progress bar
 const FULL_SCREEN_PRESSABLE_BOTTOM_OFFSET = PROGRESS_BAR_HEIGHT; // 10px buffer above progress bar
 
-const VideoItem = ({ uri, isActive }: Props) => {
-  const { width, height } = useWindowDimensions();
+const VideoItem = ({ uri, isActive, videoData }: Props) => {
+  const { width, height } = Dimensions.get("screen");
   const player = useVideoPlayer(uri, (p) => {
     p.loop = true;
     p.volume = 1;
@@ -76,7 +78,6 @@ const VideoItem = ({ uri, isActive }: Props) => {
       setVideoStatus(event.status);
       // Your original statusChange listener did not update isPaused,
       // so we will respect that and keep isPaused managed by togglePlayPause.
-
     });
     return () => subscription.remove();
   }, [player]);
@@ -210,7 +211,11 @@ const VideoItem = ({ uri, isActive }: Props) => {
 
       {/* Interact Buttons */}
       <View style={styles.interact}>
-        <InteractOptions onCommentPress={handleOpenComments} />
+        <InteractOptions
+          likes={videoData.likes}
+          comments={videoData.comments?.length}
+          onCommentPress={handleOpenComments}
+        />
       </View>
 
       {/* Conditionally render the CommentSection modal */}
@@ -218,7 +223,8 @@ const VideoItem = ({ uri, isActive }: Props) => {
         <CommentsSection
           isOpen={showCommentsModal} // Pass the state controlling its visibility
           onClose={handleCloseComments}
-          videoId='1'
+          commentss={videoData.comments}
+          videoId="1"
           longVideosOnly={false} // Or true, depending on your logic
         />
       )}
@@ -226,6 +232,10 @@ const VideoItem = ({ uri, isActive }: Props) => {
       {/* Video Info */}
       <View style={styles.details}>
         <VideoDetails
+          type={videoData.type}
+          name={videoData.name}
+          series={videoData?.series}
+          createdBy={videoData?.created_by}
           onToggleFullScreen={toggleFullScreen}
           isFullScreen={isFullScreen}
         />
@@ -234,12 +244,10 @@ const VideoItem = ({ uri, isActive }: Props) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "black",
   },
   video: {
     position: "absolute",

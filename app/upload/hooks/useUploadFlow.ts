@@ -43,6 +43,7 @@ export const useUploadFlow = () => {
     selectedFile: null,
     videoFormat: null,
     selectedSeries: null,
+    selectedSeries: null,
     isUploading: false,
     errors: {},
   });
@@ -160,7 +161,10 @@ export const useUploadFlow = () => {
   const startUpload = useCallback(() => {
     // Real upload now happens in submitUpload function
     console.log('Starting upload process...');
+    // Real upload now happens in submitUpload function
+    console.log('Starting upload process...');
   }, []);
+
 
 
 
@@ -169,11 +173,19 @@ export const useUploadFlow = () => {
     setState(prev => {
       let nextStep = prev.currentStep;
 
+
       switch (prev.currentStep) {
         case 'file-select':
           nextStep = 'format-select';
           break;
         case 'format-select':
+          // If episode format, go to series selection; if single, go directly to details
+          nextStep = prev.videoFormat === 'episode' ? 'series-selection' : 'details-1';
+          break;
+        case 'series-selection':
+          nextStep = 'series-creation';
+          break;
+        case 'series-creation':
           // If episode format, go to series selection; if single, go directly to details
           nextStep = prev.videoFormat === 'episode' ? 'series-selection' : 'details-1';
           break;
@@ -209,12 +221,21 @@ export const useUploadFlow = () => {
     setState(prev => {
       let prevStep = prev.currentStep;
 
+
       switch (prev.currentStep) {
         case 'format-select':
           prevStep = 'file-select';
           break;
         case 'series-selection':
+        case 'series-selection':
           prevStep = 'format-select';
+          break;
+        case 'series-creation':
+          prevStep = 'series-selection';
+          break;
+        case 'details-1':
+          // If episode format, go back to series selection; if single, go back to format select
+          prevStep = prev.videoFormat === 'episode' ? 'series-selection' : 'format-select';
           break;
         case 'series-creation':
           prevStep = 'series-selection';
@@ -251,6 +272,12 @@ export const useUploadFlow = () => {
     }, 1000);
   }, [updateDraft]);
 
+    // Auto-save draft when video details are updated (with debounce)
+    setTimeout(() => {
+      updateDraft();
+    }, 1000);
+  }, [updateDraft]);
+
   // Update final stage data
   const updateFinalStageData = useCallback((data: Partial<FinalStageData>) => {
     setState(prev => ({
@@ -264,12 +291,24 @@ export const useUploadFlow = () => {
     }, 1000);
   }, [updateDraft]);
 
+    // Auto-save draft when final stage data is updated
+    setTimeout(() => {
+      updateDraft();
+    }, 1000);
+  }, [updateDraft]);
+
   // Set selected file
   const setSelectedFile = useCallback((file: any) => {
     setState(prev => ({
       ...prev,
       selectedFile: file,
     }));
+
+    // Create initial draft when file is selected
+    setTimeout(() => {
+      createInitialDraft();
+    }, 500);
+  }, [createInitialDraft]);
 
     // Create initial draft when file is selected
     setTimeout(() => {
@@ -301,8 +340,26 @@ export const useUploadFlow = () => {
     }));
   }, []);
 
+  // Set selected series
+  const setSelectedSeries = useCallback((series: Series) => {
+    setState(prev => ({
+      ...prev,
+      selectedSeries: series,
+    }));
+  }, []);
+
+  // Go directly to details step (used after series selection/creation)
+  const goToDetailsStep = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      currentStep: 'details-1',
+    }));
+  }, []);
+
   // Validate current step
   const validateCurrentStep = useCallback((): boolean => {
+    const { currentStep, videoDetails, finalStageData, selectedFile, videoFormat, selectedSeries } = state;
+
     const { currentStep, videoDetails, finalStageData, selectedFile, videoFormat, selectedSeries } = state;
 
     switch (currentStep) {
@@ -314,13 +371,24 @@ export const useUploadFlow = () => {
         return selectedSeries !== null;
       case 'series-creation':
         return true; // Validation handled within the series creation screen
+      case 'series-selection':
+        return selectedSeries !== null;
+      case 'series-creation':
+        return true; // Validation handled within the series creation screen
       case 'details-1':
         return videoDetails.title.trim() !== '' && videoDetails.community !== null;
       case 'details-2':
         return videoDetails.title.trim() !== '' &&
           videoDetails.community !== null &&
           videoDetails.format !== null;
+        return videoDetails.title.trim() !== '' &&
+          videoDetails.community !== null &&
+          videoDetails.format !== null;
       case 'details-3':
+        return videoDetails.title.trim() !== '' &&
+          videoDetails.community !== null &&
+          videoDetails.format !== null &&
+          videoDetails.videoType !== null;
         return videoDetails.title.trim() !== '' &&
           videoDetails.community !== null &&
           videoDetails.format !== null &&
@@ -332,6 +400,7 @@ export const useUploadFlow = () => {
     }
   }, [state]);
 
+  // Submit final upload (complete draft with video file)
   // Submit final upload (complete draft with video file)
   const submitUpload = useCallback(async () => {
     if (!state.selectedFile) {
@@ -416,9 +485,11 @@ export const useUploadFlow = () => {
       selectedFile: null,
       videoFormat: null,
       selectedSeries: null,
+      selectedSeries: null,
       isUploading: false,
       errors: {},
     });
+    setDraftId(null);
     setDraftId(null);
   }, []);
 
@@ -428,14 +499,19 @@ export const useUploadFlow = () => {
     goToNextStep,
     goToPreviousStep,
     goToDetailsStep,
+    goToDetailsStep,
     updateVideoDetails,
     updateFinalStageData,
     setSelectedFile,
     setVideoFormat,
     setSelectedSeries,
+    setSelectedSeries,
     validateCurrentStep,
     submitUpload,
     resetFlow,
+    createInitialDraft,
+    updateDraft,
+    draftId,
     createInitialDraft,
     updateDraft,
     draftId,

@@ -15,7 +15,7 @@ import {
 import Constants from "expo-constants";
 import * as ImagePicker from "expo-image-picker";
 
-const CreateCommunityPage: React.FC = () => {
+const EditCommunityPage: React.FC = () => {
   const [fontsLoaded] = useFonts({
     "Poppins-Regular": require("../../assets/fonts/poppins/Poppins-Regular.ttf"),
     "Poppins-Bold": require("../../assets/fonts/poppins/Poppins-Bold.ttf"),
@@ -61,51 +61,67 @@ const CreateCommunityPage: React.FC = () => {
     }
   };
 
-  const handleCreate = async () => {
-    if (!communityName || !bio || !selected) {
-      Alert.alert("Error", "Please fill all required fields.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("name", communityName);
-    formData.append("bio", bio);
-    formData.append("accessType", selected);
-
-    if (selected === "Paid") {
-      formData.append("strength", strength);
-      formData.append("fee", fee);
-    }
-
-    if (imageUri) {
-      const fileName = imageUri.split("/").pop()!;
-      const fileType = fileName.split(".").pop();
-      formData.append("image", {
-        uri: imageUri,
-        name: fileName,
-        type: `image/${fileType}`,
-      } as any);
-    }
-    
+  const handleEdit = async () => {
     try {
-      const res = await fetch(`${BACKEND_API_URL}/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        body: formData,
-      });
+      const token = "your_auth_token";
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
 
-      const data = await res.json();
-
-      if (res.ok) {
-        Alert.alert("Success", "Community created!");
-      } else {
-        Alert.alert("Failed", data.message || "Something went wrong.");
+      // 1. Update name if provided
+      if (communityName) {
+        await fetch(`${BACKEND_API_URL}/community/rename`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({ name: communityName }),
+        });
       }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Network error. Please try again.");
+
+      // 2. Update bio if provided
+      if (bio) {
+        await fetch(`${BACKEND_API_URL}/community/add-bio`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({ bio }),
+        });
+      }
+
+      // 3. Update access if selected
+      if (selected) {
+        await fetch(`${BACKEND_API_URL}/community/edit-access`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({
+            type: selected.toLowerCase(),
+            ...(selected === "Paid" && strength && { strength }),
+            ...(selected === "Paid" && fee && { fee }),
+          }),
+        });
+      }
+
+      // 4. Update photo if selected
+      if (imageUri) {
+        const formData = new FormData();
+        formData.append("profilePhoto", {
+          uri: imageUri,
+          name: "community.jpg",
+          type: "image/jpeg",
+        } as any);
+
+        await fetch(`${BACKEND_API_URL}/community/change-profile-photo`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+      }
+
+      Alert.alert("Community updated successfully!");
+    } catch (err) {
+      console.error("Update failed:", err);
+      Alert.alert("Something went wrong while updating.");
     }
   };
 
@@ -119,7 +135,7 @@ const CreateCommunityPage: React.FC = () => {
           />
         </TouchableOpacity>
         <ThemedText style={CommunitiesStyles.Tab}>Create Community</ThemedText>
-        <TouchableOpacity onPress={handleCreate}>
+        <TouchableOpacity onPress={handleEdit}>
           <ThemedText style={CommunitiesStyles.RightTab}>Create</ThemedText>
         </TouchableOpacity>
       </View>
@@ -251,4 +267,4 @@ const CreateCommunityPage: React.FC = () => {
   );
 };
 
-export default CreateCommunityPage;
+export default EditCommunityPage;
