@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { UploadFlowState, VideoFormData, FinalStageData } from '../types';
 import { Series } from '../../studio/types';
+import { CONFIG } from '../../../Constants/config';
 
 /**
  * Upload Flow State Management Hook
@@ -66,7 +67,7 @@ export const useUploadFlow = () => {
 
       console.log('Creating initial draft with data:', draftData);
 
-      const response = await fetch('http://192.168.1.36:3001/api/v1/drafts/create-or-update', {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/drafts/create-or-update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +122,7 @@ export const useUploadFlow = () => {
 
       console.log('Updating draft with data:', draftData);
 
-      const response = await fetch('http://192.168.1.36:3001/api/v1/drafts/create-or-update', {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/drafts/create-or-update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -376,7 +377,7 @@ export const useUploadFlow = () => {
         });
       }, 500);
 
-      const response = await fetch(`http://192.168.1.36:3001/api/v1/drafts/complete/${currentDraftId}`, {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/drafts/complete/${currentDraftId}`, {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg0Yzc0YWU3M2Q4ZDRlZjY3YjAyZTQiLCJpYXQiOjE3NTM1MzIyMzYsImV4cCI6MTc1NjEyNDIzNn0._pqT9psCN1nR5DJpB60HyA1L1pp327o1fxfZPO4BY3M',

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Series } from '../types';
+import { CONFIG } from '../../../Constants/config';
 
 // Genre options based on the backend enum
 const genreOptions = [
@@ -120,7 +121,7 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
 
       console.log("Creating series with data:", seriesData);
 
-      const response = await fetch('http://192.168.1.36:3001/api/v1/series/create/', {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/series/create/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
