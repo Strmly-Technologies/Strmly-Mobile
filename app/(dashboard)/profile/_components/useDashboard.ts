@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { 
-  getUserProfile, 
-  getUserVideos, 
-  getUserCommunities, 
-  getUserFollowers, 
+import {
+  getUserProfile,
+  getUserVideos,
+  getUserCommunities,
+  getUserFollowers,
   getUserInteractions,
-  getUserEarnings 
+  getUserEarnings
 } from '@/api/user/userActions';
 import { CONFIG } from '@/Constants/config';
 
@@ -52,7 +52,7 @@ export const useDashboard = (token: string, activeTab: 'non-revenue' | 'revenue'
     try {
       if (activeTab === 'non-revenue') {
         console.log('Fetching non-revenue data from all working endpoints...');
-        
+
         // Call all the working endpoints in parallel
         const [userProfile, userVideos, userCommunities, userFollowers, userInteractions] = await Promise.all([
           getUserProfile(token),
@@ -73,15 +73,15 @@ export const useDashboard = (token: string, activeTab: 'non-revenue' | 'revenue'
             return { interactions: [] };
           })
         ]);
-        
+
         // Calculate stats from all the data with safe fallbacks
         const user = userProfile?.user;
         const videos = Array.isArray(userVideos?.videos) ? userVideos.videos : [];
         const communities = Array.isArray(userCommunities?.communities) ? userCommunities.communities : [];
-        const followers = Array.isArray(userFollowers?.followers) ? userFollowers.followers : 
-                         Array.isArray(user?.followers) ? user.followers : [];
+        const followers = Array.isArray(userFollowers?.followers) ? userFollowers.followers :
+          Array.isArray(user?.followers) ? user.followers : [];
         const interactions = Array.isArray(userInteractions?.interactions) ? userInteractions.interactions : [];
-        
+
         console.log('Data validation:', {
           videosCount: videos.length,
           communitiesCount: communities.length,
@@ -89,7 +89,7 @@ export const useDashboard = (token: string, activeTab: 'non-revenue' | 'revenue'
           interactionsCount: interactions.length,
           userSharedVideos: user?.shared_videos?.length || 0
         });
-        
+
         // Calculate totals with safe operations
         const totalFollowers = followers.length;
         const totalVideos = videos.length;
@@ -98,7 +98,7 @@ export const useDashboard = (token: string, activeTab: 'non-revenue' | 'revenue'
         const totalComments = interactions.filter((i: any) => i?.type === 'comment').length;
         const totalReposts = Array.isArray(user?.shared_videos) ? user.shared_videos.length : 0;
         const totalWatchTime = videos.reduce((sum: number, video: any) => sum + (video.duration || 0), 0);
-        
+
         console.log('✅ Non-revenue data calculated:', {
           totalFollowers,
           totalVideos,
@@ -108,7 +108,7 @@ export const useDashboard = (token: string, activeTab: 'non-revenue' | 'revenue'
           totalReposts,
           totalWatchTime
         });
-        
+
         setStats({
           totalViews,
           totalLikes,
@@ -121,12 +121,12 @@ export const useDashboard = (token: string, activeTab: 'non-revenue' | 'revenue'
 
       } else {
         console.log('Fetching revenue data...');
-        
+
         // Fetch revenue data from earnings endpoint
         const earnings = await getUserEarnings(token);
-        
+
         console.log('✅ Revenue data received:', earnings);
-        
+
         setStats({
           totalViews: earnings.totalViews,
           totalLikes: earnings.totalLikes,
@@ -152,7 +152,7 @@ export const useDashboard = (token: string, activeTab: 'non-revenue' | 'revenue'
     } catch (err: any) {
       console.error('❌ Error fetching dashboard data:', err);
       setError(err.message);
-      
+
       // Show zeros on error as requested
       setStats({
         totalViews: 0,

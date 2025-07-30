@@ -333,9 +333,11 @@ const StrmlyStudio = () => {
                                                     resizeMode="cover"
                                                 />
                                             ) : (
-                                                <View className="w-10 h-8 border-2 border-white rounded items-center justify-center">
-                                                    <View className="w-6 h-4 border border-white rounded" />
-                                                </View>
+                                                <Image
+                                                    source={require('../../assets/episode.png')}
+                                                    style={{ width: 32, height: 32 }}
+                                                    resizeMode="contain"
+                                                />
                                             )}
                                         </View>
 

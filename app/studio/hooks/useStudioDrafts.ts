@@ -13,17 +13,6 @@ interface DraftData {
   community: any;
   series: any;
   error_message: string;
-  id: string;
-  content_type: string;
-  status: string;
-  name: string;
-  description: string;
-  genre: string;
-  last_modified: string;
-  expires_at: string;
-  community: any;
-  series: any;
-  error_message: string;
 }
 
 interface DraftsResponse {
@@ -61,10 +50,9 @@ export const useStudioDrafts = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('http://192.168.1.36:3001/api/v1/drafts/all', {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/drafts/all`, {
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg0Yzc0YWU3M2Q4ZDRlZjY3YjAyZTQiLCJpYXQiOjE3NTM1MzIyMzYsImV4cCI6MTc1NjEyNDIzNn0._pqT9psCN1nR5DJpB60HyA1L1pp327o1fxfZPO4BY3M',
           'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg0Yzc0YWU3M2Q4ZDRlZjY3YjAyZTQiLCJpYXQiOjE3NTM1MzIyMzYsImV4cCI6MTc1NjEyNDIzNn0._pqT9psCN1nR5DJpB60HyA1L1pp327o1fxfZPO4BY3M',
           'Content-Type': 'application/json',
         },
@@ -84,14 +72,8 @@ export const useStudioDrafts = () => {
         description: draft.description || '',
         thumbnail: '', // No thumbnail for drafts
         date: `Draft on ${new Date(draft.last_modified).toLocaleDateString('en-GB', {
-        id: draft.id,
-        title: draft.name || 'Untitled',
-        description: draft.description || '',
-        thumbnail: '', // No thumbnail for drafts
-        date: `Draft on ${new Date(draft.last_modified).toLocaleDateString('en-GB', {
           day: '2-digit',
           month: 'short',
-        })}, ${new Date(draft.last_modified).toLocaleTimeString('en-GB', {
         })}, ${new Date(draft.last_modified).toLocaleTimeString('en-GB', {
           hour: '2-digit',
           minute: '2-digit',
@@ -110,7 +92,6 @@ export const useStudioDrafts = () => {
 
   useEffect(() => {
     fetchDrafts();
-  }, []);
   }, []);
 
   const refetch = () => {

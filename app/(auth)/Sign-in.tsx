@@ -15,7 +15,7 @@ import ThemedView from "@/components/ThemedView";
 import { Signinstyles } from "@/styles/signin";
 import { CreateProfileStyles } from "@/styles/createprofile";
 import { useAuthStore } from "@/store/useAuthStore";
-import Constants from "expo-constants";
+import { CONFIG } from "@/Constants/config";
 
 const SignIn = () => {
   const [useEmail, setUseEmail] = useState(false);
@@ -32,8 +32,6 @@ const SignIn = () => {
     "Inter-SemiBold": require("../../assets/fonts/inter/Inter-SemiBold.ttf"),
   });
 
-  const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
-
   const handleLogin = async () => {
     if (!nameOrEmail || !password) {
       alert("Please fill in both fields");
@@ -42,12 +40,13 @@ const SignIn = () => {
 
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nameOrEmail);
     const loginType = isEmail ? "email" : "username";
-    console.log(loginType);
+    console.log("Login type:", loginType);
+    console.log("API URL:", CONFIG.API_BASE_URL);
 
     try {
-      console.log("start");
+      console.log("Starting login request...");
       const res = await fetch(
-        `${BACKEND_API_URL}/auth/login/${loginType}`,
+        `${CONFIG.API_BASE_URL}/api/v1/auth/login/${loginType}`,
         {
           method: "POST",
           headers: {
@@ -59,9 +58,25 @@ const SignIn = () => {
           }),
         }
       );
-      console.log("res");
-
-      const data = await res.json();
+      
+      console.log("Response status:", res.status);
+      console.log("Response headers:", res.headers);
+      
+      // Check if response is empty or not JSON
+      const responseText = await res.text();
+      console.log("Raw response:", responseText);
+      
+      if (!responseText) {
+        throw new Error("Empty response from server");
+      }
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("JSON Parse Error:", parseError);
+        throw new Error("Invalid JSON response from server");
+      }
 
       if (!res.ok) {
         throw new Error(data?.message || "Login failed");

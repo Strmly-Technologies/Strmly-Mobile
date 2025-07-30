@@ -9,6 +9,7 @@ import {
   Linking,
   Image, // For opening external links
 } from "react-native";
+import { CONFIG } from "@/Constants/config";
 import {
   MapPin,
   LinkIcon,
@@ -22,7 +23,7 @@ import {
 } from "lucide-react-native";
 import { useRouter } from "expo-router"; // Use useRouter from expo-router
 import { useAuthStore } from "@/store/useAuthStore";
-import { useThumbnailsGenerate } from "@/utils/useThumbnailGenerator"; // Ensure this path is correct
+import { useThumbnailsGenerate } from "@/utils/useThumbnailGenerator";
 import ThemedView from "@/components/ThemedView"; // Assuming this is a basic wrapper for styling
 import ProfileTopbar from "@/components/profileTopbar"; // Assuming this is the converted ProfileTopbar
 import { LinearGradient } from "expo-linear-gradient";
@@ -63,12 +64,12 @@ export default function PersonalProfilePage() {
         params.append("type", activeTab);
 
         const response = await fetch(
-          // Assuming your API server is accessible from the Expo client
-          `/api/user/profile/videos?${params.toString()}`,
+          `${CONFIG.API_BASE_URL}/api/v1/user/videos?${params.toString()}`,
           {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
           }
         );
@@ -107,13 +108,12 @@ export default function PersonalProfilePage() {
 
     const fetchUserData = async () => {
       try {
-        const response = await fetch("/api/user/profile", {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/user/profile`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          // `credentials: "include"` is for browser cookies; not directly applicable here.
         });
 
         const data = await response.json();
@@ -264,8 +264,8 @@ export default function PersonalProfilePage() {
 
               {/* Dashboard Button (Gradient Border) */}
               <TouchableOpacity
-                // onPress={() => router.push("/profile/dashboard")}
-                className="rounded-lg overflow-hidden" // Use rounded-md for consistency
+                onPress={() => router.push("/(dashboard)/profile/Dashboard")}
+                className="px-4 py-2 rounded-lg border border-white"
               >
                 <Text className="text-white text-center font-bold">
                   Dashboard
@@ -285,7 +285,7 @@ export default function PersonalProfilePage() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                // onPress={() => router.push("/profile/dashboard")}
+                onPress={() => router.push("/(dashboard)/profile/access")}
                 className="rounded-lg overflow-hidden" // Use rounded-md for consistency
               >
                 <LinearGradient

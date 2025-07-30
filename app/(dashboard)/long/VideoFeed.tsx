@@ -3,49 +3,50 @@ import { FlatList, Dimensions, ActivityIndicator, Text } from "react-native";
 import VideoItem from "./VideoItem";
 import ThemedView from "@/components/ThemedView";
 import { useAuthStore } from "@/store/useAuthStore";
-import Constants from "expo-constants";
+import { CONFIG } from "@/Constants/config";
 import { VideoItemType } from "@/types/VideosType";
 
 const { height } = Dimensions.get("screen");
-
-const videoData = [
-  {
-    id: "1",
-    uri: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-  },
-  {
-    id: "2",
-    uri: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  },
-  {
-    id: "3",
-    uri: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-  },
-];
 
 const VideoFeed: React.FC = () => {
   const [videos, setVideos] = useState<VideoItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
-
   const [visibleIndex, setVisibleIndex] = useState(0);
   const { token, user, isLoggedIn } = useAuthStore();
 
   const fetchTrendingVideos = async () => {
     try {
-      console.log(token);
-      const res = await fetch(
-        `${BACKEND_API_URL}/videos/trending?page=1&limit=10`
-      );
+      console.log('🎥 Fetching trending videos...');
+      console.log('🔑 Token:', token?.substring(0, 20) + '...');
+      console.log('🌐 API URL:', CONFIG.API_BASE_URL);
 
-      if (!res.ok) throw new Error("Failed to fetch videos");
+      const url = `${CONFIG.API_BASE_URL}/api/v1/videos/trending?page=1&limit=10`;
+      console.log('📡 Full URL:', url);
+
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('📊 Response status:', res.status);
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('❌ API Error:', errorText);
+        throw new Error(`Failed to fetch videos: ${res.status}`);
+      }
 
       const json = await res.json();
+      console.log('✅ Videos fetched successfully:', json.data?.length || 0, 'videos');
 
-      setVideos(json.data);
+      setVideos(json.data || []);
     } catch (err: any) {
+      console.error('❌ Error fetching trending videos:', err);
       setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
@@ -53,8 +54,14 @@ const VideoFeed: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchTrendingVideos();
-  }, []);
+    if (token && isLoggedIn) {
+      fetchTrendingVideos();
+    } else {
+      console.log('⚠️ No token available, cannot fetch videos');
+      setError('Please log in to view videos');
+      setLoading(false);
+    }
+  }, [token, isLoggedIn]);
 
   // Debug token when VideoFeed loads
   // useEffect(() => {
@@ -83,8 +90,18 @@ const VideoFeed: React.FC = () => {
 
   if (error) {
     return (
-      <ThemedView style={{ height }} className="justify-center items-center">
-        <Text className="text-white">{error}</Text>
+      <ThemedView style={{ height }} className="justify-center items-center px-4">
+        <Text className="text-white text-center mb-4">{error}</Text>
+        <Text 
+          className="text-blue-400 underline" 
+          onPress={() => {
+            setError(null);
+            setLoading(true);
+            fetchTrendingVideos();
+          }}
+        >
+          Tap to retry
+        </Text>
       </ThemedView>
     );
   }

@@ -9,8 +9,6 @@ import {
   Platform,
   ActivityIndicator,
   ScrollView
-  ActivityIndicator,
-  ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Series } from '../types';
@@ -44,25 +42,12 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
   onSeriesCreated
 }) => {
   // Series creation form state
-  // Series creation form state
   const [title, setTitle] = useState('');
   const [type, setType] = useState<'free' | 'paid' | null>(null);
   const [price, setPrice] = useState<number | undefined>(undefined);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Two-step flow state
-  const [currentStep, setCurrentStep] = useState<'creation' | 'details'>('creation');
-
-  // Video detail form state
-  const [videoDetails, setVideoDetails] = useState({
-    description: '',
-    genre: null as string | null,
-    language: 'english' // Default language
-  });
-
-  const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
 
   // Two-step flow state
   const [currentStep, setCurrentStep] = useState<'creation' | 'details'>('creation');
@@ -111,22 +96,7 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
     setLoading(true);
 
     // Move to details step
-    // Move to details step
     setTimeout(() => {
-      setLoading(false);
-      setCurrentStep('details');
-    }, 500);
-  };
-
-  const handleContinue = async () => {
-    if (!isVideoDetailsValid()) {
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const seriesData = {
       setLoading(false);
       setCurrentStep('details');
     }, 500);
@@ -198,12 +168,6 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
 
   const handleBackFromDetails = () => {
     setCurrentStep('creation');
-      setErrors({ general: 'Network error occurred' });
-    }
-  };
-
-  const handleBackFromDetails = () => {
-    setCurrentStep('creation');
   };
 
   const handleTypeSelect = (selectedType: 'free' | 'paid') => {
@@ -217,19 +181,8 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
     return type === 'free' ? 'Free' : 'Paid';
   };
 
-  // Handle video detail form changes
-  const handleVideoDetailChange = (field: string, value: string) => {
-    setVideoDetails(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Check if video details form is valid
-  const isVideoDetailsValid = () => {
-    return videoDetails.description.trim() !== '' &&
-      videoDetails.genre !== null;
-  };
-
-  // Render video details step
-  const renderVideoDetailsStep = () => (
+  // Render series creation step
+  const renderSeriesCreationStep = () => (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1"
@@ -332,8 +285,6 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
     </KeyboardAvoidingView>
   );
 
-  // Render series creation step
-  const renderSeriesCreationStep = () => (
   // Handle video detail form changes
   const handleVideoDetailChange = (field: string, value: string) => {
     setVideoDetails(prev => ({ ...prev, [field]: value }));
@@ -347,110 +298,7 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
 
   // Render video details step
   const renderVideoDetailsStep = () => (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
-    >
-      <View className="flex-1 bg-black">
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
 
-        {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-3 mt-12">
-          <TouchableOpacity onPress={handleBackFromDetails}>
-            <Ionicons name="chevron-back" size={24} color="white" />
-          </TouchableOpacity>
-          <Text className="text-white text-xl font-medium">Video detail</Text>
-          <View className="w-6" />
-        </View>
-
-        <ScrollView className="flex-1 px-4 pt-6">
-          {/* Description Field */}
-          <View className="mb-8">
-            <Text className="text-white text-lg font-medium mb-3">Description</Text>
-            <TextInput
-              value={videoDetails.description}
-              onChangeText={(description) => handleVideoDetailChange('description', description)}
-              placeholder="Enter series description..."
-              placeholderTextColor="#9CA3AF"
-              className="bg-black border border-gray-600 text-white px-4 py-4 rounded-xl text-base"
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-              maxLength={1000}
-            />
-          </View>
-
-          {/* Genre Dropdown */}
-          <View className="mb-8">
-            <Text className="text-white text-lg font-medium mb-3">Genre</Text>
-            <TouchableOpacity
-              onPress={() => setGenreDropdownOpen(!genreDropdownOpen)}
-              className="bg-black border border-gray-600 rounded-xl px-4 py-4 flex-row items-center justify-between"
-            >
-              <Text className={`text-base ${videoDetails.genre ? 'text-white' : 'text-gray-400'}`}>
-                {videoDetails.genre || 'Select Genre'}
-              </Text>
-              <Ionicons
-                name={genreDropdownOpen ? "chevron-up" : "chevron-down"}
-                size={20}
-                color="#9CA3AF"
-              />
-            </TouchableOpacity>
-
-            {genreDropdownOpen && (
-              <View className="bg-gray-800 border border-gray-600 rounded-xl mt-2 max-h-48">
-                <ScrollView>
-                  {genreOptions.map((option) => (
-                    <TouchableOpacity
-                      key={option.value}
-                      onPress={() => {
-                        handleVideoDetailChange('genre', option.value);
-                        setGenreDropdownOpen(false);
-                      }}
-                      className="px-4 py-3 border-b border-gray-600"
-                    >
-                      <Text className="text-white text-base">{option.label}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-          </View>
-
-          {/* Add some bottom padding for better scrolling */}
-          <View className="h-20" />
-        </ScrollView>
-
-        {/* Continue Button */}
-        <View className="px-4 pb-8 pt-4">
-          <TouchableOpacity
-            onPress={handleContinue}
-            disabled={!isVideoDetailsValid() || loading}
-            className="bg-gray-200 rounded-full py-4 items-center"
-            style={{
-              backgroundColor: (!isVideoDetailsValid() || loading) ? '#6B7280' : '#E5E7EB'
-            }}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="black" />
-            ) : (
-              <Text className="text-black text-lg font-medium">Continue</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* General Error */}
-        {errors.general && (
-          <View className="px-4 pb-4">
-            <Text className="text-red-400 text-sm text-center">{errors.general}</Text>
-          </View>
-        )}
-      </View>
-    </KeyboardAvoidingView>
-  );
-
-  // Render series creation step
-  const renderSeriesCreationStep = () => (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1"
@@ -604,9 +452,6 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
       </View>
     </KeyboardAvoidingView>
   );
-
-  // Main render - show appropriate step
-  return currentStep === 'creation' ? renderSeriesCreationStep() : renderVideoDetailsStep();
 
   // Main render - show appropriate step
   return currentStep === 'creation' ? renderSeriesCreationStep() : renderVideoDetailsStep();

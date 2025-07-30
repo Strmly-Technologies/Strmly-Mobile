@@ -17,7 +17,7 @@ export interface FinalStageData {
 }
 
 export interface UploadFlowState {
-  currentStep: 'file-select' | 'format-select' | 'series-selection' | 'series-creation' | 'details-1' | 'details-2' | 'details-3' | 'final' | 'progress';
+  currentStep: 'file-select' | 'format-select' | 'episode-selection' | 'series-selection' | 'series-creation' | 'details-1' | 'details-2' | 'details-3' | 'final' | 'progress';
   uploadProgress: number;
   videoDetails: VideoFormData;
   finalStageData: FinalStageData;

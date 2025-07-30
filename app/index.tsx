@@ -11,6 +11,7 @@
 // // import CreateProfile from './CreateProfile/CreateProfile';
 // import SignUp from './(auth)/Sign-up';
 // import StrmlyStudio from './studio/StrmlyStudio';
+// import FileSelectScreen from './upload/screens/FileSelectScreen';
 
 // const Home = () => {
 //   return (
@@ -29,31 +30,14 @@
 //       // <CommentsSection isOpen={true} onClose={() => {}} videoId={'1'} longVideosOnly={false} />
 //       // <WalletPage/>
 //       // <StrmlyStudio/>
-
+//       <FileSelectScreen />
 //     // </ThemedView>
 //   )
 // }
 
 // export default Home
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   img: {
-//     marginVertical: 20
-//   },
-//   title: {
-//     fontWeight: 'bold',
-//     fontSize: 18,
-//   },
-//   link: {
-//     marginVertical: 10,
-//     borderBottomWidth: 1
-//   },
-// })
+
 
 import { Redirect } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';

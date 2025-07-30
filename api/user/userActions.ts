@@ -210,8 +210,6 @@ export const getUserVideos = async (
       }
     });
 
-    console.log(`User videos response status: ${res.status}`);
-
     if (!res.ok) {
       const errorText = await res.text();
       console.error(`❌ Videos endpoint error: ${res.status}`);
@@ -222,7 +220,7 @@ export const getUserVideos = async (
     const responseText = await res.text();
 
     if (responseText.trim().startsWith('<')) {
-      console.error("Received HTML response instead of JSON");
+      console.error("❌ Received HTML response instead of JSON");
       return { videos: [], pagination: { total: 0, page: 1, limit: 10 } };
     }
 

@@ -9,6 +9,7 @@ import {
   Image,
   Linking, // For opening external links
 } from "react-native";
+import { CONFIG } from "@/Constants/config";
 import {
   MapPin,
   LinkIcon,
@@ -67,11 +68,12 @@ export default function PublicProfilePage() {
         queryParams.append("type", activeTab);
 
         const response = await fetch(
-          `${BACKEND_API_URL}/user/profile/videos?${queryParams.toString()}`,
+          `${CONFIG.API_BASE_URL}/api/v1/user/videos?${queryParams.toString()}`,
           {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
           }
         );

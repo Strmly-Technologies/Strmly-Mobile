@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { MoreHorizontal, LogOut, ChevronLeft } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
+import { CONFIG } from "@/Constants/config";
 
 interface ProfileTopbarProps {
   hashtag: boolean;
@@ -17,8 +18,11 @@ const ProfileTopbar = ({ hashtag, name }: ProfileTopbarProps) => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("/api/auth/logout", {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/auth/logout`, {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {

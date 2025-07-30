@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, StatusBar, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import ContinueButton from '../components/ContinueButton';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface FormatSelectScreenProps {
   onFormatSelected: (format: 'episode' | 'single') => void;
@@ -22,89 +22,171 @@ const FormatSelectScreen: React.FC<FormatSelectScreenProps> = ({
   onFormatSelected,
   onBack
 }) => {
-  const [selectedFormat, setSelectedFormat] = useState<'episode' | 'single' | null>(null);
-
-  // Handle format selection
+  // Handle format selection and navigate directly
   const handleFormatSelect = (format: 'episode' | 'single') => {
-    setSelectedFormat(format);
-  };
-
-  // Handle continue with selected format
-  const handleContinue = () => {
-    if (selectedFormat) {
-      onFormatSelected(selectedFormat);
-    }
+    onFormatSelected(format);
   };
 
   return (
-    <View className="flex-1 bg-black">
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 mt-12">
+      <View style={styles.header}>
         <TouchableOpacity onPress={onBack}>
           <Ionicons name="chevron-back" size={24} color="white" />
         </TouchableOpacity>
-        <Text className="text-white text-xl font-medium">Upload</Text>
-        <View className="w-6" />
+        <Text style={styles.headerTitle}>Upload</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
-      <View className="flex-1 px-4 pt-16">
+      {/* Main Content */}
+      <View style={styles.content}>
         {/* Title */}
-        <Text className="text-white text-2xl font-medium text-center mb-12">
+        <Text style={styles.title}>
           Select Video Format
         </Text>
 
         {/* Format Options */}
-        <View className="flex-row justify-between px-4 mb-8">
+        <View style={styles.optionsContainer}>
           {/* Episode Option */}
           <TouchableOpacity
             onPress={() => handleFormatSelect('episode')}
-            className={`flex-1 mr-3 bg-gray-800 rounded-2xl p-6 items-center ${
-              selectedFormat === 'episode' ? 'border-2 border-blue-500' : ''
-            }`}
+            style={styles.optionButton}
           >
-            <View className="w-16 h-16 mb-4 items-center justify-center">
-              {/* Episode Icon - Multiple rectangles representing series */}
-              <View className="relative">
-                <View className="w-12 h-8 border-2 border-white rounded opacity-30 absolute -top-1 -left-1" />
-                <View className="w-12 h-8 border-2 border-white rounded opacity-60 absolute top-0 left-0" />
-                <View className="w-12 h-8 border-2 border-white rounded" />
+            <LinearGradient
+              colors={['#000000', '#0a0a0a', '#1a1a1a']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradientCard}
+            >
+              <View style={styles.iconContainer}>
+                <Image
+                  source={require('../../../assets/episode.png')}
+                  style={styles.formatIcon}
+                  resizeMode="contain"
+                />
               </View>
-            </View>
-            <Text className="text-white text-lg font-medium">Episode</Text>
+              <Text style={styles.optionText}>Episode</Text>
+            </LinearGradient>
           </TouchableOpacity>
 
           {/* Single Option */}
           <TouchableOpacity
             onPress={() => handleFormatSelect('single')}
-            className={`flex-1 ml-3 bg-gray-800 rounded-2xl p-6 items-center ${
-              selectedFormat === 'single' ? 'border-2 border-blue-500' : ''
-            }`}
+            style={styles.optionButton}
           >
-            <View className="w-16 h-16 mb-4 items-center justify-center">
-              {/* Single Icon - Single rectangle */}
-              <View className="w-12 h-8 border-2 border-white rounded" />
-            </View>
-            <Text className="text-white text-lg font-medium">Single</Text>
+            <LinearGradient
+              colors={['#000000', '#0a0a0a', '#1a1a1a']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradientCard}
+            >
+              <View style={styles.iconContainer}>
+                <Image
+                  source={require('../../../assets/single.png')}
+                  style={styles.formatIcon}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.optionText}>Single</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
         {/* Description */}
-        <Text className="text-gray-400 text-center text-base leading-6 px-4">
-          Select &quot;Episode&quot; for series or &quot;Single&quot; for one-time content.
+        <Text style={styles.description}>
+          Select "Episode" for series or "Single" for one-time content.
         </Text>
       </View>
 
-      {/* Continue Button - Only show when format is selected */}
-      {selectedFormat && (
-        <ContinueButton
-          title="Continue"
-          onPress={handleContinue}
-        />
-      )}
+
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 48,
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: '500',
+  },
+  headerSpacer: {
+    width: 24,
+  },
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  title: {
+    color: 'white',
+    fontSize: 28,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 48,
+  },
+  optionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 16,
+    marginBottom: 32,
+  },
+  optionButton: {
+    flex: 1,
+    marginHorizontal: 8,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+
+  gradientCard: {
+    padding: 24,
+    alignItems: 'center',
+    borderRadius: 16,
+    shadowColor: '#ffffff',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    marginBottom: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  formatIcon: {
+    width: 48,
+    height: 48,
+  },
+  optionText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  description: {
+    color: '#9CA3AF',
+    textAlign: 'center',
+    fontSize: 16,
+    lineHeight: 24,
+    paddingHorizontal: 32,
+  },
+
+});
 
 export default FormatSelectScreen;

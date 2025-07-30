@@ -5,6 +5,7 @@ import FormatSelectScreen from './screens/FormatSelectScreen';
 import VideoDetailScreen from './screens/VideoDetailScreen';
 import FinalStageScreen from './screens/FinalStageScreen';
 import UploadProgressScreen from './screens/UploadProgressScreen';
+import EpisodeSelectionScreen from './screens/EpisodeSelectionScreen';
 import { SeriesSelectionScreen } from '../studio/screens';
 import SimpleSeriesCreationScreen from '../studio/screens/SimpleSeriesCreationScreen';
 import { Series } from '../studio/types';
@@ -133,6 +134,15 @@ const VideoUploadFlow: React.FC<VideoUploadFlowProps> = ({
           <FormatSelectScreen
             onFormatSelected={handleFormatSelected}
             onBack={handleBack}
+          />
+        );
+
+      case 'episode-selection':
+        return (
+          <EpisodeSelectionScreen
+            onBack={handleBack}
+            onSeriesSelected={handleSeriesSelected}
+            onAddNewSeries={handleAddNewSeries}
           />
         );
 

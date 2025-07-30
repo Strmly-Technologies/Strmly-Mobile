@@ -47,14 +47,14 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
   };
 
   // Handle format selection
-  const handleFormatSelect = (format: 'Netflix' | 'Youtube') => {
-    onFormChange({ ...formData, format });
+  const handleFormatSelect = (format: string) => {
+    onFormChange({ ...formData, format: format as 'Netflix' | 'Youtube' });
     setFormatDropdownOpen(false);
   };
 
   // Handle video type selection
-  const handleVideoTypeSelect = (videoType: 'free' | 'paid') => {
-    onFormChange({ ...formData, videoType });
+  const handleVideoTypeSelect = (videoType: string) => {
+    onFormChange({ ...formData, videoType: videoType as 'free' | 'paid' });
     setVideoTypeDropdownOpen(false);
   };
 
@@ -91,24 +91,7 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
       </View>
 
       <ScrollView className="flex-1 px-4 pt-6">
-        {/* Series Information - Show for episodes */}
-        {videoFormat === 'episode' && selectedSeries && (
-          <View className="mb-8 bg-gray-800 rounded-2xl p-4">
-            <Text className="text-white text-lg font-medium mb-2">Selected Series</Text>
-            <View className="flex-row items-center">
-              <View className="w-10 h-8 border-2 border-white rounded mr-3 items-center justify-center">
-                <View className="w-6 h-4 border border-white rounded" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white text-base font-medium">{selectedSeries.title}</Text>
-                <Text className="text-gray-400 text-sm">
-                  {selectedSeries.accessType === 'paid' ? `₹${selectedSeries.price}` : 'Free'} •
-                  {selectedSeries.totalEpisodes} episodes
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
+        {/* Series Information - Hidden since series is already selected in previous step */}
 
         {/* Title Field */}
         <FormField
