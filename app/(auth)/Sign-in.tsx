@@ -17,10 +17,14 @@ import { CreateProfileStyles } from "@/styles/createprofile";
 import { useAuthStore } from "@/store/useAuthStore";
 import { CONFIG } from "@/Constants/config";
 
+import { useNotification } from "@/providers/NotificationProvider";
+
+
 const SignIn = () => {
   const [useEmail, setUseEmail] = useState(false);
   const [nameOrEmail, setNameOrEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { sendTokenToBackend } = useNotification();
 
   const [fontsLoaded] = useFonts({
     "Poppins-Regular": require("../../assets/fonts/poppins/Poppins-Regular.ttf"),
@@ -84,6 +88,15 @@ const SignIn = () => {
 
       // Save in zustand and secure store
       await useAuthStore.getState().login(data.token, data.user);
+
+      // Send FCM token to backend after successful login
+      try {
+        await sendTokenToBackend(data.token);
+        console.log("FCM token sent to backend successfully");
+      } catch (fcmError) {
+        console.error("Failed to send FCM token:", fcmError);
+        // Don't block login flow if FCM fails
+      }
 
       alert("Login successful!");
       setTimeout(() => router.push("/(dashboard)/long/VideoFeed"), 300);

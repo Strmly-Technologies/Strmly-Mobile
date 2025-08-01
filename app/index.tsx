@@ -12,6 +12,7 @@
 // import SignUp from './(auth)/Sign-up';
 // import StrmlyStudio from './studio/StrmlyStudio';
 // import FileSelectScreen from './upload/screens/FileSelectScreen';
+// import Interests from './(InterestsSection)/Interests';
 
 // const Home = () => {
 //   return (
@@ -24,13 +25,14 @@
 //     // <PublicProfilePage/>
 //     // <PublicCommunityPage/>
 
-//       // <KYCForm/>
-//       // <VideoContentGifting creatorProfile='' creatorName='Irshad' creatorUsername='@User123'/>
-//       // <VideoFeed/>
-//       // <CommentsSection isOpen={true} onClose={() => {}} videoId={'1'} longVideosOnly={false} />
-//       // <WalletPage/>
-//       // <StrmlyStudio/>
-//       <FileSelectScreen />
+//     // <KYCForm/>
+//     // <VideoContentGifting creatorProfile='' creatorName='Irshad' creatorUsername='@User123'/>
+//     // <VideoFeed/>
+//     // <CommentsSection isOpen={true} onClose={() => {}} videoId={'1'} longVideosOnly={false} />
+//     // <WalletPage/>
+//     // <StrmlyStudio/>
+//     // <FileSelectScreen />
+//     <Interests />
 //     // </ThemedView>
 //   )
 // }
@@ -41,26 +43,40 @@
 
 import { Redirect } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useNotification } from '@/providers/NotificationProvider';
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
 
 export default function Index() {
   const { token, isLoggedIn } = useAuthStore();
+  const { sendTokenToBackend, isInitialized } = useNotification();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Give some time for the auth store to hydrate from SecureStore
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       console.log('=== APP ENTRY POINT ===');
       console.log('Token:', token);
       console.log('Is logged in:', isLoggedIn);
       console.log('Token length:', token?.length);
+      console.log('FCM initialized:', isInitialized);
       console.log('=====================');
+
+      // If user is already logged in and FCM is initialized, refresh the token
+      if (token && isLoggedIn && isInitialized) {
+        try {
+          await sendTokenToBackend(token);
+          console.log('FCM token refreshed for existing user');
+        } catch (error) {
+          console.error('Failed to refresh FCM token:', error);
+        }
+      }
+
       setIsLoading(false);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [token, isLoggedIn]);
+  }, [token, isLoggedIn, isInitialized]);
 
   // Show loading while checking auth state
   if (isLoading) {

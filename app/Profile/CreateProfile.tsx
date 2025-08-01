@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useNotification } from "@/providers/NotificationProvider";
 import Constants from "expo-constants";
 
 const CreateProfile = () => {
@@ -30,6 +31,8 @@ const CreateProfile = () => {
 
   const [cooldown, setCooldown] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { sendTokenToBackend } = useNotification();
 
   const [fontsLoaded] = useFonts({
     "Poppins-Regular": require("../../assets/fonts/poppins/Poppins-Regular.ttf"),
@@ -141,6 +144,18 @@ const CreateProfile = () => {
 
       // Update auth store to mark email_verified
       useAuthStore.getState().updateUser({ isVerified: true });
+
+      // Send FCM token to backend after successful verification
+      try {
+        const authToken = useAuthStore.getState().token;
+        if (authToken) {
+          await sendTokenToBackend(authToken);
+          console.log("FCM token sent to backend successfully");
+        }
+      } catch (fcmError) {
+        console.error("Failed to send FCM token:", fcmError);
+        // Don't block the flow if FCM fails
+      }
 
       alert("Email verified successfully!");
       setTimeout(() => router.replace("/(dashboard)/long/VideoFeed"), 1000); // or push to dashboard if already logged in

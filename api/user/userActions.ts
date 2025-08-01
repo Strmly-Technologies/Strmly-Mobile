@@ -1,5 +1,6 @@
 // User API Actions
 import { CONFIG } from '@/Constants/config';
+import { processUserForCDN, processVideosForCDN } from '@/utils/cdnUtils';
 
 const API_BASE_URL = CONFIG.API_BASE_URL;
 
@@ -118,6 +119,13 @@ export const getUserProfile = async (token: string) => {
       communities: data.user?.my_communities?.length || 0,
       onboarding_completed: data.user?.onboarding_completed
     });
+
+    // Process user data to use CDN URLs for profile images
+    if (data.user) {
+      data.user = processUserForCDN(data.user);
+      console.log('🚀 User profile processed with CDN URLs');
+    }
+
     return data;
   } catch (error) {
     console.error("Failed to get user profile:", error);
@@ -227,9 +235,13 @@ export const getUserVideos = async (
     const data = JSON.parse(responseText);
     console.log('✅ getUserVideos successful:', data);
 
+    // Process videos to use CDN URLs
+    const videosWithCDN = Array.isArray(data.videos) ? processVideosForCDN(data.videos) : [];
+    console.log('🚀 User videos processed with CDN URLs');
+
     // Ensure we always return a videos array
     return {
-      videos: Array.isArray(data.videos) ? data.videos : [],
+      videos: videosWithCDN,
       pagination: data.pagination || { total: 0, page: 1, limit: 10 },
       ...data
     };
@@ -354,5 +366,84 @@ export const getUserInteractions = async (
   } catch (error) {
     console.error("Failed to get user interactions:", error);
     return { interactions: [] };
+  }
+};
+
+// FCM Token API
+export const sendFCMToken = async (token: string, fcmToken: string) => {
+  try {
+    const url = `${API_BASE_URL}/api/v1/user/fcm_token`;
+    console.log(`Sending FCM token to: ${url}`);
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        fcm_token: fcmToken
+      })
+    });
+
+    console.log(`FCM token response status: ${res.status}`);
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`❌ FCM token endpoint error: ${res.status}`, errorText);
+      return false;
+    }
+
+    const responseText = await res.text();
+    console.log('✅ FCM token sent successfully:', responseText);
+    return true;
+  } catch (error) {
+    console.error("Failed to send FCM token:", error);
+    return false;
+  }
+};
+
+// User Interests API
+export const submitUserInterests = async (token: string, interests: string[]) => {
+  try {
+    const url = `${API_BASE_URL}/api/v1/user/interests`;
+    console.log(`📤 Submitting user interests to: ${url}`);
+    console.log(`📋 Interests:`, interests);
+
+    const requestBody = JSON.stringify({ interests: interests });
+    console.log(`📦 Request body:`, requestBody);
+
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: requestBody
+    });
+
+    console.log(`📊 Response status: ${res.status}`);
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`❌ Interests API error: ${res.status}`);
+      console.error(`❌ Error response:`, errorText.substring(0, 500));
+      throw new Error(`Failed to submit interests: ${res.status} - ${errorText}`);
+    }
+
+    const responseText = await res.text();
+    console.log('✅ Interests submitted successfully');
+    
+    try {
+      const data = JSON.parse(responseText);
+      console.log('✅ Response:', data.message);
+      return data;
+    } catch (parseError) {
+      console.log('ℹ️ Response is not JSON, treating as success');
+      return { success: true, message: responseText };
+    }
+  } catch (error) {
+    console.error("❌ Failed to submit user interests:", error);
+    throw error;
   }
 };

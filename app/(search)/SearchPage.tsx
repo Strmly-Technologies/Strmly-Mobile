@@ -196,22 +196,7 @@ return (
         )}
 
         {/* Search suggestions when not searching */}
-        {!isSearchActive && !isLoading && (
-            <View style={styles.searchSuggestionsContainer}>
-                <Text style={styles.searchSuggestionsTitle}>Popular searches</Text>
-                <View style={styles.searchChipsContainer}>
-                    {['Action', 'Comedy', 'Drama', 'English', 'Hindi'].map((suggestion, index) => (
-                        <TouchableOpacity 
-                            key={index}
-                            style={styles.searchChip}
-                            onPress={() => setSearchQuery(suggestion)}
-                        >
-                            <Text style={styles.searchChipText}>{suggestion}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </View>
-        )}
+
 
         {/* Content */}
         {!isLoading && (

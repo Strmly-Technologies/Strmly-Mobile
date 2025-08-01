@@ -3,12 +3,17 @@ import ThemedView from '@/components/ThemedView'
 import React, { useState } from 'react'
 import { useFonts } from 'expo-font';
 import { CreateProfileStyles } from '@/styles/createprofile'
-import { Image, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Image, Text, TouchableOpacity, View, ScrollView, Alert } from 'react-native';
+import { useAuthStore } from '@/store/useAuthStore';
+import { submitUserInterests } from '@/api/user/userActions';
+import { router } from 'expo-router';
 
 const Interests = () => {
     const [Step, setStep] = useState(1)
     const [Type, setType] = useState("Netflix")
     const [Interests, setInterests] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { token } = useAuthStore();
     const [fontsLoaded] = useFonts({
         'Poppins-Regular': require('../../assets/fonts/poppins/Poppins-Regular.ttf'),
         'Poppins-Bold': require('../../assets/fonts/poppins/Poppins-Bold.ttf'),
@@ -36,6 +41,37 @@ const Interests = () => {
             setInterests(Interests.filter(i => i !== item));
         } else if (Interests.length < 3) {
             setInterests([...Interests, item]);
+        }
+    }
+
+    const handleSubmitInterests = async () => {
+        if (!token) {
+            Alert.alert('Error', 'Please login to continue');
+            return;
+        }
+
+        if (Interests.length !== 3) {
+            Alert.alert('Error', `Please select exactly 3 interests. Currently selected: ${Interests.length}`);
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await submitUserInterests(token, Interests);
+            Alert.alert('Success', 'Your interests have been saved successfully!', [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        // Navigate to home tab
+                        router.push('/(tabs)/home');
+                    }
+                }
+            ]);
+        } catch (error) {
+            console.error('Failed to submit interests:', error);
+            Alert.alert('Error', 'Failed to save interests. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -109,7 +145,7 @@ const Interests = () => {
         const items = isCinema
             ? ['Netflix', 'Youtube', 'Amazon Prime', 'Hotstar', 'Jio Cinema', 'Sony Liv']
             : ['Gaming', 'Podcasts', 'Cooking', 'Fitness', 'Tech Reviews', 'Travel'];
-        
+
         return (
             <ThemedView style={CreateProfileStyles.Container}>
                 <View style={CreateProfileStyles.TopBar}>
@@ -122,11 +158,13 @@ const Interests = () => {
                     <ThemedText>Select only 3 of your interest from {isCinema ? '“Cinema content”' : '“Non-cinema content”'}</ThemedText>
                     <View style={{ marginTop: 20 }}>{renderGrid(items)}</View>
                     <TouchableOpacity
-                        disabled={Interests.length !== 3}
-                        onPress={() => HandleStep(true)}
-                        style={CreateProfileStyles.button}
+                        disabled={Interests.length !== 3 || isSubmitting}
+                        onPress={Step === 3 ? handleSubmitInterests : () => HandleStep(true)}
+                        style={[CreateProfileStyles.button, { opacity: (Interests.length !== 3 || isSubmitting) ? 0.5 : 1 }]}
                     >
-                        Continue
+                        <Text style={{ color: 'black', fontSize: 18, fontFamily: 'Inter-SemiBold' }}>
+                            {Step === 3 ? (isSubmitting ? 'Saving...' : 'Save Interests') : 'Continue'}
+                        </Text>
                     </TouchableOpacity>
                 </ScrollView>
             </ThemedView>

@@ -17,6 +17,7 @@ export default {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.strmly.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -45,6 +46,14 @@ export default {
         {
           "supportsBackgroundPlayback": true,
           "supportsPictureInPicture": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/sounds/notification.wav"]
         }
       ],
       "expo-web-browser"

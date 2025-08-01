@@ -1,7 +1,10 @@
 import { useState, useCallback } from 'react';
 import { UploadFlowState, VideoFormData, FinalStageData } from '../types';
 import { Series } from '../../studio/types';
-import { CONFIG } from '../../../Constants/config';
+
+import { CONFIG } from '@/Constants/config';
+import { useAuthStore } from '@/store/useAuthStore';
+
 
 /**
  * Upload Flow State Management Hook
@@ -24,6 +27,18 @@ const initialFinalStageData: FinalStageData = {
 };
 
 export const useUploadFlow = () => {
+  const { token, isLoggedIn, user } = useAuthStore();
+  
+  // Debug auth state
+  console.log('=== UPLOAD FLOW AUTH DEBUG ===');
+  console.log('Token exists:', !!token);
+  console.log('Token length:', token?.length);
+  console.log('Token preview:', token?.substring(0, 20) + '...');
+  console.log('Is logged in:', isLoggedIn);
+  console.log('User:', user?.name);
+  console.log('API Base URL:', CONFIG.API_BASE_URL);
+  console.log('==============================');
+  
   const [state, setState] = useState<UploadFlowState>({
     currentStep: 'file-select',
     uploadProgress: 0,
@@ -38,6 +53,19 @@ export const useUploadFlow = () => {
 
   const [draftId, setDraftId] = useState<string | null>(null);
 
+  // Test API connection
+  const testApiConnection = useCallback(async () => {
+    try {
+      console.log('Testing API connection...');
+      const response = await fetch(`${CONFIG.API_BASE_URL}/health`);
+      console.log('Health check response:', response.status);
+      return response.ok;
+    } catch (error) {
+      console.error('API connection test failed:', error);
+      return false;
+    }
+  }, []);
+
   // Create initial draft when upload starts
   const createInitialDraft = useCallback(async () => {
     if (draftId) {
@@ -45,22 +73,36 @@ export const useUploadFlow = () => {
       return draftId;
     }
 
+    if (!token) {
+      console.error('No authentication token available');
+      return null;
+    }
+
+    // Test API connection first
+    const isConnected = await testApiConnection();
+    if (!isConnected) {
+      console.error('API connection failed');
+      return null;
+    }
+
     try {
       const draftData = {
-        name: 'Untitled Video',
-        description: 'No description',
-        genre: 'Action',
-        type: 'Free',
+        name: state.videoDetails.title || 'Untitled Video',
+        description: state.videoDetails.title || 'No description',
+        genre: state.finalStageData.genre || 'Action',
+        type: state.videoDetails.videoType === 'paid' ? 'Paid' : 'Free',
         language: 'english'
       };
 
       console.log('Creating initial draft with data:', draftData);
+      console.log('Using API URL:', CONFIG.API_BASE_URL);
+      console.log('Using token:', token?.substring(0, 20) + '...');
 
       const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/drafts/create-or-update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg0Yzc0YWU3M2Q4ZDRlZjY3YjAyZTQiLCJpYXQiOjE3NTM1MzIyMzYsImV4cCI6MTc1NjEyNDIzNn0._pqT9psCN1nR5DJpB60HyA1L1pp327o1fxfZPO4BY3M'
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(draftData)
       });
@@ -87,13 +129,18 @@ export const useUploadFlow = () => {
       console.error('Error creating initial draft:', error);
       return null;
     }
-  }, [draftId]);
+  }, [draftId, token, state, testApiConnection]);
 
   // Update existing draft with current form data
   const updateDraft = useCallback(async () => {
     if (!draftId) {
       console.log('No draft ID available, creating initial draft first');
       return await createInitialDraft();
+    }
+
+    if (!token) {
+      console.error('No authentication token available');
+      return null;
     }
 
     try {
@@ -112,7 +159,7 @@ export const useUploadFlow = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg0Yzc0YWU3M2Q4ZDRlZjY3YjAyZTQiLCJpYXQiOjE3NTM1MzIyMzYsImV4cCI6MTc1NjEyNDIzNn0._pqT9psCN1nR5DJpB60HyA1L1pp327o1fxfZPO4BY3M'
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(draftData)
       });
@@ -140,7 +187,7 @@ export const useUploadFlow = () => {
       console.error('Error updating draft:', error);
       return null;
     }
-  }, [state, draftId, createInitialDraft]);
+  }, [state, draftId, createInitialDraft, token]);
 
   // Start the upload process
   const startUpload = useCallback(() => {
@@ -231,11 +278,17 @@ export const useUploadFlow = () => {
       videoDetails: { ...prev.videoDetails, ...details },
     }));
 
-    // Auto-save draft when video details are updated (with debounce)
-    setTimeout(() => {
-      updateDraft();
-    }, 1000);
-  }, [updateDraft]);
+    // Create draft when we have enough details (title is provided)
+    if (details.title && details.title.trim() !== '' && token) {
+      setTimeout(() => {
+        if (!draftId) {
+          createInitialDraft();
+        } else {
+          updateDraft();
+        }
+      }, 1000);
+    }
+  }, [updateDraft, createInitialDraft, draftId, token]);
 
   // Update final stage data
   const updateFinalStageData = useCallback((data: Partial<FinalStageData>) => {
@@ -244,11 +297,13 @@ export const useUploadFlow = () => {
       finalStageData: { ...prev.finalStageData, ...data },
     }));
 
-    // Auto-save draft when final stage data is updated
-    setTimeout(() => {
-      updateDraft();
-    }, 1000);
-  }, [updateDraft]);
+    // Auto-save draft when final stage data is updated (only if draft exists)
+    if (draftId && token) {
+      setTimeout(() => {
+        updateDraft();
+      }, 1000);
+    }
+  }, [updateDraft, draftId, token]);
 
   // Set selected file
   const setSelectedFile = useCallback((file: any) => {
@@ -257,11 +312,9 @@ export const useUploadFlow = () => {
       selectedFile: file,
     }));
 
-    // Create initial draft when file is selected
-    setTimeout(() => {
-      createInitialDraft();
-    }, 500);
-  }, [createInitialDraft]);
+    // Don't create draft immediately - wait until we have more details
+    console.log('File selected:', file?.name);
+  }, []);
 
   // Set video format
   const setVideoFormat = useCallback((format: 'episode' | 'single') => {
@@ -325,6 +378,11 @@ export const useUploadFlow = () => {
       return false;
     }
 
+    if (!token) {
+      console.error('No authentication token available');
+      return false;
+    }
+
     // Ensure we have a draft ID before uploading
     let currentDraftId = draftId;
     if (!currentDraftId) {
@@ -366,7 +424,10 @@ export const useUploadFlow = () => {
       const response = await fetch(`${CONFIG.API_BASE_URL}/api/v1/drafts/complete/${currentDraftId}`, {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg0Yzc0YWU3M2Q4ZDRlZjY3YjAyZTQiLCJpYXQiOjE3NTM1MzIyMzYsImV4cCI6MTc1NjEyNDIzNn0._pqT9psCN1nR5DJpB60HyA1L1pp327o1fxfZPO4BY3M',
+
+          'Authorization': `Bearer ${token}`,
+          // Don't set Content-Type for FormData - let the browser set it
+
         },
         body: formData,
       });
@@ -389,7 +450,7 @@ export const useUploadFlow = () => {
       setState(prev => ({ ...prev, isUploading: false, errors: { upload: 'Network error during upload' } }));
       return false;
     }
-  }, [draftId, state.selectedFile, createInitialDraft]);
+  }, [draftId, state.selectedFile, createInitialDraft, token]);
 
   // Reset flow
   const resetFlow = useCallback(() => {
@@ -424,5 +485,6 @@ export const useUploadFlow = () => {
     createInitialDraft,
     updateDraft,
     draftId,
+    testApiConnection,
   };
 };

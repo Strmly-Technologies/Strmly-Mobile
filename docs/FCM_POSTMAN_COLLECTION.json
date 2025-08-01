@@ -1,0 +1,98 @@
+{
+  "info": {
+    "name": "Strmly FCM API",
+    "description": "Test FCM token registration endpoint",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register FCM Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fcm_token\": \"{{fcm_token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/user/fcm_token",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "user", "fcm_token"]
+        }
+      }
+    },
+    {
+      "name": "Test Invalid FCM Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fcm_token\": \"invalid-token\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/user/fcm_token",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "user", "fcm_token"]
+        }
+      }
+    },
+    {
+      "name": "Test Missing FCM Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/user/fcm_token",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "user", "fcm_token"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://192.168.252.2:8080"
+    },
+    {
+      "key": "jwt_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODg4OWI2OTUwZjg0ZDJlNGIyNTk5OTMiLCJpYXQiOjE3NTM3OTQ2NzAsImV4cCI6MTc1NjM4NjY3MH0.FqMH1vIqdmu9lt9BqEIIQA4FBy7mL6JUnHPvB7DIu_Q"
+    },
+    {
+      "key": "fcm_token",
+      "value": "ExponentPushToken[test-token-for-postman]"
+    }
+  ]
+}

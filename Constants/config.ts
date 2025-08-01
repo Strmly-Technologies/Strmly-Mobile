@@ -3,6 +3,12 @@ export const CONFIG = {
   // Dynamic IP configuration - uses IP from env variable
   IP_ADDRESS: process.env.EXPO_PUBLIC_IP_ADDRESS || 'localhost',
   API_BASE_URL: process.env.EXPO_PUBLIC_API_URL || `http://${process.env.EXPO_PUBLIC_IP_ADDRESS || 'localhost'}:3001`,
+
+  
+  // CDN Configuration
+  CDN_URL: process.env.EXPO_PUBLIC_CDN_URL || '',
+  S3_BASE_URL: process.env.EXPO_PUBLIC_S3_BASE_URL || 'https://strmly-videos-mumbai.s3.ap-south-1.amazonaws.com',
+
   
   // Google Play Billing
   GOOGLE_PLAY_LICENSE_KEY: process.env.EXPO_PUBLIC_GOOGLE_PLAY_LICENSE_KEY || '',
