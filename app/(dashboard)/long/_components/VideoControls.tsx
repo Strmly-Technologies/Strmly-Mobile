@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Pressable, StyleSheet, ActivityIndicator } from "react-native";
-import { Volume2Icon, VolumeOffIcon } from "lucide-react-native";
+import { PlayIcon, PauseIcon } from "lucide-react-native";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import InteractOptions from "./interactOptions";
 import VideoDetails from "./VideoDetails";
@@ -16,39 +16,39 @@ const VideoControls = ({
   isWantToGift,
   setShowCommentsModal,
 }: Props) => {
-  const isMuted = usePlayerStore((state) => state.isMuted);
+  const isPlaying = usePlayerStore((state) => state.isPlaying);
   const isBuffering = usePlayerStore((state) => state.isBuffering);
-  const toggleMute = usePlayerStore((state) => state.toggleMute);
+  const togglePlayPause = usePlayerStore((state) => state.togglePlayPause);
 
-  const [showMuteIcon, setShowMuteIcon] = useState(false);
+  const [showPlayPauseIcon, setShowPlayPauseIcon] = useState(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | number;
-    if (showMuteIcon) {
-      timer = setTimeout(() => setShowMuteIcon(false), 800);
+    if (showPlayPauseIcon) {
+      timer = setTimeout(() => setShowPlayPauseIcon(false), 800);
     }
     return () => clearTimeout(timer);
-  }, [showMuteIcon]);
+  }, [showPlayPauseIcon]);
 
-  const handleToggleMute = () => {
-    toggleMute();
-    setShowMuteIcon(true);
+  const handleTogglePlayPause = () => {
+    togglePlayPause();
+    setShowPlayPauseIcon(true);
   };
 
   return (
     <>
       <Pressable
         style={styles.fullScreenPressable}
-        onPress={handleToggleMute}
+        onPress={handleTogglePlayPause}
       />
       <View style={styles.iconContainer} pointerEvents="none">
-        {showMuteIcon &&
-          (isMuted ? (
-            <VolumeOffIcon size={40} color="white" />
+        {showPlayPauseIcon &&
+          (!isPlaying ? (
+            <PlayIcon size={40} color="white" />
           ) : (
-            <Volume2Icon size={40} color="white" />
+            <PauseIcon size={40} color="white" />
           ))}
-        {isBuffering && !showMuteIcon && (
+        {isBuffering && !showPlayPauseIcon && (
           <ActivityIndicator size="large" color="white" />
         )}
       </View>
@@ -68,6 +68,7 @@ const VideoControls = ({
         <VideoDetails
           videoId={videoData._id}
           type={videoData.type}
+          videoAmount={videoData.amount}
           is_monetized={videoData.is_monetized}
           name={videoData.name}
           series={videoData?.series}

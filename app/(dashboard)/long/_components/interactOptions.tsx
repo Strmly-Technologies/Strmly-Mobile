@@ -22,7 +22,7 @@ type InteractOptionsProps = {
   gifts: number;
   shares: number;
   comments?: number;
-  setIsWantToGift: (value: boolean)=> void;
+  setIsWantToGift: (value: boolean) => void;
   creator: {
     _id: string;
     username: string;
@@ -48,7 +48,7 @@ const InteractOptions = ({
   const [isResharedVideo, setIsResharedVideo] = useState(false);
   const [isGiftedVideo, setIsGiftedVideo] = useState(false);
 
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
 
   const BACKEND_API_URL = CONFIG.API_BASE_URL;
 
@@ -100,7 +100,10 @@ const InteractOptions = ({
             body: JSON.stringify({ videoId: videoId }),
           }
         );
-        if (!response.ok) throw new Error("Failed while checking video like status");
+        
+        if (!response.ok)
+          throw new Error("Failed while checking video like status");
+
         const data = await response.json();
         console.log("check like", data);
         setLike(data.likes);
@@ -116,7 +119,7 @@ const InteractOptions = ({
   }, [token, videoId, likes]);
 
   // ------------- Reshare ------------
-  useEffect(()=> setReshares(shares), [shares]);
+  useEffect(() => setReshares(shares), [shares]);
 
   useEffect(() => {
     const checkIfReshare = async () => {
@@ -136,7 +139,8 @@ const InteractOptions = ({
             body: JSON.stringify({ videoId: videoId }),
           }
         );
-        if (!response.ok) throw new Error("Failed while checking reshare status");
+        if (!response.ok)
+          throw new Error("Failed while checking reshare status");
         const data = await response.json();
         console.log("reshared or not", data.isReshared);
         setIsResharedVideo(data.isReshared);
@@ -177,7 +181,7 @@ const InteractOptions = ({
   };
 
   // ---------------- Gifting API ----------------
-  useEffect(()=> setGifts(gifts), [gifts]);
+  useEffect(() => setGifts(gifts), [gifts]);
 
   const openGifting = () => {
     setIsWantToGift(true);
@@ -185,6 +189,18 @@ const InteractOptions = ({
 
   return (
     <View className="p-1">
+      {isResharedVideo && (
+        <View className="absolute -left-[21.5rem] bottom-0">
+          <View className="flex-row gap-2 items-center bg-[#000000A8] w-40 py-0.5 justify-center rounded-xl">
+            <Image
+              source={require("../../../../assets/images/repost.png")}
+              className="size-5"
+            />
+            <Text className="text-white">by {user?.username}</Text>
+          </View>
+        </View>
+      )}
+
       <View className="gap-5">
         <View className="items-center gap-1">
           <Pressable onPress={() => LikeVideo()}>

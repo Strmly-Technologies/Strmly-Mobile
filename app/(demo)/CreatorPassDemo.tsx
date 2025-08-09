@@ -8,16 +8,17 @@ import {
 import { X, Unlock, Calendar, Ban, Heart, Paperclip } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import ThemedView from '@/components/ThemedView';
 
 const CreatorPassDemo = () => {
     const router = useRouter();
 
     return (
-        <View className="flex-1 bg-black">
+        <ThemedView className="flex-1 pt-10">
             <StatusBar barStyle="light-content" backgroundColor="#000" />
 
             {/* Header */}
-            <View className="flex-row items-center justify-between px-4 py-3 mt-10">
+            <View className="flex-row items-center justify-between px-4">
                 <TouchableOpacity onPress={() => router.back()}>
                     <X size={24} color="white" />
                 </TouchableOpacity>
@@ -107,7 +108,7 @@ const CreatorPassDemo = () => {
                     </TouchableOpacity>
                 </LinearGradient>
             </View>
-        </View>
+        </ThemedView>
     );
 };
 

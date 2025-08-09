@@ -63,7 +63,8 @@ const Interests = () => {
       }
 
       // Success - navigate to next screen or show success message
-      updateUser({isOnboarded: true});
+      updateUser({ isOnboarded: true });
+
       Alert.alert("Success", "Your interests have been updated successfully!");
       router.push("/(dashboard)/long/VideosFeed");
     } catch (error) {
@@ -249,7 +250,7 @@ const Interests = () => {
   };
 
   if (!fontsLoaded) return null;
-
+        
   if (Step === 1) {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
@@ -322,24 +323,96 @@ const Interests = () => {
     const items = isCinema
       ? Type === "Netflix"
         ? [
-            "Netflix",
-            "Youtube",
-            "Amazon Prime",
-            "Hotstar",
-            "Jio Cinema",
-            "Sony Liv",
-          ]
-        : ["Gaming", "Podcasts", "Cooking", "Fitness", "Tech Reviews", "Travel"]
-      : Type === "Netflix"
-        ? ["Gaming", "Podcasts", "Cooking", "Fitness", "Tech Reviews", "Travel"]
+  "Drama",
+  "Comedy",
+  "Action & Adventure",
+  "Thriller & Suspense",
+  "Horror",
+  "Romance",
+  "Sci-Fi & Fantasy",
+  "Crime & Mystery",
+  "Documentary",
+  "Biography & True Story",
+  "Family & Kids",
+  "Teen & Young Adult",
+  "Animation & Anime",
+  "Reality & Unscripted",
+  "Talk Shows & Stand-up Comedy",
+  "Historical & Period Pieces",
+  "Musical & Music-Based",
+  "International & World Cinema",
+  "Sports & Fitness",
+  "Short Films & Anthologies",
+]
+
         : [
-            "Netflix",
-            "Youtube",
-            "Amazon Prime",
-            "Hotstar",
-            "Jio Cinema",
-            "Sony Liv",
-          ];
+            "Entertainment",
+            "Education",
+            "Gaming",
+            "Commentary & Opinion",
+            "Music & Audio",
+            "Film & TV",
+            "Vlogs & Lifestyle",
+            "Health & Fitness",
+            "Food & Cooking",
+            "Beauty & Fashion",
+            "Science & Technology",
+            "Travel & Adventure",
+            "DIY & Crafts",
+            "Home & Family",
+            "Business & Finance",
+            "Motivation & Self-Improvement",
+            "Career & Skill Development",
+            "Spirituality & Philosophy",
+            "Reviews & Unboxings",
+            "Live Streams & Podcasts",
+          ]
+      : Type === "Youtube"
+        ? [
+            "Entertainment",
+            "Education",
+            "Gaming",
+            "Commentary & Opinion",
+            "Music & Audio",
+            "Film & TV",
+            "Vlogs & Lifestyle",
+            "Health & Fitness",
+            "Food & Cooking",
+            "Beauty & Fashion",
+            "Science & Technology",
+            "Travel & Adventure",
+            "DIY & Crafts",
+            "Home & Family",
+            "Business & Finance",
+            "Motivation & Self-Improvement",
+            "Career & Skill Development",
+            "Spirituality & Philosophy",
+            "Reviews & Unboxings",
+            "Live Streams & Podcasts",
+          ]
+        : [
+  "Drama",
+  "Comedy",
+  "Action & Adventure",
+  "Thriller & Suspense",
+  "Horror",
+  "Romance",
+  "Sci-Fi & Fantasy",
+  "Crime & Mystery",
+  "Documentary",
+  "Biography & True Story",
+  "Family & Kids",
+  "Teen & Young Adult",
+  "Animation & Anime",
+  "Reality & Unscripted",
+  "Talk Shows & Stand-up Comedy",
+  "Historical & Period Pieces",
+  "Musical & Music-Based",
+  "International & World Cinema",
+  "Sports & Fitness",
+  "Short Films & Anthologies",
+]
+;
     return (
       <ThemedView style={CreateProfileStyles.Container}>
         <View style={CreateProfileStyles.TopBar}>
@@ -363,7 +436,7 @@ const Interests = () => {
           </Text>
           <View style={{ marginTop: 20 }}>{renderGrid(items)}</View>
 
-          <View className="relative h-[70%] justify-end">
+          <View className="relative h-[70%] justify-end bottom-10">
             <TouchableOpacity
               disabled={
                 (Step === 2
@@ -379,7 +452,7 @@ const Interests = () => {
               {isSubmitting ? (
                 <ActivityIndicator color="black" />
               ) : (
-                <Text className="text-black text-xl">
+                <Text className="text-black absolute text-xl">
                   {Step === 3 ? "Submit" : "Continue"}
                 </Text>
               )}

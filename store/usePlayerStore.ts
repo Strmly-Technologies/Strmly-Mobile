@@ -1,6 +1,5 @@
 // Enhanced usePlayerStore.ts
 import { create } from 'zustand';
-import { VideoPlayerStatus } from 'expo-video';
 
 interface PlayerState {
   isPlaying: boolean;
@@ -150,6 +149,8 @@ export const usePlayerStore = create<PlayerState & PlayerActions>((set, get) => 
       }
       
       activePlayer.play();
+      // Immediately update the playing state for responsive UI
+      set({ isPlaying: true });
     }
   },
 
@@ -157,15 +158,35 @@ export const usePlayerStore = create<PlayerState & PlayerActions>((set, get) => 
   smartPause: () => {
     if (activePlayer) {
       activePlayer.pause();
+      // Immediately update the playing state for responsive UI
+      set({ isPlaying: false });
     }
   },
 
   togglePlayPause: () => {
+    const currentState = get();
     if (activePlayer) {
-      if (get().isPlaying) {
-        get().smartPause();
+      if (currentState.isPlaying) {
+        // Currently playing, so pause it
+        activePlayer.pause();
+        set({ isPlaying: false });
       } else {
-        get().smartPlay();
+        // Currently paused, so play it
+        const state = get();
+        
+        // If user has never interacted with audio, unmute on first play action
+        if (!state.hasUserInteractedWithAudio) {
+          activePlayer.muted = false;
+          set({ 
+            isMuted: false,
+            hasUserInteractedWithAudio: true,
+            isPlaying: true
+          });
+        } else {
+          set({ isPlaying: true });
+        }
+        
+        activePlayer.play();
       }
     }
   },

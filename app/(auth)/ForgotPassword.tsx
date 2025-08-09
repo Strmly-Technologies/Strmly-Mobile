@@ -26,6 +26,10 @@ const ForgotPassword = () => {
   const [cooldown, setCooldown] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [needButton, setNeedButton] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alert, setAlert] = useState("");
+
   const [fontsLoaded] = useFonts({
     "Poppins-Regular": require("../../assets/fonts/poppins/Poppins-Regular.ttf"),
     "Poppins-Bold": require("../../assets/fonts/poppins/Poppins-Bold.ttf"),
@@ -39,6 +43,12 @@ const ForgotPassword = () => {
   });
 
   const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
+
+  const handleWarning = () => {
+    setAlert("Please enter your email");
+    setShowAlert(() => true);
+    setNeedButton(true);
+  }
 
   const handleRequestResetEmail = async () => {
     setIsLoading(true);
@@ -56,13 +66,17 @@ const ForgotPassword = () => {
         throw new Error(data.message || "Failed to request password reset.");
       }
 
-      Alert.alert("Success", data.message);
+      setAlert(`Success 
+        ${data.message}`);
+      setShowAlert(() => true);
+      setNeedButton(false);
       setStep(2); // go to verification step
     } catch (error) {
-      Alert.alert(
-        "Error",
-        error instanceof Error ? error.message : "Unknown error."
+      setAlert(`Error
+        ${error instanceof Error ? error.message : "Unknown error."}`
       );
+      setShowAlert(() => true);
+      setNeedButton(true);
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +92,7 @@ const ForgotPassword = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ token: otp }),
+          body: JSON.stringify({ otp: otp }),
         }
       );
 
@@ -88,13 +102,18 @@ const ForgotPassword = () => {
         throw new Error(data.message || "OTP verification failed");
       }
 
-      Alert.alert("Verified", "You may now reset your password.");
+      setAlert(`Verified, 
+        You may now reset your password.`);
+      setShowAlert(() => true);
+      setNeedButton(false);
       setStep(3);
     } catch (error) {
-      Alert.alert(
-        "Error",
-        error instanceof Error ? error.message : "Unknown error."
+      setAlert(`
+        Error
+        ${error instanceof Error ? error.message : "Unknown error."}`
       );
+      setShowAlert(() => true);
+      setNeedButton(true);
     } finally {
       setIsLoading(false);
     }
@@ -109,9 +128,9 @@ const ForgotPassword = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          token: otp,
+          otp: otp,
           newPassword: password,
-          confirmPassword: password, // assuming no separate confirm field
+          confirmPassword: password,
         }),
       });
 
@@ -121,13 +140,14 @@ const ForgotPassword = () => {
         throw new Error(data.message || "Failed to reset password.");
       }
 
-      Alert.alert("Success", "Password reset successful. Please log in.");
+      setAlert("Password reset successful. Please log in.");
+      setShowAlert(() => true);
+      setNeedButton(true);
       router.replace("/(auth)/Sign-in");
     } catch (error) {
-      Alert.alert(
-        "Error",
-        error instanceof Error ? error.message : "Unknown error."
-      );
+      setAlert(`${error instanceof Error ? error.message : "Unknown error."}`);
+      setShowAlert(() => true);
+      setNeedButton(true);
     } finally {
       setIsLoading(false);
     }
@@ -141,19 +161,25 @@ const ForgotPassword = () => {
 
     if (Step === 1) {
       if (!email.includes("@") || email.length < 5) {
-        alert("Please enter a valid email");
+        setAlert("Please enter a valid email");
+        setShowAlert(() => true);
+        setNeedButton(true);
         return;
       }
     }
 
     if (Step === 2 && confirmationCode.trim().length < 4) {
-      alert("Invalid confirmation code");
+      setAlert("Invalid confirmation code");
+      setShowAlert(() => true);
+      setNeedButton(true);
       return;
     }
 
     // validation for each step
     if (Step === 3 && password.length < 6) {
-      alert("Password must be at least 6 characters");
+      setAlert("Password must be at least 6 characters");
+      setShowAlert(() => true);
+      setNeedButton(true);
       return;
     }
 
@@ -192,7 +218,7 @@ const ForgotPassword = () => {
         <TouchableOpacity
           onPress={() =>
             email.length == 0
-              ? Alert.alert("Please enter your email")
+              ? handleWarning()
               : handleRequestResetEmail()
           }
           style={CreateProfileStyles.button}

@@ -240,14 +240,14 @@ By submitting this request, you confirm that you understand and agree to our`,
         </Pressable>
 
         <Pressable
-          onPress={() => openURL("https://strmly.com/privacy")}
+          onPress={() => openURL("https://www.strmly.com/legal/privacy")}
           className="w-full"
         >
           <Text className="text-white text-lg">Privacy Policy</Text>
         </Pressable>
 
         <Pressable
-          onPress={() => openURL("https://strmly.com/terms")}
+          onPress={() => openURL("https://www.strmly.com/legal/terms")}
           className="w-full"
         >
           <Text className="text-white text-lg">Term of Use</Text>

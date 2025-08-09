@@ -275,9 +275,9 @@ const VideoContentGifting = ({
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 justify-between px-5 py-6">
+          <View className="flex-1 justify-between pt-10 px-5">
             {/* Top section */}
-            <View className="mt-10">
+            <View className="mt-5">
               {isWithdrawMode ? (
                 <View className="flex-row items-center justify-between mb-8">
                   <Pressable onPress={() => router.back()} className="p-2">
@@ -300,8 +300,8 @@ const VideoContentGifting = ({
 
             {/* Middle section */}
             <View className="items-center">
-              <View className="gap-2 flex-row items-center justify-center">
-                <Text className="text-2xl text-white">₹</Text>
+              <View className="flex-row items-center justify-center">
+                <Text className="text-4xl text-white">₹</Text>
                 <TextInput
                   value={amount}
                   onChangeText={handleAmountChange}
@@ -340,7 +340,7 @@ const VideoContentGifting = ({
                 position: "absolute",
                 left: 0,
                 right: 0,
-                bottom: Animated.add(new Animated.Value(5), animatedBottom),
+                bottom: Animated.add(new Animated.Value(80), animatedBottom),
                 paddingBottom: insets.bottom,
               }}
               className="gap-2 justify-end"

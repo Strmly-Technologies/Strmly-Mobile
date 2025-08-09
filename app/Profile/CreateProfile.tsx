@@ -16,6 +16,7 @@ import {
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
 import Constants from "expo-constants";
+import ModalMessage from "@/components/AuthModalMessage";
 
 const CreateProfile = () => {
   const [Step, setStep] = useState(1);
@@ -31,6 +32,10 @@ const CreateProfile = () => {
 
   const [cooldown, setCooldown] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [needButton, setNeedButton] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alert, setAlert] = useState("");
 
   const [fontsLoaded] = useFonts({
     "Poppins-Regular": require("../../assets/fonts/poppins/Poppins-Regular.ttf"),
@@ -110,11 +115,15 @@ const CreateProfile = () => {
       // Save token and partially registered user
       await useAuthStore.getState().login(data.token, data.user);
 
-      alert("OTP sent to your email.");
+      setAlert("OTP sent to your email.");
+      setShowAlert(true);
+      setNeedButton(false);
       setTimeout(() => setStep(4), 1000);
     } catch (err: any) {
       console.error("Registration error:", err);
-      alert(err.message || "Something went wrong");
+      setAlert(err.message || "Something went wrong");
+      setShowAlert(true);
+      setNeedButton(true);
     } finally {
       setIsLoading(false);
     }
@@ -144,11 +153,15 @@ const CreateProfile = () => {
       // Update auth store to mark email_verified
       useAuthStore.getState().updateUser({ isVerified: true });
 
-      alert("Email verified successfully!");
+      setAlert("Email verified successfully!");
+      setShowAlert(true);
+      setNeedButton(false);
       setTimeout(() => router.replace("/Interests"), 1000);
     } catch (err: any) {
       console.error("OTP Verification error:", err);
-      alert(err.message || "Something went wrong");
+      setAlert(err.message || "Something went wrong");
+      setShowAlert(true);
+      setNeedButton(true);
     } finally {
       setIsLoading(false);
     }
@@ -170,25 +183,34 @@ const CreateProfile = () => {
 
       if (!res.ok) {
         if (data.code === "RATE_LIMITED") {
-          Alert.alert("Too Many Requests", data.message);
+          setAlert(`Too Many Requests
+             ${data.message}`);
+          setShowAlert(true);
+          setNeedButton(true);
           setCooldown(60); // Start cooldown
         } else if (data.code === "ALREADY_VERIFIED") {
-          Alert.alert("Already Verified", data.message);
+          setAlert(`Already Verified
+             ${data.message}`);
+          setShowAlert(true);
+          setNeedButton(true);
         } else {
-          Alert.alert(
-            "Resend Failed",
-            data.message || "Please try again later"
-          );
+          setAlert(`Resend Failed
+             ${data.message || "Please try again later"}`);
+          setShowAlert(true);
+          setNeedButton(true);
         }
         return;
       }
 
-      Alert.alert(
-        "OTP Sent",
-        "A new verification code was sent to your email."
-      );
+      setAlert(`OTP Sent 
+        A new verification code was sent to your email.`);
+      setShowAlert(true);
+      setNeedButton(true);
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Network error");
+      setAlert(`Error 
+        ${error.message || "Network error"}`);
+      setShowAlert(true);
+      setNeedButton(true);
     } finally {
       setIsLoading(false);
     }
@@ -217,45 +239,61 @@ const CreateProfile = () => {
     // validation for each step
     if (Step === 1) {
       if (!username || username.length <= 3) {
-        alert("Username must be at least 4 characters");
+        setAlert("Username must be at least 4 characters");
+        setShowAlert(true);
+        setNeedButton(true);
         return;
       }
 
       if (usernameExists === true) {
-        alert("Username already exists");
+        setAlert("Username already exists");
+        setShowAlert(true);
+        setNeedButton(true);
         return;
       }
 
       if (usernameExists === null) {
-        alert("Checking username... please wait");
+        setAlert("Checking username... please wait");
+        setShowAlert(true);
+        setNeedButton(true);
         return;
       }
     }
 
     if (Step === 2 && password.length < 6) {
-      alert("Password must be at least 6 characters");
+      setAlert("Password must be at least 6 characters");
+      setShowAlert(true);
+      setNeedButton(true);
       return;
     }
 
     if (Step === 3) {
       if (!email.includes("@") || email.length < 5) {
-        alert("Please enter a valid email");
+        setAlert("Please enter a valid email");
+        setShowAlert(true);
+        setNeedButton(true);
         return;
       }
 
       if (emailExists === true) {
-        alert("Email already exists");
+        setAlert("Email already exists");
+        setShowAlert(true);
+        setNeedButton(true);
         return;
       }
 
       if (emailExists === null) {
-        alert("Checking email... please wait");
+        setAlert("Checking email... please wait");
+        setShowAlert(true);
+        setNeedButton(true);
         return;
       }
     }
 
     if (Step === 4 && confirmationCode.trim().length < 4) {
-      alert("Invalid confirmation code");
+      setAlert("Invalid confirmation code");
+      setShowAlert(true);
+      setNeedButton(true);
       return;
     }
 
@@ -304,6 +342,13 @@ const CreateProfile = () => {
             <Text className="font-semibold text-lg">Continue</Text>
           )}
         </TouchableOpacity>
+
+        <ModalMessage
+          visible={showAlert}
+          text={alert}
+          needCloseButton={needButton}
+          onClose={setShowAlert}
+        />
       </ThemedView>
     );
   }
@@ -342,45 +387,64 @@ const CreateProfile = () => {
             <Text className="font-semibold text-lg">Continue</Text>
           )}
         </TouchableOpacity>
+
+        <ModalMessage
+          visible={showAlert}
+          text={alert}
+          needCloseButton={needButton}
+          onClose={setShowAlert}
+        />
       </ThemedView>
     );
   }
 
   if (Step === 3) {
     return (
-      <ThemedView style={CreateProfileStyles.Container}>
-        <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
-          <TouchableOpacity onPress={() => HandleStep(false)} className="w-fit">
-            <Image
-              className="w-5 h-5"
-              source={require("../../assets/images/back.png")}
-            />
-          </TouchableOpacity>
-          <ThemedText className="text-white text-2xl text-center w-full">
-            Enter your email
-          </ThemedText>
-        </View>
-        <TextInput
-          style={CreateProfileStyles.Input}
-          placeholder="Email"
-          className="placeholder:text-[#B0B0B0]"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-        />
+      <>
+        <ThemedView style={CreateProfileStyles.Container}>
+          <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
+            <TouchableOpacity
+              onPress={() => HandleStep(false)}
+              className="w-fit"
+            >
+              <Image
+                className="w-5 h-5"
+                source={require("../../assets/images/back.png")}
+              />
+            </TouchableOpacity>
+            <ThemedText className="text-white text-2xl text-center w-full">
+              Enter your email
+            </ThemedText>
+          </View>
+          <TextInput
+            style={CreateProfileStyles.Input}
+            placeholder="Email"
+            className="placeholder:text-[#B0B0B0]"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
 
-        <TouchableOpacity
-          onPress={handleRegisterUser}
-          style={CreateProfileStyles.button}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#000" />
-          ) : (
-            <Text className="font-semibold text-lg">Verify</Text>
-          )}
-        </TouchableOpacity>
-      </ThemedView>
+          <TouchableOpacity
+            onPress={handleRegisterUser}
+            style={CreateProfileStyles.button}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#000" />
+            ) : (
+              <Text className="font-semibold text-lg">Verify</Text>
+            )}
+          </TouchableOpacity>
+
+          <ModalMessage
+            visible={showAlert}
+            text={alert}
+            needCloseButton={needButton}
+            onClose={setShowAlert}
+          />
+        </ThemedView>
+      </>
     );
   }
 
@@ -431,6 +495,13 @@ const CreateProfile = () => {
             </ThemedText>
           )}
         </TouchableOpacity>
+
+        <ModalMessage
+          visible={showAlert}
+          text={alert}
+          needCloseButton={needButton}
+          onClose={setShowAlert}
+        />
       </ThemedView>
     );
   }

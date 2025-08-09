@@ -17,13 +17,17 @@ import { Signinstyles } from "@/styles/signin";
 import { CreateProfileStyles } from "@/styles/createprofile";
 import { useAuthStore } from "@/store/useAuthStore";
 import CONFIG from "@/Constants/config";
-
+import ModalMessage from "@/components/AuthModalMessage";
 
 const SignIn = () => {
   const [useEmail, setUseEmail] = useState(false);
   const [nameOrEmail, setNameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [needButton, setNeedButton] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alert, setAlert] = useState("");
 
   const [fontsLoaded] = useFonts({
     "Poppins-Regular": require("../../assets/fonts/poppins/Poppins-Regular.ttf"),
@@ -37,7 +41,9 @@ const SignIn = () => {
 
   const handleLogin = async () => {
     if (!nameOrEmail || !password) {
-      alert("Please fill in both fields");
+      setShowAlert(true);
+      setAlert("Please fill in both fields");
+      setNeedButton(true);
       return;
     }
 
@@ -45,57 +51,44 @@ const SignIn = () => {
 
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nameOrEmail);
     const loginType = isEmail ? "email" : "username";
-    console.log("Login type:", loginType);
-    console.log("Login type:", loginType);
 
     try {
       const loginUrl = `${CONFIG.API_BASE_URL}/auth/login/${loginType}`;
       console.log("🔗 Login URL:", loginUrl);
-      
-      const res = await fetch(loginUrl,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            [loginType]: nameOrEmail, // dynamic key: email or username
-            password,
-          }),
-        }
-      );
-      
-      console.log("📡 Response status:", res.status);
-      console.log("📡 Response headers:", res.headers);
-      
-      console.log("📡 Response status:", res.status);
-      console.log("📡 Response headers:", res.headers);
+
+      const res = await fetch(loginUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          [loginType]: nameOrEmail, // dynamic key: email or username
+          password,
+        }),
+      });
 
       if (!res.ok) {
         const errorText = await res.text();
         console.error("❌ Login error response:", errorText);
         throw new Error(`Login failed: ${res.status} ${res.statusText}`);
-        
       }
-
-      
-
-
 
       const data = await res.json();
       console.log("✅ Login successful:", data);
 
-
-
       // Save in zustand and secure store
       await useAuthStore.getState().login(data.token, data.user);
 
-      alert("Login successful!");
-      setTimeout(() => router.push("/(dashboard)/long/VideosFeed"), 1000);
+      setAlert("Login successful!");
+      setShowAlert(() => true);
+      setNeedButton(false);
+      setTimeout(() => router.replace("/(dashboard)/long/VideosFeed"), 1000);
     } catch (error: any) {
       console.error("Login Error", error);
-      alert(error.message || "Something went wrong");
-    } finally{
+      setAlert(error.message || "Something went wrong");
+      setShowAlert(() => true);
+      setNeedButton(true);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -151,7 +144,10 @@ const SignIn = () => {
         </View>
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={() => alert("Google Sign-in")}
+        onPress={() => {
+          setAlert("Google Sign-in");
+          setShowAlert(true);
+        }}
         style={Signinstyles.button}
       >
         <View className="flex-row items-center justify-between w-full px-4">
@@ -184,14 +180,11 @@ const SignIn = () => {
         secureTextEntry
       />
       <TouchableOpacity
-      disabled={isLoading}
+        disabled={isLoading}
         style={CreateProfileStyles.button}
         onPress={handleLogin}
       >
-        {
-        isLoading &&
-        <ActivityIndicator className="size-5"/>
-        }
+        {isLoading && <ActivityIndicator className="size-5" />}
         <Text className="text-lg font-semibold">Sign in</Text>
       </TouchableOpacity>
       <Link href={"/(auth)/ForgotPassword"} className="text-white mt-8">
@@ -221,6 +214,14 @@ const SignIn = () => {
       {renderWelcomeText()}
       {useEmail ? renderEmailForm() : renderSocialOptions()}
       {!useEmail && renderLink()}
+
+      {/* 🔔 Modal overlays the screen */}
+      <ModalMessage
+        visible={showAlert}
+        text={alert}
+        needCloseButton={needButton}
+        onClose={() => setShowAlert(false)}
+      />
     </ThemedView>
   );
 };
