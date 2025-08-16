@@ -30,7 +30,7 @@ const CommunityPassBuy = () => {
   const route = useRoute();
   const { id } = route.params as { id: string };
   const [userData, setUserData] = useState<any>(null);
-  const [walletInfo, setWalletInfo] = useState<{ balance?: number }>({});
+  const [walletInfo, setWalletInfo] = useState<{ balance: number }>();
   const [hasCommunityPass, setHasCommunityPass] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,7 +39,7 @@ const CommunityPassBuy = () => {
   const insets = useSafeAreaInsets();
   const animatedBottom = useRef(new Animated.Value(insets.bottom)).current;
 
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { completePass } = useGiftingStore();
 
   // Check if Community pass is already purchased
@@ -102,7 +102,7 @@ const CommunityPassBuy = () => {
         }
 
         setUserData(data);
-        console.log('commuity data',data)
+        console.log("commuity data", data);
       } catch (error) {
         console.log(error);
         Alert.alert(
@@ -132,6 +132,16 @@ const CommunityPassBuy = () => {
     if (hasCommunityPass) {
       console.log("community pass already purchased", hasCommunityPass);
       Alert.alert("You already purchased community pass");
+      return;
+    }
+
+    if (walletInfo && walletInfo.balance < userData?.community_fee_amount) {
+      Alert.alert("You don't have sufficient balance");
+      return;
+    }
+
+    if (user && user?.id < userData?.founder?._id) {
+      Alert.alert("You cannot pay yourself");
       return;
     }
 

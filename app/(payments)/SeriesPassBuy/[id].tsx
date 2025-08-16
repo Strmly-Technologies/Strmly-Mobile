@@ -30,8 +30,8 @@ const SeriesPassBuy = () => {
   const route = useRoute();
   const { id } = route.params as { id: string };
   const [userData, setUserData] = useState<any>(null);
-  const [walletInfo, setWalletInfo] = useState<{ balance?: number }>({});
-  const [hasCreatorPass, setHasCreatorPass] = useState<boolean>(false);
+  const [walletInfo, setWalletInfo] = useState<{ balance: number }>();
+  const [hasSeriesAccess, setHasSeriesAccess] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,15 +39,15 @@ const SeriesPassBuy = () => {
   const insets = useSafeAreaInsets();
   const animatedBottom = useRef(new Animated.Value(insets.bottom)).current;
 
-  const { token } = useAuthStore();
-  const { completeSeriesPurchasing } = useGiftingStore();
+  const { token, user } = useAuthStore();
+  const { completeSeriesPurchasing, series } = useGiftingStore();
 
   // Check if Creator pass is already purchased
   useEffect(() => {
-    const hasCreatorPass = async () => {
+    const hasSeriesPass = async () => {
       try {
         const response = await fetch(
-          `${BACKEND_API_URL}/user/has-creator-pass/${id}`,
+          `${BACKEND_API_URL}/user/has-user-access/${series?._id}`,
           {
             method: "GET",
             headers: {
@@ -60,26 +60,27 @@ const SeriesPassBuy = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch user creator pass");
+          throw new Error(data.message || "Failed to fetch video access");
         }
 
-        console.log("has Creator pass", data);
-        setHasCreatorPass(data.hasCreatorPass);
+        console.log("has Series pass", data.data);
+        setHasSeriesAccess(data.data.hasUserAccess);
       } catch (error) {
         console.log(error);
         Alert.alert(
           "Error",
           error instanceof Error
             ? error.message
-            : "An unknown error occurred while following user."
+            : "An unknown error occurred while checking video access."
         );
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (id && token) {
-      hasCreatorPass();
+    if (series?._id && token) {
+      console.log(series)
+      hasSeriesPass();
     }
   }, []);
 
@@ -125,37 +126,53 @@ const SeriesPassBuy = () => {
   // ------------ Transaction -------------------
 
   const purchasePass = async () => {
-    if (!token && !id && hasCreatorPass) {
-      console.log("hasCreatorPass", hasCreatorPass);
+    if (!token && !id && hasSeriesAccess) {
+      console.log("hasCreatorPass", hasSeriesAccess);
       return;
     }
 
-    if (hasCreatorPass) {
-      console.log("creator pass already purchased", hasCreatorPass);
-      Alert.alert("You already purchased creator pass");
+    if (hasSeriesAccess) {
+      console.log("creator pass already purchased", hasSeriesAccess);
+      Alert.alert("You already purchased series pass");
+      return;
+    }
+    
+    if (walletInfo && walletInfo.balance < series?.price) {
+      Alert.alert("You don't have sufficient balance");
+      return;
+    }
+
+    if (user && user?.id < userData?.userDetails._id) {
+      Alert.alert("You cannot pay yourself");
       return;
     }
 
     try {
       const response = await fetch(
-        `${BACKEND_API_URL}/creator-pass/purchase-with-wallet`,
+        `${BACKEND_API_URL}/wallet/transfer-series`,
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ creatorId: id }),
+          body: JSON.stringify({
+            seriesId: series?._id,
+            amount: series?.price,
+          }),
         }
       );
 
-      if (!response.ok) throw new Error("Failed to provide creator pass");
+      if (!response.ok) {
+        throw new Error("Failed to provide creator pass");
+      }
       const data = await response.json();
       console.log("purchase creator pass data---------------", data);
       completeSeriesPurchasing();
       router.back();
     } catch (err) {
       console.log(err);
+      Alert.alert("An unknown error occurred while provide creator pass.");
     }
   };
 
@@ -212,9 +229,7 @@ const SeriesPassBuy = () => {
         {/* Middle section */}
         <View className="items-center">
           <View className="flex-row items-center justify-center">
-            <Text className="text-4xl text-white">
-              ₹ {userData?.userDetails?.creator_profile?.creator_pass_price}
-            </Text>
+            <Text className="text-4xl text-white">₹ {series?.price}</Text>
           </View>
 
           {/* Error Message */}

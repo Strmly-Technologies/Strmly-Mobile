@@ -322,7 +322,7 @@ export default function PublicProfilePageWithId() {
             );
           }
 
-          // console.log("has Creator pass", data);
+          console.log("has Creator pass", data);
           setHasCreatorPass(data.hasCreatorPass);
         } catch (error) {
           console.log(error);
@@ -507,8 +507,10 @@ export default function PublicProfilePageWithId() {
                         ?.creator_pass_price !== 0 && !hasCreatorPass ? (
                         <TouchableOpacity
                           onPress={() =>
-                            router.push(
-                              `/(demo)/PurchaseCreatorPass/${userData?.userDetails._id}`
+                            router.push({
+                              pathname: "/(dashboard)/PurchasePass/PurchaseCreatorPass/[id]",
+                              params: {id: userData?.userDetails._id}
+                            }
                             )
                           }
                           className={`h-10 rounded-lg overflow-hidden`}
@@ -543,7 +545,7 @@ export default function PublicProfilePageWithId() {
                             </View>
                           </LinearGradient>
                         </TouchableOpacity>
-                      ) : (
+                      ) : userData?.userDetails?.creator_profile.creator_pass_price !== 0 ?(
                         <TouchableOpacity
                           className={`h-10 rounded-lg overflow-hidden`}
                         >
@@ -569,7 +571,12 @@ export default function PublicProfilePageWithId() {
                             </View>
                           </LinearGradient>
                         </TouchableOpacity>
-                      )}
+                      )
+                      :
+                      (
+                        <></>
+                      )
+                      }
                     </View>
 
                     {/* Social Media Links - Moved here to replace hashtags */}
@@ -577,7 +584,7 @@ export default function PublicProfilePageWithId() {
                       Object.values(
                         userData.userDetails.social_media_links
                       ).some((link) => link) && (
-                        <View className="mt-5 flex flex-row justify-center gap-3 flex-wrap">
+                        <View className="mt-5 flex-row justify-center gap-8 flex-wrap">
                           {userData.userDetails.social_media_links.snapchat && (
                             <TouchableOpacity
                               onPress={() =>
@@ -586,14 +593,10 @@ export default function PublicProfilePageWithId() {
                                     .snapchat
                                 )
                               }
-                              className="w-12 h-12 rounded-lg overflow-hidden"
+                              className="w-10 h-10 rounded-lg overflow-hidden"
                               style={{ backgroundColor: "#FFFC00" }}
                             >
-                              <View className="w-full h-full items-center justify-center">
-                                <Text className="text-black text-lg font-bold">
-                                  👻
-                                </Text>
-                              </View>
+                              <Image source={require('../../../../assets/images/snapchat.png')}/>
                             </TouchableOpacity>
                           )}
                           {userData.userDetails.social_media_links
@@ -605,14 +608,8 @@ export default function PublicProfilePageWithId() {
                                     .instagram
                                 )
                               }
-                              className="w-12 h-12 rounded-lg overflow-hidden"
-                              style={{ backgroundColor: "#E4405F" }}
                             >
-                              <View className="w-full h-full items-center justify-center">
-                                <Text className="text-white text-lg font-bold">
-                                  📷
-                                </Text>
-                              </View>
+                              <Image source={require('../../../../assets/images/insta.png')} className="size-10"/>
                             </TouchableOpacity>
                           )}
                           {userData.userDetails.social_media_links.youtube && (
@@ -623,14 +620,8 @@ export default function PublicProfilePageWithId() {
                                     .youtube
                                 )
                               }
-                              className="w-12 h-12 rounded-lg overflow-hidden"
-                              style={{ backgroundColor: "#FF0000" }}
                             >
-                              <View className="w-full h-full items-center justify-center">
-                                <Text className="text-white text-lg font-bold">
-                                  ▶
-                                </Text>
-                              </View>
+                              <Image source={require('../../../../assets/images/yt.png')} className="size-10"/>
                             </TouchableOpacity>
                           )}
                           {userData.userDetails.social_media_links.facebook && (
@@ -641,7 +632,7 @@ export default function PublicProfilePageWithId() {
                                     .facebook
                                 )
                               }
-                              className="w-12 h-12 rounded-lg overflow-hidden"
+                              className="w-10 h-10 rounded-lg overflow-hidden"
                               style={{ backgroundColor: "#1877F2" }}
                             >
                               <View className="w-full h-full items-center justify-center">
@@ -659,7 +650,7 @@ export default function PublicProfilePageWithId() {
                                     .twitter
                                 )
                               }
-                              className="w-12 h-12 rounded-lg overflow-hidden"
+                              className="w-10 border border-gray-800 h-10 rounded-lg overflow-hidden"
                               style={{ backgroundColor: "#000000" }}
                             >
                               <View className="w-full h-full items-center justify-center">
@@ -831,9 +822,6 @@ export default function PublicProfilePageWithId() {
           <BottomNavBar />
         </View>
       )}
-
-      {/* Bottom Navigation Bar */}
-      {!isVideoPlayerActive && <BottomNavBar />}
     </ThemedView>
   );
 }

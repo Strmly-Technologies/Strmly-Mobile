@@ -76,7 +76,7 @@ const VideoProgressBar = ({
     }
   }, [isActive, initialStartTime, player]);
 
-  // Time sync and milestone tracking
+  // Time sync and milestone tracking - Optimized for performance
   useEffect(() => {
     if (!isActive) {
       setCurrentTime(0);
@@ -88,28 +88,21 @@ const VideoProgressBar = ({
       if (!isDragging && !seekInProgress.current && !userInteracting.current) {
         const time = typeof player.currentTime === "number" ? player.currentTime : 0;
 
-        // Only update if we have a valid time and it makes sense
-        if (time >= 0) {
+        // Only update if time has changed significantly to reduce re-renders
+        if (time >= 0 && Math.abs(time - lastTimeRef.current) > 0.2) {
           const timeDiff = Math.abs(time - lastTimeRef.current);
           
           // Handle looping: if time is much smaller than lastTime, it's likely a loop restart
           const isLoopRestart = time < 2 && lastTimeRef.current > duration - 2;
           
-          // Only allow natural progression or loop restarts
-          // Be very conservative to avoid interfering with seeks
-          if (isLoopRestart) {
-            console.log("Video looped - restarting from beginning");
-            setCurrentTime(time);
-            lastTimeRef.current = time;
-          } else if (time >= lastTimeRef.current - 0.5 && timeDiff < 2) {
-            // Only allow small, forward progression
+          // Simplified logic for better performance
+          if (isLoopRestart || time >= lastTimeRef.current - 1 || timeDiff > 3) {
             setCurrentTime(time);
             lastTimeRef.current = time;
           }
-          // Block all other updates to prevent interference with seeks
         }
       }
-    }, 200); // Slower updates to reduce interference
+    }, 300); // Slower updates to reduce CPU usage
 
     return () => clearInterval(interval);
   }, [isActive, player, isDragging, duration]);
@@ -125,38 +118,19 @@ const VideoProgressBar = ({
 
     try {
       if (newTimeSeconds < 0 || newTimeSeconds > duration) {
-        console.warn("Blocked seek: out of bounds", newTimeSeconds, duration);
         return;
       }
 
-      console.log("Seeking to absolute position:", newTimeSeconds, "seconds");
-
-      // Disable time sync for a longer period during seeking
-      userInteracting.current = true;
-
-      // Update our local state immediately to show the seek position
+      // Update local state immediately
       setCurrentTime(newTimeSeconds);
       lastTimeRef.current = newTimeSeconds;
 
-      // Try multiple seek methods to ensure it works
-      try {
-        // Method 1: Direct assignment
-        player.currentTime = newTimeSeconds;
-      } catch (e) {
-        console.log("Direct assignment failed, trying seekBy");
-        // Method 2: Seek by offset
-        const currentPlayerTime = player.currentTime || 0;
-        const seekOffset = newTimeSeconds - currentPlayerTime;
-        if (Math.abs(seekOffset) > 0.1) {
-          player.seekBy(seekOffset);
-        }
-      }
+      // Simple seek - just use direct assignment
+      player.currentTime = newTimeSeconds;
 
-      console.log("Seek initiated to:", newTimeSeconds);
     } catch (error) {
-      console.error("Seek failed:", error);
+      // Silent error handling to reduce console spam
     } finally {
-      // Allow next seek immediately but keep user interaction flag longer
       seekInProgress.current = false;
     }
   };
@@ -164,23 +138,16 @@ const VideoProgressBar = ({
   const handleTouchStart = (event: GestureResponderEvent) => {
     const containerWidth = progressBarContainerWidth.current;
     if (containerWidth > 0) {
-      console.log("Touch start - preparing to seek");
-      touchStartTime.current = Date.now();
       userInteracting.current = true;
       wasPlayingBeforeSeek.current = player.playing;
-
       setIsDragging(true);
 
       const touchX = event.nativeEvent.locationX;
       const seekPercentage = Math.max(0, Math.min(1, touchX / containerWidth));
       const newTime = seekPercentage * duration;
 
-      console.log("Touch start - will seek to:", newTime, "seconds");
-
       setDragProgress(seekPercentage);
       setDragTime(newTime);
-
-      // Don't seek immediately, wait for touch end for more reliable seeking
     }
   };
 
@@ -193,36 +160,36 @@ const VideoProgressBar = ({
       const seekPercentage = Math.max(0, Math.min(1, touchX / containerWidth));
       const newTime = seekPercentage * duration;
 
-      setDragProgress(seekPercentage);
-      setDragTime(newTime);
-
-      // Update visual progress immediately, but don't seek continuously during drag
-      // This provides smooth visual feedback without overwhelming the player
+      // Throttle updates to reduce re-renders
+      if (Math.abs(newTime - (dragTime || 0)) > 0.1) {
+        setDragProgress(seekPercentage);
+        setDragTime(newTime);
+      }
     }
   };
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
 
-    console.log("Touch end - finalizing seek and resuming playback");
-
-    // Get the final seek position from dragTime if available
     const finalSeekTime = dragTime !== null ? dragTime : currentTime;
 
     setIsDragging(false);
     setDragTime(null);
 
-    // Ensure we're at the correct position
+    // Seek to final position
     if (finalSeekTime !== null && finalSeekTime >= 0 && finalSeekTime <= duration) {
-      console.log("Final seek to:", finalSeekTime);
       handleSeek(finalSeekTime);
+      
+      // Resume playback
+      if (wasPlayingBeforeSeek.current) {
+        setTimeout(() => player.play(), 50);
+      }
     }
 
-    // Keep user interaction flag active for much longer to prevent time sync interference
+    // Re-enable time sync
     setTimeout(() => {
       userInteracting.current = false;
-      console.log("Re-enabling time sync after seek");
-    }, 2000); // 2 seconds delay
+    }, 500);
   };
 
   const progress = isDragging ? dragProgress : (duration > 0 ? (currentTime / duration) : 0);
@@ -336,4 +303,12 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(VideoProgressBar);
+export default React.memo(VideoProgressBar, (prevProps, nextProps) => {
+  // Only re-render if essential props change
+  return (
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.duration === nextProps.duration &&
+    prevProps.videoId === nextProps.videoId &&
+    prevProps.player === nextProps.player
+  );
+});

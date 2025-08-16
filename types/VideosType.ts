@@ -50,6 +50,8 @@ export type VideoItemType = {
     name: string;
   } | null;
 
+  is_following_creator: boolean;
+  
   creatorPassDetails: {
     _id: string;
     creator_profile: {

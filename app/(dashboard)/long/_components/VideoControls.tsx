@@ -77,6 +77,7 @@ const VideoControls = ({
           is_monetized={videoData.is_monetized}
           name={videoData.name}
           series={videoData?.series}
+          is_following_creator={videoData.is_following_creator}
           creatorPass={videoData?.creatorPassDetails}
           episode_number={videoData?.episode_number}
           createdBy={videoData?.created_by}

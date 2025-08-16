@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StatusBar, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StatusBar, Alert, Dimensions } from "react-native";
 import {
   X,
   Unlock,
@@ -10,19 +10,22 @@ import {
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import ThemedView from "@/components/ThemedView";
 import { useRoute } from "@react-navigation/native";
+import Constants from "expo-constants";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useGiftingStore } from "@/store/useGiftingStore";
-import Constants from "expo-constants";
 
-const CommunityAccessDemo = () => {
+const { height } = Dimensions.get('screen');
+
+const CreatorPassDemo = () => {
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
   const route = useRoute();
   const { id } = route.params as { id: string };
   const { token } = useAuthStore();
-  const { initiateCommunityPass } = useGiftingStore();
+  const { initiateCreatorPass } = useGiftingStore();
 
   const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 
@@ -38,10 +41,11 @@ const CommunityAccessDemo = () => {
   const validTo = formatDate(nextMonth);
 
   useEffect(() => {
-    const fetchCommunityData = async () => {
+    if (!id) return;
+
+    const fetchUserData = async () => {
       try {
-        setIsLoading(true);
-        const response = await fetch(`${BACKEND_API_URL}/community/${id}`, {
+        const response = await fetch(`${BACKEND_API_URL}/user/profile/${id}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -52,17 +56,19 @@ const CommunityAccessDemo = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch community profile");
+          throw new Error(data.message || "Failed to fetch user profile");
         }
 
-        setUserData(data);
+        setUserData(data.user);
+        initiateCreatorPass(data.user.userDetails)
+        console.log("Pubic User data", data.user);
       } catch (error) {
         console.log(error);
         Alert.alert(
           "Error",
           error instanceof Error
             ? error.message
-            : "An unknown error occurred while fetching community data."
+            : "An unknown error occurred while fetching user data."
         );
       } finally {
         setIsLoading(false);
@@ -70,16 +76,16 @@ const CommunityAccessDemo = () => {
     };
 
     if (token && id) {
-      fetchCommunityData();
+      fetchUserData();
     }
-  }, [id, token]);
+  }, [token, id]);
 
   return (
-    <View className="flex-1 bg-black">
+    <View style={{height: height, paddingTop: 20, backgroundColor: 'black'}}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 mt-12">
+      <View className="flex-row items-center justify-between px-4 pt-10 py-3">
         <TouchableOpacity onPress={() => router.back()}>
           <X size={24} color="white" />
         </TouchableOpacity>
@@ -96,9 +102,7 @@ const CommunityAccessDemo = () => {
         </View>
 
         {/* Title */}
-        <Text className="text-white text-2xl font-bold mb-2">
-          Community Access
-        </Text>
+        <Text className="text-white text-2xl font-bold mb-2">Creator Pass</Text>
 
         {/* Features Card */}
         <View className="w-full max-w-md rounded-2xl mb-8 overflow-hidden">
@@ -122,7 +126,8 @@ const CommunityAccessDemo = () => {
                   <Unlock size={28} color="#10B981" />
                 </View>
                 <Text className="text-white text-sm flex-1 leading-6">
-                  Join a paid community to upload your videos
+                  Unlock all premium videos by @
+                  {userData?.userDetails.username}
                 </Text>
               </View>
 
@@ -142,7 +147,7 @@ const CommunityAccessDemo = () => {
                   <Ban size={28} color="white" />
                 </View>
                 <Text className="text-white text-sm flex-1 leading-6">
-                  Instantly reach all followers of the community
+                  No extra pay for any content
                 </Text>
               </View>
 
@@ -152,7 +157,7 @@ const CommunityAccessDemo = () => {
                   <Heart size={28} color="#EF4444" fill="#EF4444" />
                 </View>
                 <Text className="text-white text-sm flex-1 leading-6">
-                  Locked price — no increase for existing members
+                  Directly support {userData?.userDetails?.username}'s work
                 </Text>
               </View>
             </LinearGradient>
@@ -166,17 +171,10 @@ const CommunityAccessDemo = () => {
           end={{ x: 1, y: 1 }}
           className="rounded-full"
         >
-          <TouchableOpacity
-            onPress={() => {
-              initiateCommunityPass(userData?.founder);
-              router.replace(
-                `/(payments)/CommunityPassBuy/${id}`
-              );
-            }}
-            className="px-8 py-4 rounded-full"
-          >
+          <TouchableOpacity onPress={()=> router.push(`/(payments)/CreatorPassBuy/${id}`)} className="px-8 py-4 rounded-full">
             <Text className="text-white text-lg font-medium">
-              Join at ₹{userData?.community_fee_amount}/month
+              Join at ₹
+              {userData?.userDetails?.creator_profile?.creator_pass_price}/month
             </Text>
           </TouchableOpacity>
         </LinearGradient>
@@ -185,4 +183,4 @@ const CommunityAccessDemo = () => {
   );
 };
 
-export default CommunityAccessDemo;
+export default CreatorPassDemo;

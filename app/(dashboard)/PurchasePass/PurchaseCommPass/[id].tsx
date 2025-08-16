@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StatusBar, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StatusBar, Alert, Dimensions } from "react-native";
 import {
   X,
   Unlock,
@@ -12,17 +12,20 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useRoute } from "@react-navigation/native";
 import { useAuthStore } from "@/store/useAuthStore";
-import Constants from "expo-constants";
 import { useGiftingStore } from "@/store/useGiftingStore";
+import Constants from "expo-constants";
+import ThemedView from "@/components/ThemedView";
 
-const SeriesAccess = () => {
-  const [seriesData, setSeriesData] = useState<any>(null);
+const {height} = Dimensions.get('screen');
+
+const CommunityAccessDemo = () => {
+  const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
   const route = useRoute();
   const { id } = route.params as { id: string };
   const { token } = useAuthStore();
-  const { initiateSeries } = useGiftingStore();
+  const { initiateCommunityPass } = useGiftingStore();
 
   const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 
@@ -38,11 +41,10 @@ const SeriesAccess = () => {
   const validTo = formatDate(nextMonth);
 
   useEffect(() => {
-    if (!id && !token) return;
-
-    const fetchSeriesData = async () => {
+    const fetchCommunityData = async () => {
       try {
-        const response = await fetch(`${BACKEND_API_URL}/series/${id}`, {
+        setIsLoading(true);
+        const response = await fetch(`${BACKEND_API_URL}/community/${id}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -53,19 +55,17 @@ const SeriesAccess = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch series data");
+          throw new Error(data.message || "Failed to fetch community profile");
         }
 
-        setSeriesData(data.data);
-        initiateSeries(data.data);
-        console.log("Series data", data.data);
+        setUserData(data);
       } catch (error) {
         console.log(error);
         Alert.alert(
           "Error",
           error instanceof Error
             ? error.message
-            : "An unknown error occurred while fetching series data."
+            : "An unknown error occurred while fetching community data."
         );
       } finally {
         setIsLoading(false);
@@ -73,16 +73,16 @@ const SeriesAccess = () => {
     };
 
     if (token && id) {
-      fetchSeriesData();
+      fetchCommunityData();
     }
-  }, [token, id]);
+  }, [id, token]);
 
   return (
-    <View className="flex-1 bg-black">
+    <ThemedView style={{height: height, paddingTop: 20}}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 mt-12">
+      <View className="flex-row items-center justify-between px-4 py-3 pt-10">
         <TouchableOpacity onPress={() => router.back()}>
           <X size={24} color="white" />
         </TouchableOpacity>
@@ -100,7 +100,7 @@ const SeriesAccess = () => {
 
         {/* Title */}
         <Text className="text-white text-2xl font-bold mb-2">
-          Series Access
+          Community Access
         </Text>
 
         {/* Features Card */}
@@ -125,7 +125,7 @@ const SeriesAccess = () => {
                   <Unlock size={28} color="#10B981" />
                 </View>
                 <Text className="text-white text-sm flex-1 leading-6">
-                  Unlock all episodes in this series by {seriesData?.created_by?.username}
+                  Join a paid community to upload your videos
                 </Text>
               </View>
 
@@ -145,7 +145,7 @@ const SeriesAccess = () => {
                   <Ban size={28} color="white" />
                 </View>
                 <Text className="text-white text-sm flex-1 leading-6">
-                  Access to all future episodes in this series
+                  Instantly reach all followers of the community
                 </Text>
               </View>
 
@@ -155,7 +155,7 @@ const SeriesAccess = () => {
                   <Heart size={28} color="#EF4444" fill="#EF4444" />
                 </View>
                 <Text className="text-white text-sm flex-1 leading-6">
-                  Support the creator's ongoing series
+                  Locked price — no increase for existing members
                 </Text>
               </View>
             </LinearGradient>
@@ -169,15 +169,23 @@ const SeriesAccess = () => {
           end={{ x: 1, y: 1 }}
           className="rounded-full"
         >
-          <TouchableOpacity onPress={()=> router.push(`/(payments)/SeriesPassBuy/${seriesData?.created_by?._id}`)} className="px-8 py-4 rounded-full">
+          <TouchableOpacity
+            onPress={() => {
+              initiateCommunityPass(userData?.founder);
+              router.replace(
+                `/(payments)/CommunityPassBuy/${id}`
+              );
+            }}
+            className="px-8 py-4 rounded-full"
+          >
             <Text className="text-white text-lg font-medium">
-              Join at ₹{seriesData?.price}/series
+              Join at ₹{userData?.community_fee_amount}/month
             </Text>
           </TouchableOpacity>
         </LinearGradient>
       </View>
-    </View>
+    </ThemedView>
   );
 };
 
-export default SeriesAccess;
+export default CommunityAccessDemo;

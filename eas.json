@@ -22,6 +22,10 @@
       },
       "ios": {
         "simulator": false
+      },
+      "env": {
+        "BACKEND_API_URL": "https://api.yourapp.com",
+        "GOOGLE_SERVICES_API_KEY": "your-google-api-key"
       }
     }
   }

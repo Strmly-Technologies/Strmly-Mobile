@@ -22,12 +22,12 @@ const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 
 const VideoBuy = () => {
   const route = useRoute();
-//   const { id } = route.params as { id: string };
-  const id = "68978209f59701af962d1fa5";
+    const { id } = route.params as { id: string };
+  // const id = "68978209f59701af962d1fa5";
   const [userData, setUserData] = useState<any>(null);
-  const [walletInfo, setWalletInfo] = useState<{ balance?: number }>({});
+  const [walletInfo, setWalletInfo] = useState<{ balance: number }>();
   const [hasVideoAccess, setHasVideoAccess] = useState<boolean>(false);
-  
+
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +35,7 @@ const VideoBuy = () => {
   const insets = useSafeAreaInsets();
   const animatedBottom = useRef(new Animated.Value(insets.bottom)).current;
 
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { completeVideoAccess } = useGiftingStore();
 
   // Check if Creator pass is already purchased
@@ -59,8 +59,8 @@ const VideoBuy = () => {
           throw new Error(data.message || "Failed to fetch video access");
         }
 
-        console.log("has Creator pass", data);
-        // setHasVideoAccess(data.hasCreatorPass);
+        console.log("has Video pass", data.data);
+        setHasVideoAccess(data.data.hasUserAccess);
       } catch (error) {
         console.log(error);
         Alert.alert(
@@ -132,18 +132,25 @@ const VideoBuy = () => {
       return;
     }
 
+    if (walletInfo && walletInfo.balance < userData?.access.price) {
+      Alert.alert("You don't have sufficient balance");
+      return;
+    }
+
+    if (user && user?.id < userData?.created_by?._id) {
+      Alert.alert("You cannot pay yourself");
+      return;
+    }
+
     try {
-      const response = await fetch(
-        `${BACKEND_API_URL}/videos/${id}/purchase`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ amount: userData?.access.price }),
-        }
-      );
+      const response = await fetch(`${BACKEND_API_URL}/videos/${id}/purchase`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: userData?.access.price }),
+      });
 
       if (!response.ok) throw new Error("Failed to provide creator pass");
       const data = await response.json();

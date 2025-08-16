@@ -292,7 +292,9 @@ export default function EditCommunity() {
             <TouchableOpacity onPress={pickImage} className="items-center">
               <View className="w-32 h-32 rounded-full bg-gray-600 items-center justify-center mb-4 overflow-hidden">
                 <Image
+
                   source={{ uri: getProfilePhotoUrl(imageUri, 'community') }}
+
                   className="w-full h-full"
                   resizeMode="cover"
                 />

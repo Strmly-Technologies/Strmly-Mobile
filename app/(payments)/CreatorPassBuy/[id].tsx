@@ -24,9 +24,9 @@ const CreatorPassBuy = () => {
   const route = useRoute();
   const { id } = route.params as { id: string };
   const [userData, setUserData] = useState<any>(null);
-  const [walletInfo, setWalletInfo] = useState<{ balance?: number }>({});
+  const [walletInfo, setWalletInfo] = useState<{ balance: number }>();
   const [hasCreatorPass, setHasCreatorPass] = useState<boolean>(false);
-  
+
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ const CreatorPassBuy = () => {
   const insets = useSafeAreaInsets();
   const animatedBottom = useRef(new Animated.Value(insets.bottom)).current;
 
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { completePass } = useGiftingStore();
 
   // Check if Creator pass is already purchased
@@ -128,6 +128,20 @@ const CreatorPassBuy = () => {
     if (hasCreatorPass) {
       console.log("creator pass already purchased", hasCreatorPass);
       Alert.alert("You already purchased creator pass");
+      return;
+    }
+
+    if (
+      walletInfo &&
+      walletInfo?.balance <
+        userData?.userDetails?.creator_profile?.creator_pass_price
+    ) {
+      Alert.alert("You don't have sufficient balance");
+      return;
+    }
+
+    if (user && user?.id < userData?.userDetails?._id) {
+      Alert.alert("You cannot pay yourself");
       return;
     }
 

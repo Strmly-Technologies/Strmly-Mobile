@@ -56,54 +56,6 @@ export default function PersonalProfilePage() {
 
   const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 
-  // Manual refresh function
-  const refreshProfileData = useCallback(async () => {
-    if (!token || !isLoggedIn) return;
-    
-    console.log('🔄 Manual profile data refresh triggered');
-    setIsLoading(true);
-    try {
-      const timestamp = new Date().getTime();
-      const response = await fetch(
-        `${CONFIG.API_BASE_URL}/user/profile-details?_=${timestamp}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch user profile");
-      }
-
-      console.log("✅ Profile data refreshed:", {
-        followers: data.user.totalFollowers,
-        following: data.user.totalFollowing,
-        communities: data.user.totalCommunities
-      });
-      setUserData(data.user);
-      setIsError(null);
-      setRefreshKey(prev => prev + 1); // Force re-render
-    } catch (error) {
-      console.error("❌ Error refreshing profile data:", error);
-      setIsError(
-        error instanceof Error
-          ? error.message
-          : "An unknown error occurred."
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token, isLoggedIn]);
-
   const thumbnails = useThumbnailsGenerate(
     videos.map((video) => ({
       id: video._id,
@@ -116,60 +68,6 @@ export default function PersonalProfilePage() {
       if (!token || !isLoggedIn) {
         router.replace("/(auth)/Sign-up");
         return;
-      }
-    }, [token, isLoggedIn])
-  );
-
-  // Focus listener to refresh profile data when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      console.log('🎯 Profile screen focused - refreshing profile data');
-      if (token && isLoggedIn) {
-        // Refresh profile data to get latest counts
-        const fetchUserData = async () => {
-          setIsLoading(true);
-          try {
-            const timestamp = new Date().getTime();
-            const response = await fetch(
-              `${CONFIG.API_BASE_URL}/user/profile-details?_=${timestamp}`,
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                  "Cache-Control": "no-cache, no-store, must-revalidate",
-                  Pragma: "no-cache",
-                  Expires: "0",
-                },
-              }
-            );
-
-            const data = await response.json();
-
-            if (!response.ok) {
-              throw new Error(data.message || "Failed to fetch user profile");
-            }
-
-            console.log("🔄 Refreshed profile data on focus:", {
-              followers: data.user.totalFollowers,
-              following: data.user.totalFollowing,
-              communities: data.user.totalCommunities
-            });
-            setUserData(data.user);
-            setIsError(null);
-          } catch (error) {
-            console.error("❌ Error refreshing profile data:", error);
-            setIsError(
-              error instanceof Error
-                ? error.message
-                : "An unknown error occurred."
-            );
-          } finally {
-            setIsLoading(false);
-          }
-        };
-
-        fetchUserData();
       }
     }, [token, isLoggedIn])
   );
@@ -193,6 +91,13 @@ export default function PersonalProfilePage() {
 
   useFocusEffect(
     React.useCallback(() => {
+      if (!token) return;
+
+      if(activeTab === "repost"){
+        userReshareVideos();
+        return;
+      }
+
       const fetchUserVideos = async () => {
         setIsLoadingVideos(true);
         try {
@@ -226,7 +131,7 @@ export default function PersonalProfilePage() {
         }
       };
 
-      if (token) {
+      if (token && activeTab !== 'repost') {
         fetchUserVideos();
       }
     }, [isLoggedIn, router, token, activeTab])
@@ -329,7 +234,7 @@ export default function PersonalProfilePage() {
       }
 
       setVideos(data.reshares);
-      console.log("reshare videos", data);
+      console.log("reshare videos", data.reshares[0].long_video.thumbnailUrl);
     } catch (error) {
       console.log(error);
       Alert.alert(
@@ -376,11 +281,11 @@ export default function PersonalProfilePage() {
   const renderGridItem = ({ item }: { item: any }) => (
     <TouchableOpacity
       className="relative aspect-[9/16] flex-1 rounded-sm overflow-hidden"
-      onPress={() => navigateToVideoPlayer(item, videos)}
+      onPress={() => {navigateToVideoPlayer(item, videos); console.log('item', item)}}
     >
-      {item.thumbnailUrl !== "" ? (
+      {(item.thumbnailUrl !== "" || item?.long_video?.thumbnailUrl !== '') ? (
         <Image
-          source={{ uri: item.thumbnailUrl }}
+          source={{ uri: `${item.thumbnailUrl ? item.thumbnailUrl : item.long_video.thumbnailUrl}` }}
           alt="video thumbnail"
           className="w-full h-full object-cover"
         />

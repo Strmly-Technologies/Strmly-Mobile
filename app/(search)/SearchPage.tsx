@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#000',
-        paddingTop: 20,
+        paddingTop: 45,
     },
     searchInput: {
         backgroundColor: 'rgba(255,255,255,0.1)',

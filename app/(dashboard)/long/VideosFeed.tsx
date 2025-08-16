@@ -23,7 +23,7 @@ export type GiftType = {
   videoId: string;
 };
 
-const { height: screenHeight } = Dimensions.get("screen");
+const { height: screenHeight } = Dimensions.get("window");
 const VIDEO_HEIGHT = screenHeight;
 
 const VideosFeed: React.FC = () => {
@@ -99,7 +99,7 @@ const VideosFeed: React.FC = () => {
         setVisibleIndex(currentIndex);
 
         // Trigger next batch if user watched 6 videos
-        if (currentIndex === 6) {
+        if (currentIndex === 6 || currentIndex === 4) {
           fetchTrendingVideos(page);
         }
 
@@ -131,7 +131,7 @@ const VideosFeed: React.FC = () => {
   const getItemLayout = useCallback(
     (_data: any, index: number) => ({
       length: VIDEO_HEIGHT,
-      offset: VIDEO_HEIGHT * index,
+      offset: VIDEO_HEIGHT,
       index,
     }),
     []
@@ -219,32 +219,32 @@ const VideosFeed: React.FC = () => {
 
   return (
     // <SafeAreaProvider>
-    //   <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
     <ThemedView>
-      <FlatList
-        data={videos}
-        renderItem={renderItem}
-        keyExtractor={(item) => item._id}
-        getItemLayout={getItemLayout}
-        pagingEnabled
-        scrollEnabled={!showCommentsModal}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
-        initialNumToRender={2}
-        maxToRenderPerBatch={2}
-        windowSize={3}
-        showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic" // iOS
-        contentContainerStyle={{ paddingBottom: 0 }}
-        style={{ height: VIDEO_HEIGHT }}
-        // onScrollBeginDrag={() => {
-        //   if (showCommentsModal) {
-        //     console.log('🚫 VideosFeed: Scroll blocked - comments modal is open');
-        //   }
-        // }}
-      />
+      <SafeAreaView>
+        <FlatList
+          data={videos}
+          renderItem={renderItem}
+          keyExtractor={(item) => item._id}
+          getItemLayout={getItemLayout}
+          pagingEnabled
+          scrollEnabled={!showCommentsModal}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
+          initialNumToRender={2}
+          maxToRenderPerBatch={2}
+          windowSize={3}
+          showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="automatic" // iOS
+          contentContainerStyle={{ paddingBottom: 0 }}
+          style={{ height: VIDEO_HEIGHT }}
+          // onScrollBeginDrag={() => {
+          //   if (showCommentsModal) {
+          //     console.log('🚫 VideosFeed: Scroll blocked - comments modal is open');
+          //   }
+          // }}
+        />
+      </SafeAreaView>
     </ThemedView>
-    //   </SafeAreaView>
     // </SafeAreaProvider>
   );
 };
