@@ -230,7 +230,7 @@ const VideosFeed: React.FC = () => {
   );
 
   // Show loading while checking authentication or fetching videos
-  if (loading && videos.length === 0) {
+  if (loading && isFetchingMore) {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>

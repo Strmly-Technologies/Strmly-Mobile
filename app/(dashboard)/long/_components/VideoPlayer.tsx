@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useVideoPlayer, VideoView } from "expo-video";
 import {
@@ -25,6 +26,8 @@ import CreatorPassBuyMessage from "./CreatorPassBuyMessage";
 import VideoBuyMessage from "./VideoBuyMessage";
 import { useIsFocused } from "@react-navigation/native";
 import { Text } from "react-native";
+import { useAuthStore } from "@/store/useAuthStore";
+import { set } from "lodash";
 
 const { height: screenHeight } = Dimensions.get("window");
 
@@ -69,7 +72,13 @@ const VideoPlayer = ({
     clearPassData,
   } = useGiftingStore();
 
+  const [haveCreator, setHaveCreator] = useState(false);
+  const [haveAccess, setHaveAccess] = useState<string | null>(null);
+
+  const [showThumbnail, setShowThumbnail] = useState(true);
+
   const { _updateStatus } = usePlayerStore.getState();
+  const { user } = useAuthStore();
   const isMutedFromStore = usePlayerStore((state) => state.isMuted);
 
   const [isReady, setIsReady] = useState(false);
@@ -109,6 +118,26 @@ const VideoPlayer = ({
   useEffect(() => {
     if (!player || !videoData?.videoUrl) return;
 
+    // if (videoData.created_by._id !== user?.id) {
+    //   console.log("Video access:", haveAccess, haveCreator);
+    //   if (
+    //     (!haveCreator &&
+    //       (videoData.amount != 0 ||
+    //         (videoData.series && videoData.series.type !== "free"))) ||
+    //     !haveAccess
+    //   ) {
+    //     if (!haveAccess) {
+    //       Alert.alert(
+    //         "Access Denied",
+    //         "You do not have permission to view this video."
+    //       );
+    //       setShowThumbnail(true);
+    //       console.log("thumbnail ", videoData.thumbnailUrl);
+    //       return;
+    //     }
+    //   }
+    // }
+
     const handleStatusChange = ({ status, error }: any) => {
       if (!mountedRef.current) return;
 
@@ -132,14 +161,19 @@ const VideoPlayer = ({
         statusListenerRef.current = null;
       }
     };
-  }, [player, videoData?.videoUrl]);
+  }, [player, videoData?.videoUrl, haveCreator, haveAccess]);
 
   // Handle video playback based on focus and active state
   useEffect(() => {
     if (!player || !videoData?.videoUrl) return;
 
     const shouldPlay =
-      isReady && isActive && isFocused && !isGifted && !playerError;
+      isReady &&
+      isActive &&
+      isFocused &&
+      !isGifted &&
+      !playerError &&
+      (haveAccess || haveCreator);
 
     try {
       if (shouldPlay) {
@@ -320,29 +354,47 @@ const VideoPlayer = ({
     );
   }
 
+  useEffect(() => {
+    if(!haveCreator){
+      setShowThumbnail(true);
+    }
+    if(haveAccess){
+      setShowThumbnail(false);
+    }
+  }, [haveAccess, haveCreator]);
+
   return (
     <View style={dynamicStyles.container}>
-      {!isReady && !isBuffering && videoData.thumbnailUrl && (
-        <View className="relative">
-          <Image
-            source={{ uri: videoData.thumbnailUrl }}
-            style={dynamicStyles.thumbnail}
-          />
-          <ActivityIndicator
+      {(!isReady || showThumbnail) &&
+        !isBuffering &&
+        videoData.thumbnailUrl && (
+          <View className="relative">
+            <Image
+              source={{ uri: videoData.thumbnailUrl }}
+              style={dynamicStyles.thumbnail}
+            />
+            {/* <ActivityIndicator
             size="large"
             color="white"
             className="absolute w-full top-96"
-          />
-        </View>
-      )}
+          /> */}
+          </View>
+        )}
 
-      {player && (
+      {player && (haveCreator || haveAccess || videoData.amount == 0) ? (
         <VideoView
           player={player}
           nativeControls={false}
           style={dynamicStyles.video}
           contentFit="cover"
         />
+      ) : (
+        <View className="relative">
+          <Image
+            source={{ uri: videoData.thumbnailUrl }}
+            style={dynamicStyles.thumbnail}
+          />
+        </View>
       )}
 
       {isBuffering && (
@@ -354,6 +406,10 @@ const VideoPlayer = ({
       )}
 
       <VideoControls
+        haveCreatorPass={haveCreator}
+        haveAccessPass={haveAccess}
+        haveCreator={setHaveCreator}
+        haveAccess={setHaveAccess}
         player={player}
         videoData={videoData}
         isGlobalPlayer={isGlobalPlayer}

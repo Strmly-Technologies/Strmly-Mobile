@@ -9,6 +9,10 @@ import { VideoPlayer } from "expo-video";
 import { useFocusEffect } from "expo-router";
 
 type Props = {
+  haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
+  haveAccess: React.Dispatch<React.SetStateAction<string | null>>;
+  haveCreatorPass: boolean;
+  haveAccessPass: string | null;
   player: VideoPlayer;
   videoData: VideoItemType;
   isGlobalPlayer: boolean;
@@ -23,6 +27,10 @@ type Props = {
 };
 
 const VideoControls = ({
+  haveCreator,
+  haveAccess,
+  haveCreatorPass,
+  haveAccessPass,
   player,
   videoData,
   isGlobalPlayer,
@@ -99,10 +107,12 @@ const VideoControls = ({
 
   return (
     <>
-      <Pressable
-        style={styles.fullScreenPressable}
-        onPress={handleTogglePlayPause}
-      />
+      {(haveCreatorPass || haveAccessPass === 'video' || haveAccessPass === 'series') && (
+          <Pressable
+            style={styles.fullScreenPressable}
+            onPress={handleTogglePlayPause}
+          />
+        )}
       <View style={styles.iconContainer} pointerEvents="none">
         {showPlayPauseIcon &&
           (!playing ? (
@@ -137,6 +147,8 @@ const VideoControls = ({
       </View>
       <View style={isGlobalPlayer ? styles.detailsGlobal : styles.details}>
         <VideoDetails
+          haveCreator={haveCreator}
+          haveAccess={haveAccess}
           videoId={videoData._id}
           type={videoData.type}
           videoAmount={videoData.amount}

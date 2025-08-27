@@ -23,6 +23,9 @@ import { useGiftingStore } from "@/store/useGiftingStore";
 import { getProfilePhotoUrl } from "@/utils/profileUtils";
 
 type VideoDetailsProps = {
+  haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
+  haveAccess: React.Dispatch<React.SetStateAction<string | null>>;
+
   videoId: string;
   name: string;
   type: string;
@@ -74,6 +77,8 @@ type VideoDetailsProps = {
 };
 
 const VideoDetails = ({
+  haveCreator,
+  haveAccess,
   videoId,
   type,
   is_monetized,
@@ -141,6 +146,9 @@ const VideoDetails = ({
             data.data?.accessData && data.data?.accessData.content_type
           );
           setHasAccessPass(
+            data.data?.accessData ? data.data.accessData.content_type : null
+          );
+          haveAccess(
             data.data?.accessData ? data.data.accessData.content_type : null
           );
         } catch (error) {
@@ -286,6 +294,7 @@ const VideoDetails = ({
           }
 
           setHasCreatorPass(data.hasCreatorPass);
+          haveCreator(data.hasCreatorPass);
         } catch (error) {
           console.log(error);
           Alert.alert(
@@ -428,8 +437,8 @@ const VideoDetails = ({
         {/* Paid Dropdown */}
         {showPriceDropdown && (
           <View className="absolute bottom-14 -right-2 rounded-xl p-2 w-80">
-            {series != null &&
-            series.type != "Free" &&
+            {(series != null &&
+            series.type != "Free") || (videoAmount != 0) &&
             !hasCreatorPass &&
             creatorPass?.creator_profile.creator_pass_price !== 0 ? (
               <TouchableOpacity
@@ -605,7 +614,11 @@ const VideoDetails = ({
                             )
                           ) : hasAccessPass || hasCreatorPass ? (
                             <Text className="text-[16px] text-green-600">
-                              Active
+                              Active{" "}
+                              <ArrowUpRightFromSquare
+                                color={"green"}
+                                size={8}
+                              />
                             </Text>
                           ) : (
                             `₹${videoAmount}`

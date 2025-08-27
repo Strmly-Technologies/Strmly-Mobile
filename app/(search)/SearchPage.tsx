@@ -451,8 +451,8 @@ const SearchScreen: React.FC = () => {
   }
 
   return (
-    <View style={{ ...styles.container, height: page_height }}>
-      <SafeAreaView style={{height: page_height}}>
+    <SafeAreaView style={{ height: page_height, backgroundColor: "black" }}>
+      <View style={{ ...styles.container, height: page_height }}>
         <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         <TextInput
@@ -467,31 +467,33 @@ const SearchScreen: React.FC = () => {
 
         {/* Show tabs only when searching */}
         {isSearchActive && (
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.selectionTabContainer}
-                    contentContainerStyle={styles.selectionTab}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.selectionTabContainer}
+            contentContainerStyle={styles.selectionTab}
+          >
+            {tabs.map((label, index) => (
+              <TouchableOpacity
+                style={[
+                  styles.selectionButton,
+                  selectedTab === index ? styles.selectedButton : {},
+                ]}
+                key={index}
+                onPress={() => setSelectedTab(index)}
+              >
+                <ThemedText
+                  style={[
+                    styles.tab,
+                    selectedTab === index ? styles.selectedText : {},
+                  ]}
                 >
-                    {tabs.map((label, index) => (
-                        <TouchableOpacity
-                            style={[
-                                styles.selectionButton,
-                                selectedTab === index ? styles.selectedButton : {}
-                            ]}
-                            key={index}
-                            onPress={() => setSelectedTab(index)}
-                        >
-                            <ThemedText style={[
-                                styles.tab,
-                                selectedTab === index ? styles.selectedText : {}
-                            ]}>
-                                {label}
-                            </ThemedText>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-            )}
+                  {label}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
 
         {/* Loading indicator */}
         {(searchLoading || trendingLoading) && (
@@ -512,50 +514,70 @@ const SearchScreen: React.FC = () => {
 
         {/* Content */}
         {!(searchLoading || trendingLoading) && (
-                <FlatList
-                    data={isSearchActive ? getCurrentTabData() : trendingVideos}
-                    numColumns={isSearchActive && selectedTab !== 0 ? 1 : 3} // Show videos in grid (3 columns), others in list (1 column)
-                    key={isSearchActive ? `search-${selectedTab}` : 'default'} // Force re-render when switching modes or tabs
-                    keyExtractor={(item, index) =>
-                        isSearchActive ? `search-${item.id || item._id || index}` : `default-${item._id || index}`
-                    }
-                    renderItem={isSearchActive ? renderSearchResultItem : renderTrendingItem}
-                    contentContainerStyle={[
-                        isSearchActive && selectedTab !== 0 ? styles.searchResultsContainer : styles.grid,
-                        { paddingBottom: 100 }
-                    ]}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={
-                        isSearchActive ? (
-                            <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>
-                                    No {tabs[selectedTab].toLowerCase()} found for "{searchQuery}"
-                                </Text>
-                                <Text style={styles.emptySubtext}>
-                                    {selectedTab === 0 && "Try searching for video names or descriptions"}
-                                    {selectedTab === 1 && "Try searching for usernames or emails"}
-                                    {selectedTab === 2 && "Try searching for series titles, genres, or languages"}
-                                </Text>
-                                <View style={styles.suggestionsContainer}>
-                                    <Text style={styles.suggestionsTitle}>Try searching for:</Text>
-                                    {selectedTab === 0 && (
-                                        <Text style={styles.suggestionText}>• Video names or descriptions</Text>
-                                    )}
-                                    {selectedTab === 1 && (
-                                        <Text style={styles.suggestionText}>• @username or email addresses</Text>
-                                    )}
-                                    {selectedTab === 2 && (
-                                        <Text style={styles.suggestionText}>• "Action", "Comedy", "Drama"</Text>
-                                    )}
-                                    {selectedTab === 2 && (
-                                        <Text style={styles.suggestionText}>• "English", "Hindi", "Tamil"</Text>
-                                    )}
-                                </View>
-                            </View>
-                        ) : null
-                    }
-                />
-            )}
+          <FlatList
+            data={isSearchActive ? getCurrentTabData() : trendingVideos}
+            numColumns={isSearchActive && selectedTab !== 0 ? 1 : 3} // Show videos in grid (3 columns), others in list (1 column)
+            key={isSearchActive ? `search-${selectedTab}` : "default"} // Force re-render when switching modes or tabs
+            keyExtractor={(item, index) =>
+              isSearchActive
+                ? `search-${item.id || item._id || index}`
+                : `default-${item._id || index}`
+            }
+            renderItem={
+              isSearchActive ? renderSearchResultItem : renderTrendingItem
+            }
+            contentContainerStyle={[
+              isSearchActive && selectedTab !== 0
+                ? styles.searchResultsContainer
+                : styles.grid,
+              { paddingBottom: 100 },
+            ]}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              isSearchActive ? (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>
+                    No {tabs[selectedTab].toLowerCase()} found for "
+                    {searchQuery}"
+                  </Text>
+                  <Text style={styles.emptySubtext}>
+                    {selectedTab === 0 &&
+                      "Try searching for video names or descriptions"}
+                    {selectedTab === 1 &&
+                      "Try searching for usernames or emails"}
+                    {selectedTab === 2 &&
+                      "Try searching for series titles, genres, or languages"}
+                  </Text>
+                  <View style={styles.suggestionsContainer}>
+                    <Text style={styles.suggestionsTitle}>
+                      Try searching for:
+                    </Text>
+                    {selectedTab === 0 && (
+                      <Text style={styles.suggestionText}>
+                        • Video names or descriptions
+                      </Text>
+                    )}
+                    {selectedTab === 1 && (
+                      <Text style={styles.suggestionText}>
+                        • @username or email addresses
+                      </Text>
+                    )}
+                    {selectedTab === 2 && (
+                      <Text style={styles.suggestionText}>
+                        • "Action", "Comedy", "Drama"
+                      </Text>
+                    )}
+                    {selectedTab === 2 && (
+                      <Text style={styles.suggestionText}>
+                        • "English", "Hindi", "Tamil"
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              ) : null
+            }
+          />
+        )}
 
         {/* Integrated Video Player */}
         {isVideoPlayerActive && currentVideoData && (
@@ -590,8 +612,8 @@ const SearchScreen: React.FC = () => {
             />
           </View>
         )}
-      </SafeAreaView>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 

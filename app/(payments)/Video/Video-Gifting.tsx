@@ -497,7 +497,7 @@ const VideoContentGifting = ({
   }, [token]);
 
   return (
-    <SafeAreaView style={{ height: height }} edges={['bottom']}>
+    <SafeAreaView style={{ height: height, backgroundColor: "black" }}>
       <ThemedView style={{ height }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}

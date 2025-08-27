@@ -23,7 +23,7 @@ const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 const VideoBuy = () => {
   const route = useRoute();
     const { id } = route.params as { id: string };
-  // const id = "68978209f59701af962d1fa5";
+  // const id = "68af09b07e3b646508d07331";
   const [userData, setUserData] = useState<any>(null);
   const [walletInfo, setWalletInfo] = useState<{ balance: number }>();
   const [hasVideoAccess, setHasVideoAccess] = useState<boolean>(false);

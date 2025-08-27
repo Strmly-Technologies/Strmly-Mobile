@@ -66,7 +66,7 @@ const WalletPage = () => {
   }, [error]);
 
   return (
-    <SafeAreaView style={{ height: height }}>
+    <SafeAreaView style={{ height: height, backgroundColor: "black" }}>
       <ThemedView
         style={{
           height: height,
