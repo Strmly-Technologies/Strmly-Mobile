@@ -24,7 +24,7 @@ import { getProfilePhotoUrl } from "@/utils/profileUtils";
 
 type VideoDetailsProps = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
-  haveAccess: React.Dispatch<React.SetStateAction<string | null>>;
+  haveAccess: React.Dispatch<React.SetStateAction<boolean>>;
 
   videoId: string;
   name: string;
@@ -148,9 +148,9 @@ const VideoDetails = ({
           setHasAccessPass(
             data.data?.accessData ? data.data.accessData.content_type : null
           );
-          haveAccess(
-            data.data?.accessData ? data.data.accessData.content_type : null
-          );
+          if(data.data?.accessData && data.data.accessData.content_type){
+            haveAccess(true);
+          }
         } catch (error) {
           console.log(error);
           Alert.alert(
@@ -384,8 +384,7 @@ const VideoDetails = ({
           </TouchableOpacity> */}
         </View>
 
-        {(type !== "Free" ||
-          creatorPass?.creator_profile.creator_pass_price != 0 ||
+        {(type !== "Free" || videoAmount != 0 ||
           (series != null &&
             (series?.type != "Free" || series?.price != 0))) && (
           <View>

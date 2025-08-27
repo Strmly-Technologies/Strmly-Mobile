@@ -10,9 +10,9 @@ import { useFocusEffect } from "expo-router";
 
 type Props = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
-  haveAccess: React.Dispatch<React.SetStateAction<string | null>>;
+  haveAccess: React.Dispatch<React.SetStateAction<boolean>>;
   haveCreatorPass: boolean;
-  haveAccessPass: string | null;
+  haveAccessPass: boolean;
   player: VideoPlayer;
   videoData: VideoItemType;
   isGlobalPlayer: boolean;
@@ -107,7 +107,7 @@ const VideoControls = ({
 
   return (
     <>
-      {(haveCreatorPass || haveAccessPass === 'video' || haveAccessPass === 'series') && (
+      {(haveCreatorPass || haveAccessPass || videoData.amount === 0) && (
           <Pressable
             style={styles.fullScreenPressable}
             onPress={handleTogglePlayPause}

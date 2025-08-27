@@ -27,7 +27,6 @@ import VideoBuyMessage from "./VideoBuyMessage";
 import { useIsFocused } from "@react-navigation/native";
 import { Text } from "react-native";
 import { useAuthStore } from "@/store/useAuthStore";
-import { set } from "lodash";
 
 const { height: screenHeight } = Dimensions.get("window");
 
@@ -73,7 +72,7 @@ const VideoPlayer = ({
   } = useGiftingStore();
 
   const [haveCreator, setHaveCreator] = useState(false);
-  const [haveAccess, setHaveAccess] = useState<string | null>(null);
+  const [haveAccess, setHaveAccess] = useState(false);
 
   const [showThumbnail, setShowThumbnail] = useState(true);
 
@@ -118,25 +117,24 @@ const VideoPlayer = ({
   useEffect(() => {
     if (!player || !videoData?.videoUrl) return;
 
-    // if (videoData.created_by._id !== user?.id) {
-    //   console.log("Video access:", haveAccess, haveCreator);
-    //   if (
-    //     (!haveCreator &&
-    //       (videoData.amount != 0 ||
-    //         (videoData.series && videoData.series.type !== "free"))) ||
-    //     !haveAccess
-    //   ) {
-    //     if (!haveAccess) {
-    //       Alert.alert(
-    //         "Access Denied",
-    //         "You do not have permission to view this video."
-    //       );
-    //       setShowThumbnail(true);
-    //       console.log("thumbnail ", videoData.thumbnailUrl);
-    //       return;
-    //     }
-    //   }
-    // }
+    if (videoData.created_by._id !== user?.id) {
+      if (
+        (!haveCreator &&
+          (videoData.amount != 0 ||
+            (videoData.series && videoData.series.type !== "free"))) ||
+        !haveAccess
+      ) {
+        if (!haveCreator) {
+          Alert.alert(
+            "Access Denied",
+            "You do not have permission to view this video."
+          );
+          setShowThumbnail(true);
+          console.log("thumbnail ", videoData.thumbnailUrl);
+          return;
+        }
+      }
+    }
 
     const handleStatusChange = ({ status, error }: any) => {
       if (!mountedRef.current) return;
@@ -247,7 +245,7 @@ const VideoPlayer = ({
 
   // Handle player store updates
   useEffect(() => {
-    if (!videoData?.videoUrl || !player) return;
+    if (!videoData?.videoUrl || !player || !haveAccess || !haveCreator) return;
 
     const handleStatus = (payload: any) => {
       if (isActive && mountedRef.current) {
@@ -354,18 +352,9 @@ const VideoPlayer = ({
     );
   }
 
-  useEffect(() => {
-    if(!haveCreator){
-      setShowThumbnail(true);
-    }
-    if(haveAccess){
-      setShowThumbnail(false);
-    }
-  }, [haveAccess, haveCreator]);
-
   return (
     <View style={dynamicStyles.container}>
-      {(!isReady || showThumbnail) &&
+      {(!isReady || !showThumbnail) &&
         !isBuffering &&
         videoData.thumbnailUrl && (
           <View className="relative">
@@ -381,7 +370,7 @@ const VideoPlayer = ({
           </View>
         )}
 
-      {player && (haveCreator || haveAccess || videoData.amount == 0) ? (
+      {player && (haveCreator || haveAccess) ? (
         <VideoView
           player={player}
           nativeControls={false}
