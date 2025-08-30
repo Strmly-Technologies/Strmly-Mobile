@@ -7,10 +7,7 @@ import VideoDetails from "./VideoDetails";
 import { VideoItemType } from "@/types/VideosType";
 import { VideoPlayer } from "expo-video";
 import { useFocusEffect } from "expo-router";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVideosStore } from "@/store/useVideosStore";
 
 type Props = {
@@ -25,6 +22,7 @@ type Props = {
   isGlobalPlayer: boolean;
   setShowCommentsModal?: (visible: boolean) => void;
   onEpisodeChange?: (episodeData: any) => void;
+
   onStatsUpdate?: (stats: {
     likes?: number;
     gifts?: number;
@@ -32,7 +30,7 @@ type Props = {
     comments?: number;
   }) => void;
 
-  onToggleFullScreen: ()=> void;
+  onToggleFullScreen: () => void;
 };
 
 const VideoControls = ({
@@ -54,10 +52,10 @@ const VideoControls = ({
   const [buffering, setBuffering] = useState(false);
   const [wantToBuyVideo, setWantToBuyVideo] = useState(false);
   const insets = useSafeAreaInsets();
-  const {setVideosInZustand} = useVideosStore();
+  const { setVideosInZustand } = useVideosStore();
 
-  useEffect(()=> {
-    if(wantToBuyVideo){
+  useEffect(() => {
+    if (wantToBuyVideo) {
       setVideosInZustand([videoData]);
     }
   }, [wantToBuyVideo]);
@@ -145,7 +143,12 @@ const VideoControls = ({
           <ActivityIndicator size="large" color="white" />
         )}
       </View>
-      <View style={[isGlobalPlayer ? styles.interactGlobal : styles.interact, { paddingBottom: insets.bottom + 20 }]}>
+      <View
+        style={[
+          isGlobalPlayer ? styles.interactGlobal : styles.interact,
+          { paddingBottom: insets.bottom + 20 },
+        ]}
+      >
         <InteractOptions
           videoId={videoData._id}
           name={videoData.name}
@@ -157,9 +160,11 @@ const VideoControls = ({
           onCommentPress={
             setShowCommentsModal ? () => setShowCommentsModal(true) : undefined
           }
-          // onLikeUpdate={(newLikes, isLiked) =>
-          //   onStatsUpdate?.({ likes: newLikes })
-          // }
+          onCommentUpdate={(newCount) => {
+            if (onStatsUpdate) {
+              onStatsUpdate({ comments: newCount });
+            }
+          }}
           // onShareUpdate={(newShares, isShared) =>
           //   onStatsUpdate?.({ shares: newShares })
           // }

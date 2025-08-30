@@ -97,6 +97,14 @@ const VideoPlayer = ({
   const VIDEO_HEIGHT = containerHeight || screenHeight;
   const isFocused = useIsFocused();
 
+  // Comments state
+  const [localStats, setLocalStats] = useState({
+    likes: videoData.likes || 0,
+    gifts: videoData.gifts || 0,
+    shares: videoData.shares || 0,
+    comments: videoData.comments?.length || 0,
+  });
+
   // Full screen:
   const [showFullScreen, setShowFullScreen] = useState(false);
 
@@ -120,6 +128,21 @@ const VideoPlayer = ({
       mountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    setLocalStats({
+      likes: videoData.likes || 0,
+      gifts: videoData.gifts || 0,
+      shares: videoData.shares || 0,
+      comments: videoData.comments?.length || 0,
+    });
+  }, [
+    videoData._id,
+    videoData.likes,
+    videoData.gifts,
+    videoData.shares,
+    videoData.comments?.length,
+  ]);
 
   // Handle player status changes
   useEffect(() => {
@@ -322,6 +345,24 @@ const VideoPlayer = ({
     videoData.amount,
   ]);
 
+  // FIX: Handle local stats updates
+  const handleStatsUpdate = (stats: {
+    likes?: number;
+    gifts?: number;
+    shares?: number;
+    comments?: number;
+  }) => {
+    setLocalStats((prev) => ({
+      ...prev,
+      ...stats,
+    }));
+
+    // Also call the parent callback
+    if (onStatsUpdate) {
+      onStatsUpdate(stats);
+    }
+  };
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -473,12 +514,19 @@ You do not have permission to view this video.`}
         haveCreator={setHaveCreator}
         haveAccess={setHaveAccess}
         player={player}
-        videoData={videoData}
+        videoData={{
+          ...videoData,
+          // FIX: Pass local stats instead of original videoData stats
+          likes: localStats.likes,
+          gifts: localStats.gifts,
+          shares: localStats.shares,
+          comments: { length: localStats.comments }, // Maintain the structure expected by VideoControls
+        }}
         isGlobalPlayer={isGlobalPlayer}
         setShowCommentsModal={setShowCommentsModal}
         onEpisodeChange={onEpisodeChange}
         onToggleFullScreen={onToggleFullScreen}
-        onStatsUpdate={onStatsUpdate}
+        onStatsUpdate={handleStatsUpdate}
       />
 
       {/* <View className="absolute left-0 right-0 z-10 px-2" style={!isGlobalPlayer ? { bottom: 42.5 } : { bottom: 0 }}>
@@ -536,7 +584,7 @@ You do not have permission to view this video.`}
         />
       )}
 
-      {/* {showCommentsModal && setShowCommentsModal && (
+      {showCommentsModal && setShowCommentsModal && (
         <CommentsSection
           onClose={() => setShowCommentsModal(false)}
           videoId={videoData._id}
@@ -551,13 +599,21 @@ You do not have permission to view this video.`}
             console.log("Open tip modal for comment:", commentId);
           }}
           onCommentAdded={() => {
+            // FIX: Increment local comment count immediately
+            const newCommentCount = localStats.comments + 1;
+
+            setLocalStats((prev) => ({
+              ...prev,
+              comments: newCommentCount,
+            }));
+
+            // Update the parent's stats
             if (onStatsUpdate) {
-              const newCommentCount = (videoData.comments?.length || 0) + 1;
               onStatsUpdate({ comments: newCommentCount });
             }
           }}
         />
-      )} */}
+      )}
     </View>
   );
 };

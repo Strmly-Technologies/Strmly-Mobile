@@ -43,7 +43,7 @@ const CommunityPassBuyMessage = ({
           clearCommunityPassData();
         }}
       >
-        <View className="bg-black items-center justify-center rounded-2xl px-2 py-6">
+        <View className="bg-black border border-gray-700 items-center justify-center rounded-2xl px-2 py-6">
           <View className="rounded-full bg-gray-500">
             <Image
               source={
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
-    opacity: 0.9,
+    opacity: 0.8,
   },
   modalContainer: {
     width: "100%",

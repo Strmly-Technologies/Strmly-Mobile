@@ -402,13 +402,13 @@ export default function PublicCommunityPage() {
   );
 
   return (
-    <ThemedView style={{ height, flex: 1 }}>
+    <ThemedView style={{ flex: 1 }}>
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="white" />
         </View>
       ) : (
-        <SafeAreaView>
+        <SafeAreaView className="flex-1">
           <FlatList
             ListHeaderComponent={
               <View className="max-w-4xl -mt-24 relative mx-6 pt-24">

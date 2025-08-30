@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -48,9 +48,11 @@ const CommentsSection = ({
   );
   const [repliesData, setRepliesData] = useState<{ [key: string]: any[] }>({});
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [showKeyboardInput, setShowKeyboardInput] = useState(false);
+  const inputRef = useRef<TextInput>(null);
   const insets = useSafeAreaInsets();
   const { commentMonetizationEnabled, loading: monetizationLoading } =
-    useMonetization(false); // Disable polling to reduce API calls
+    useMonetization(false);
 
   const {
     comments,
@@ -69,7 +71,7 @@ const CommentsSection = ({
     if (videoId) fetchComments();
   }, [videoId, fetchComments]);
 
-    // Debug logging for monetization (reduced)
+  // Debug logging for monetization (reduced)
   useEffect(() => {
     if (comments.length > 0) {
       console.log("💰 Comment Monetization Status:", {
@@ -92,6 +94,7 @@ const CommentsSection = ({
       Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
       () => {
         setKeyboardHeight(0);
+        setShowKeyboardInput(false);
       }
     );
 
@@ -100,6 +103,24 @@ const CommentsSection = ({
       keyboardWillHideListener.remove();
     };
   }, []);
+
+  const handleOpenKeyboardInput = () => {
+    setShowKeyboardInput(true);
+    // Small delay to ensure state updates first
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 50);
+  };
+
+  const handleCloseKeyboardInput = () => {
+    if (inputRef.current) {
+      inputRef.current.blur();
+    }
+    setShowKeyboardInput(false);
+    Keyboard.dismiss();
+  };
 
   const handleSubmitComment = async () => {
     if (!comment.trim() || isSubmitting) return;
@@ -129,6 +150,8 @@ const CommentsSection = ({
           onCommentAdded();
         }
       }
+      // Close keyboard input after successful submission
+      handleCloseKeyboardInput();
     } catch (error: any) {
       console.error("Error submitting comment:", error);
       const errorMessage = error.message || "Failed to post comment";
@@ -141,13 +164,14 @@ const CommentsSection = ({
   const handleReplyToComment = (commentId: string, userName: string) => {
     setReplyingTo(commentId);
     setReplyingToUser(userName);
-    setComment(`@${userName} `);
+    handleOpenKeyboardInput();
   };
 
   const handleCancelReply = () => {
     setReplyingTo(null);
     setReplyingToUser("");
     setComment("");
+    handleCloseKeyboardInput();
   };
 
   const handleToggleReplies = async (commentId: string) => {
@@ -519,22 +543,26 @@ const CommentsSection = ({
           top: 0,
           left: 0,
           right: 0,
-          bottom:
-            SHEET_MAX_HEIGHT +
-            (keyboardHeight > 0 ? keyboardHeight : BOTTOM_NAV_HEIGHT),
+          bottom: SHEET_MAX_HEIGHT + BOTTOM_NAV_HEIGHT,
         }}
-        onPress={onClose}
+        onPress={() => {
+          if (showKeyboardInput) {
+            handleCloseKeyboardInput();
+          } else {
+            onClose();
+          }
+        }}
         activeOpacity={1}
       />
 
-      {/* Bottom Sheet */}
+      {/* Bottom Sheet - Fixed position */}
       <View
         style={{
           backgroundColor: "#0E0E0E",
           borderTopLeftRadius: 36,
           borderTopRightRadius: 36,
           height: SHEET_MAX_HEIGHT,
-          marginBottom: keyboardHeight > 0 ? keyboardHeight : BOTTOM_NAV_HEIGHT,
+          marginBottom: BOTTOM_NAV_HEIGHT,
         }}
       >
         {/* Drag handle */}
@@ -558,10 +586,13 @@ const CommentsSection = ({
           </Text>
         </View>
 
-        {/* Comments List - Using ScrollView for reliable scrolling */}
+        {/* Comments List */}
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={{ 
+            flexGrow: 1,
+            paddingBottom: showKeyboardInput ? 0 : 80
+          }}
           showsVerticalScrollIndicator={false}
           bounces={true}
           scrollEnabled={true}
@@ -604,17 +635,110 @@ const CommentsSection = ({
           )}
         </ScrollView>
 
-        {/* Input Bar */}
+        {/* Fixed Input Bar - Only visible when keyboard input is not shown */}
+        {!showKeyboardInput && (
+          <View
+            style={{
+              paddingHorizontal: 20,
+              paddingBottom: Math.max(insets.bottom, 16),
+              paddingTop: 16,
+              backgroundColor: "#0E0E0E",
+            }}
+          >
+            {/* Reply indicator */}
+            {replyingTo && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 12,
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  backgroundColor: "rgba(158, 158, 158, 0.1)",
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={{ color: "#9E9E9E", fontSize: 14 }}>
+                  Replying to @{replyingToUser}
+                </Text>
+                <TouchableOpacity onPress={handleCancelReply}>
+                  <Text style={{ color: "#FF3B30", fontSize: 14 }}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#0E0E0E",
+                borderRadius: 28,
+                height: 52,
+                paddingHorizontal: 16,
+                borderWidth: 1,
+                borderColor: "#333333",
+              }}
+              onPress={comment.trim() ? handleSubmitComment : handleOpenKeyboardInput}
+            >
+              {/* Show actual comment text or placeholder */}
+              <Text
+                style={{
+                  flex: 1,
+                  color: comment.trim() ? "#FFFFFF" : "#9E9E9E",
+                  fontSize: 16,
+                }}
+                numberOfLines={1}
+              >
+                {comment.trim() || 
+                  (replyingTo ? `Reply to @${replyingToUser}...` : "Add comment...")
+                }
+              </Text>
+
+              {/* Send button */}
+              <TouchableOpacity
+                onPress={handleSubmitComment}
+                disabled={!comment.trim() || isSubmitting}
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginLeft: 12,
+                  minHeight: 44,
+                  minWidth: 44,
+                }}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator size="small" color="#F1C40F" />
+                ) : (
+                  <MaterialIcons
+                    name="send"
+                    size={20}
+                    color={comment.trim() ? "#F1C40F" : "#9E9E9E"}
+                  />
+                )}
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
+      {/* Keyboard Input Bar - Only visible when showKeyboardInput is true */}
+      {showKeyboardInput && (
         <View
           style={{
-            paddingHorizontal: 20,
-            paddingBottom:
-              keyboardHeight > 0 ? 16 : Math.max(insets.bottom, 16),
-            paddingTop: 16,
+            position: "absolute",
+            bottom: keyboardHeight,
+            left: 0,
+            right: 0,
             backgroundColor: "#0E0E0E",
+            borderTopWidth: 1,
+            borderTopColor: "#333333",
+            paddingHorizontal: 20,
+            paddingVertical: 70,
+            zIndex: 1001,
           }}
         >
-          {/* Reply indicator */}
+          {/* Reply indicator for keyboard input */}
           {replyingTo && (
             <View
               style={{
@@ -637,39 +761,45 @@ const CommentsSection = ({
             </View>
           )}
 
+          {/* Actual input field */}
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              backgroundColor: "#0E0E0E",
+              backgroundColor: "#1A1A1A",
               borderRadius: 28,
               height: 52,
               paddingHorizontal: 16,
               borderWidth: 1,
-              borderColor: "#333333",
+              borderColor: "#444444",
             }}
           >
-            {/* Text Input */}
             <TextInput
+              ref={inputRef}
+              value={comment}
+              onChangeText={setComment}
+              placeholder={
+                replyingTo ? `Reply to @${replyingToUser}...` : "Add comment..."
+              }
+              placeholderTextColor="#9E9E9E"
               style={{
                 flex: 1,
                 color: "#FFFFFF",
                 fontSize: 16,
                 paddingVertical: 0,
               }}
-              placeholder="Add comment........."
-              placeholderTextColor="#9E9E9E"
-              value={comment}
-              onChangeText={setComment}
               multiline={false}
               maxLength={500}
+              autoFocus={true}
+              blurOnSubmit={false}
+              onSubmitEditing={handleSubmitComment}
+              returnKeyType="send"
             />
 
-            {/* Send button - no outer circle */}
+            {/* Send button */}
             <TouchableOpacity
               onPress={handleSubmitComment}
               disabled={!comment.trim() || isSubmitting}
-              accessibilityLabel="Send comment"
               style={{
                 alignItems: "center",
                 justifyContent: "center",
@@ -679,18 +809,18 @@ const CommentsSection = ({
               }}
             >
               {isSubmitting ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <ActivityIndicator size="small" color="#F1C40F" />
               ) : (
                 <MaterialIcons
                   name="send"
                   size={20}
-                  color={comment.trim() ? "#FFFFFF" : "#9E9E9E"}
+                  color={comment.trim() ? "#F1C40F" : "#9E9E9E"}
                 />
               )}
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      )}
     </View>
   );
 };

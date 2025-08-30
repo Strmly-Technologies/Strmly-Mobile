@@ -28,6 +28,7 @@ type InteractOptionsProps = {
   onLikeUpdate?: (newLikeCount: number, isLiked: boolean) => void;
   onShareUpdate?: (newShareCount: number, isShared: boolean) => void;
   onGiftUpdate?: (newGiftCount: number) => void;
+  onCommentUpdate?: (newCommentCount: number) => void;
 };
 
 const InteractOptions = ({
@@ -39,11 +40,13 @@ const InteractOptions = ({
   shares,
   comments,
   creator,
+  onCommentUpdate,
 }: InteractOptionsProps) => {
   // Destructure onCommentPress from props
   const [like, setLike] = useState(0);
   const [reshares, setReshares] = useState(0);
   const [gift, setGifts] = useState(0);
+  const [commentCount, setCommentCount] = useState(comments || 0);
   const [isLikedVideo, setIsLikedVideo] = useState(false);
   const [isResharedVideo, setIsResharedVideo] = useState(false);
 
@@ -52,6 +55,14 @@ const InteractOptions = ({
   const { initiateGifting } = useGiftingStore();
 
   const BACKEND_API_URL = CONFIG.API_BASE_URL;
+
+  // FIX: Update local state when props change
+  useEffect(() => {
+    setLike(likes || 0);
+    setReshares(shares || 0);
+    setGifts(gifts || 0);
+    setCommentCount(comments || 0);
+  }, [likes, shares, gifts, comments]);
 
   const LikeVideo = async () => {
     if (!token || !videoId) {
@@ -261,6 +272,15 @@ const InteractOptions = ({
     router.push("/(payments)/Video/Video-Gifting");
   };
 
+  // FIX: Enhanced comment press handler
+  const handleCommentPress = useCallback(() => {
+    if (onCommentPress) {
+      onCommentPress();
+    } else {
+      console.log("Comments not available");
+    }
+  }, [onCommentPress]);
+
   return (
     <View className="px-1 py-5">
       <View className="gap-5 py-10">
@@ -276,21 +296,15 @@ const InteractOptions = ({
           <Text className="text-white text-sm">{like}</Text>
         </View>
 
-        {/* <View className="items-center gap-1">
-          <Pressable
-            onPress={
-              onCommentPress
-                ? onCommentPress
-                : () => console.log("Comments not available")
-            }
-          >
+        <View className="items-center gap-1">
+          <Pressable onPress={handleCommentPress}>
             <Image
               className="size-7"
               source={require("../../../../assets/images/comments.png")}
             />
           </Pressable>
-          <Text className="text-white text-sm">{comments}</Text>
-        </View> */}
+          <Text className="text-white text-sm">{commentCount}</Text>
+        </View>
 
         {/* <View className="items-center gap-1">
           <Pressable onPress={ReshareVideo}>
