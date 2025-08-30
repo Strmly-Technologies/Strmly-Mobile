@@ -271,58 +271,64 @@ const SearchScreen: React.FC = () => {
   };
 
   // Render account items like followers/following in profile
-  const renderAccountItem = ({ item }: { item: any }) => {
-    const userName = item.username || item.name || "user";
-    const profilePhoto = item.profile_photo || item.profile_picture;
-    const userId = item._id || item.id;
+ // Render account items like followers/following in profile
+const renderAccountItem = ({ item }: { item: any }) => {
+  const userName = item.username || item.name || "user";
+  const profilePhoto = item.profile_photo || item.profile_picture;
+  const userId = item._id || item.id;
+  
+  // Calculate followers count from the array if followers_count is not provided
+  const followersCount = item.followers_count ?? 
+    (item.followers ? item.followers.length : 0);
 
-    console.log("🖼️ Account image data:", {
-      username: userName,
-      profile_photo: item.profile_photo,
-      profile_picture: item.profile_picture,
-      finalUrl: getProfilePhotoUrl(profilePhoto, "user"),
-    });
+  console.log("🖼️ Account image data:", {
+    username: userName,
+    profile_photo: item.profile_photo,
+    profile_picture: item.profile_picture,
+    followers_count: followersCount,
+    finalUrl: getProfilePhotoUrl(profilePhoto, "user"),
+  });
 
-    return (
-      <TouchableOpacity
-        style={styles.accountRow}
-        onPress={() => {
-          if (userId) {
-            navigateToProfile(userId);
-          } else {
-            console.log("⚠️ No user ID found for account:", item.username);
-          }
-        }}
-      >
-        <View style={styles.accountRowContent}>
-          <Image
-            source={{ uri: getProfilePhotoUrl(profilePhoto, "user") }}
-            style={styles.accountAvatar}
-            onError={() => {
-              console.log(
-                "Failed to load account profile photo:",
-                item.username
-              );
-            }}
-          />
-          <View style={styles.accountInfo}>
-            <Text style={styles.accountName}>{item.username}</Text>
-            {item.bio && (
-              <Text style={styles.accountBio} numberOfLines={1}>
-                {item.bio}
-              </Text>
-            )}
-          </View>
+  return (
+    <TouchableOpacity
+      style={styles.accountRow}
+      onPress={() => {
+        if (userId) {
+          navigateToProfile(userId);
+        } else {
+          console.log("⚠️ No user ID found for account:", item.username);
+        }
+      }}
+    >
+      <View style={styles.accountRowContent}>
+        <Image
+          source={{ uri: getProfilePhotoUrl(profilePhoto, "user") }}
+          style={styles.accountAvatar}
+          onError={() => {
+            console.log(
+              "Failed to load account profile photo:",
+              item.username
+            );
+          }}
+        />
+        <View style={styles.accountInfo}>
+          <Text style={styles.accountName}>{item.username}</Text>
+          {item.bio && (
+            <Text style={styles.accountBio} numberOfLines={1}>
+              {item.bio}
+            </Text>
+          )}
         </View>
-        <View style={styles.accountStats}>
-          <Text style={styles.accountStatsNumber}>
-            {item.followers_count || 0}
-          </Text>
-          <Text style={styles.accountStatsLabel}>Followers</Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+      </View>
+      <View style={styles.accountStats}>
+        <Text style={styles.accountStatsNumber}>
+          {followersCount}
+        </Text>
+        <Text style={styles.accountStatsLabel}>Followers</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
   // Render community items like communities in profile
   const renderCommunityItem = ({ item }: { item: any }) => {

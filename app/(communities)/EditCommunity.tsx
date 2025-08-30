@@ -79,10 +79,10 @@ export default function EditCommunity() {
       setBio(result.bio || "");
       setImageUri(result.profilePhoto);
       // Set access type based on community data if available
-      setAccessType(result.access.type || "free");
-      if (result.access.type === "paid") {
-        setCreatorStrength(result.access.strength?.toString() || "");
-        setCommunityFee(result.access.amount?.toString() || "");
+      setAccessType(result.community_fee_type || "free");
+      if (result.community_fee_type === "paid") {
+        setCreatorStrength(result.creator_limit?.toString() || "");
+        setCommunityFee(result.community_fee_amount?.toString() || "");
       }
       console.log("✅ Community details fetched for editing:", result);
     } catch (error) {

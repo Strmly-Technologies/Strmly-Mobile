@@ -7,7 +7,7 @@ import {
   Pressable,
   View,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import ThemedView from "@/components/ThemedView";
 import { useAuthStore } from "@/store/useAuthStore";
 import { CONFIG } from "@/Constants/config";
@@ -27,7 +27,10 @@ export type GiftType = {
 };
 
 const { height: screenHeight } = Dimensions.get("window");
-const VIDEO_HEIGHT = screenHeight;
+const BOTTOM_NAV_HEIGHT = -25; // Height of your bottom navigation
+
+// Define the height for each video item (adjust as needed)
+const VIDEO_HEIGHT = screenHeight + BOTTOM_NAV_HEIGHT;
 
 const VideosFeed: React.FC = () => {
   const [videos, setVideos] = useState<VideoItemType[]>([]);
@@ -201,6 +204,7 @@ const VideosFeed: React.FC = () => {
         isActive={index === visibleIndex && isScreenFocused}
         showCommentsModal={showCommentsModal}
         setShowCommentsModal={setShowCommentsModal}
+        containerHeight={VIDEO_HEIGHT}
       />
     ),
     [visibleIndex, showCommentsModal, isScreenFocused]
@@ -235,21 +239,17 @@ const VideosFeed: React.FC = () => {
   // Show loading while checking authentication or fetching videos
   if (loading && isFetchingMore) {
     return (
-      <SafeAreaProvider>
-        <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
-          <ThemedView
-            style={{ height: VIDEO_HEIGHT }}
-            className="justify-center items-center"
-          >
-            <ActivityIndicator size="large" color="white" />
-            <Text className="text-white mt-4">
-              {!token || !isLoggedIn
-                ? "Checking authentication..."
-                : "Loading videos..."}
-            </Text>
-          </ThemedView>
-        </SafeAreaView>
-      </SafeAreaProvider>
+      <ThemedView
+        style={{ height: VIDEO_HEIGHT }}
+        className="justify-center items-center"
+      >
+        <ActivityIndicator size="large" color="white" />
+        <Text className="text-white mt-4">
+          {!token || !isLoggedIn
+            ? "Checking authentication..."
+            : "Loading videos..."}
+        </Text>
+      </ThemedView>
     );
   }
 
@@ -278,22 +278,18 @@ const VideosFeed: React.FC = () => {
 
   if (videos.length === 0) {
     return (
-      <SafeAreaProvider>
-        <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
-          <ThemedView
-            style={{ height: VIDEO_HEIGHT }}
-            className="justify-center items-center"
-          >
-            <Text className="text-lg text-white">No Videos Available</Text>
-            <Text className="text-lg text-white">
-              Want to Upload your own{" "}
-              <Link href={"/studio"} className="text-blue-500">
-                Upload
-              </Link>
-            </Text>
-          </ThemedView>
-        </SafeAreaView>
-      </SafeAreaProvider>
+      <ThemedView
+        style={{ height: VIDEO_HEIGHT }}
+        className="justify-center items-center"
+      >
+        <Text className="text-lg text-white">No Videos Available</Text>
+        <Text className="text-lg text-white">
+          Want to Upload your own{" "}
+          <Link href={"/studio"} className="text-blue-500">
+            Upload
+          </Link>
+        </Text>
+      </ThemedView>
     );
   }
 

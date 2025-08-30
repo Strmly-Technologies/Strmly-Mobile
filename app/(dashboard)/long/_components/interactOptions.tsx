@@ -8,23 +8,19 @@ import { router, useFocusEffect } from "expo-router";
 import { useGiftingStore } from "@/store/useGiftingStore";
 
 type InteractOptionsProps = {
-  onCommentPress?: () => void; // Callback function for comment button press - now optional
+  onCommentPress?: () => void;
   videoId: string;
   name: string;
   likes: number;
   gifts: number;
   shares: number;
   comments?: number;
-
   creator: {
     _id: string;
     username: string;
     profile_photo: string;
   };
-
-  // Callbacks to update parent component stats
-
-  // Callbacks to update parent component stats
+  // FIX: Add callback props for real-time updates
   onLikeUpdate?: (newLikeCount: number, isLiked: boolean) => void;
   onShareUpdate?: (newShareCount: number, isShared: boolean) => void;
   onGiftUpdate?: (newGiftCount: number) => void;
@@ -40,20 +36,21 @@ const InteractOptions = ({
   shares,
   comments,
   creator,
+  onLikeUpdate,
+  onShareUpdate, 
+  onGiftUpdate,
   onCommentUpdate,
 }: InteractOptionsProps) => {
-  // Destructure onCommentPress from props
-  const [like, setLike] = useState(0);
-  const [reshares, setReshares] = useState(0);
-  const [gift, setGifts] = useState(0);
+  // FIX: Initialize state with props values
+  const [like, setLike] = useState(likes || 0);
+  const [reshares, setReshares] = useState(shares || 0);
+  const [gift, setGifts] = useState(gifts || 0);
   const [commentCount, setCommentCount] = useState(comments || 0);
   const [isLikedVideo, setIsLikedVideo] = useState(false);
   const [isResharedVideo, setIsResharedVideo] = useState(false);
 
   const { token, user } = useAuthStore();
-
   const { initiateGifting } = useGiftingStore();
-
   const BACKEND_API_URL = CONFIG.API_BASE_URL;
 
   // FIX: Update local state when props change
@@ -69,15 +66,24 @@ const InteractOptions = ({
       return;
     }
 
+    // FIX: Optimistic update with proper state management
     const prevLiked = isLikedVideo;
     const prevLikeCount = like;
+    const newLikeCount = prevLiked ? prevLikeCount - 1 : prevLikeCount + 1;
+    const newLikedState = !prevLiked;
 
-    setLike(() => (prevLiked ? prevLikeCount - 1 : prevLikeCount + 1));
-    setIsLikedVideo(() => !prevLiked);
+    // Update local state immediately
+    setLike(newLikeCount);
+    setIsLikedVideo(newLikedState);
+
+    // FIX: Call parent update callback
+    if (onLikeUpdate) {
+      onLikeUpdate(newLikeCount, newLikedState);
+    }
 
     try {
       const response = await fetch(
-        `${BACKEND_API_URL}/interactions/${isLikedVideo ? "unlike" : "like"}`,
+        `${BACKEND_API_URL}/interactions/like`,
         {
           method: "POST",
           headers: {
@@ -87,27 +93,39 @@ const InteractOptions = ({
           body: JSON.stringify({ videoId: videoId }),
         }
       );
+      
       if (!response.ok) {
-        setLike(() => prevLikeCount);
-        setIsLikedVideo(() => prevLiked);
+        // Revert on error
+        setLike(prevLikeCount);
+        setIsLikedVideo(prevLiked);
+        if (onLikeUpdate) {
+          onLikeUpdate(prevLikeCount, prevLiked);
+        }
         throw new Error("Failed while like video");
       }
+      
       const data = await response.json();
-      // setLike(data.likes);
-      // setIsLikedVideo(data.isLiked);
-      console.log("Like video", data);
-
-      // Update parent component with new stats
-      // if (onLikeUpdate) {
-      //   onLikeUpdate(like, isLikedVideo);
-      // }
+      console.log("Like video response:", data);
+      
+      // FIX: Update with server response
+      setLike(data.likes);
+      setIsLikedVideo(data.isLiked);
+      
+      if (onLikeUpdate) {
+        onLikeUpdate(data.likes, data.isLiked);
+      }
     } catch (err) {
-      console.log(err);
-      setLike(() => prevLikeCount);
-      setIsLikedVideo(() => prevLiked);
+      console.log("Like error:", err);
+      // Revert optimistic updates on error
+      setLike(prevLikeCount);
+      setIsLikedVideo(prevLiked);
+      if (onLikeUpdate) {
+        onLikeUpdate(prevLikeCount, prevLiked);
+      }
     }
   };
 
+  // FIX: Check like status on component mount and video change
   useFocusEffect(
     useCallback(() => {
       const checkIfVideoLike = async () => {
@@ -116,7 +134,7 @@ const InteractOptions = ({
         }
 
         try {
-          console.log("checking like status for", token);
+          console.log("checking like status for", videoId);
           const response = await fetch(
             `${BACKEND_API_URL}/interactions/like/status`,
             {
@@ -133,21 +151,22 @@ const InteractOptions = ({
             throw new Error("Failed while checking video like status");
 
           const data = await response.json();
-          console.log("check like", data, creator.username, videoId, name);
+          console.log("check like response:", data);
+          
           setLike(data.likes);
           setIsLikedVideo(data.isLiked);
         } catch (err) {
-          console.log(err);
+          console.log("Error checking like status:", err);
         }
       };
 
       if (token && videoId) {
         checkIfVideoLike();
       }
-    }, [token, videoId, likes])
+    }, [token, videoId])
   );
 
-  // Check video gifting
+  // FIX: Check video gifting with proper error handling
   useFocusEffect(
     useCallback(() => {
       const checkVideoGifting = async () => {
@@ -167,17 +186,18 @@ const InteractOptions = ({
             }
           );
           if (!response.ok)
-            throw new Error("Failed while checking video like status");
+            throw new Error("Failed while checking video gifting status");
+            
           const data = await response.json();
-          console.log("check gifting", data);
+          console.log("check gifting response:", data);
+          
           setGifts(data.data);
-
-          // Update parent component with new gift count
-          // if (onGiftUpdate) {
-          //   onGiftUpdate(data.data);
-          // }
+          
+          if (onGiftUpdate) {
+            onGiftUpdate(data.data);
+          }
         } catch (err) {
-          console.log(err);
+          console.log("Error checking gift status:", err);
         }
       };
 
@@ -187,9 +207,7 @@ const InteractOptions = ({
     }, [token, videoId])
   );
 
-  // ------------- Reshare ------------
-  useEffect(() => setReshares(shares), [shares]);
-
+  // Check reshare status
   useEffect(() => {
     const checkIfReshare = async () => {
       if (!token || !videoId) {
@@ -210,32 +228,37 @@ const InteractOptions = ({
         );
         if (!response.ok)
           throw new Error("Failed while checking reshare status");
+          
         const data = await response.json();
-        console.log("reshared or not", data.isReshared);
+        console.log("reshare status:", data.isReshared);
         setIsResharedVideo(data.isReshared);
       } catch (err) {
-        console.log(err);
+        console.log("Error checking reshare status:", err);
       }
     };
 
     if (token && videoId) {
       checkIfReshare();
     }
-  }, [token, videoId, shares]);
+  }, [token, videoId]);
 
   const ReshareVideo = async () => {
     if (!token || !videoId) {
-      console.log("videoId", token);
       return;
     }
 
     const prevReshareCount = reshares;
     const prevIsReshared = isResharedVideo;
+    const newReshareCount = prevIsReshared ? prevReshareCount - 1 : prevReshareCount + 1;
+    const newReshareState = !prevIsReshared;
 
-    setReshares(() =>
-      prevIsReshared ? prevReshareCount - 1 : prevReshareCount + 1
-    );
-    setIsResharedVideo(() => !prevIsReshared);
+    // Optimistic update
+    setReshares(newReshareCount);
+    setIsResharedVideo(newReshareState);
+
+    if (onShareUpdate) {
+      onShareUpdate(newReshareCount, newReshareState);
+    }
 
     try {
       const response = await fetch(`${BACKEND_API_URL}/interactions/reshare`, {
@@ -246,24 +269,33 @@ const InteractOptions = ({
         },
         body: JSON.stringify({ videoId: videoId }),
       });
+      
       if (!response.ok) {
-        setReshares(() => prevReshareCount);
-        setIsResharedVideo(() => prevIsReshared);
+        // Revert on error
+        setReshares(prevReshareCount);
+        setIsResharedVideo(prevIsReshared);
+        if (onShareUpdate) {
+          onShareUpdate(prevReshareCount, prevIsReshared);
+        }
         throw new Error("Failed to reshare video");
       }
+      
       const data = await response.json();
-      // setIsResharedVideo(!isResharedVideo);
-      // setReshares(data.totalReshares);
-      console.log("Reshare video", data);
-
-      // Update parent component with new stats
-      // if (onShareUpdate) {
-      //   onShareUpdate(reshares, isResharedVideo);
-      // }
+      console.log("Reshare video response:", data);
+      
+      setReshares(data.totalReshares);
+      
+      if (onShareUpdate) {
+        onShareUpdate(data.totalReshares, newReshareState);
+      }
     } catch (err) {
-      setReshares(() => prevReshareCount);
-      setIsResharedVideo(() => prevIsReshared);
-      console.log(err);
+      console.log("Reshare error:", err);
+      // Revert on error
+      setReshares(prevReshareCount);
+      setIsResharedVideo(prevIsReshared);
+      if (onShareUpdate) {
+        onShareUpdate(prevReshareCount, prevIsReshared);
+      }
     }
   };
 
@@ -271,6 +303,15 @@ const InteractOptions = ({
     initiateGifting(creator, videoId);
     router.push("/(payments)/Video/Video-Gifting");
   };
+
+  // FIX: Add function to handle comment updates from CommentSection
+  const handleCommentAdded = useCallback(() => {
+    const newCount = commentCount + 1;
+    setCommentCount(newCount);
+    if (onCommentUpdate) {
+      onCommentUpdate(newCount);
+    }
+  }, [commentCount, onCommentUpdate]);
 
   // FIX: Enhanced comment press handler
   const handleCommentPress = useCallback(() => {
@@ -285,14 +326,13 @@ const InteractOptions = ({
     <View className="px-1 py-5">
       <View className="gap-5 py-10">
         <View className="items-center gap-1">
-          <Pressable onPress={() => LikeVideo()}>
+          <Pressable onPress={LikeVideo}>
             <FontAwesome
               name={isLikedVideo ? "heart" : "heart-o"}
               size={27}
               color={isLikedVideo ? "red" : "white"}
             />
           </Pressable>
-
           <Text className="text-white text-sm">{like}</Text>
         </View>
 
@@ -303,9 +343,11 @@ const InteractOptions = ({
               source={require("../../../../assets/images/comments.png")}
             />
           </Pressable>
+          {/* FIX: Use local comment count state */}
           <Text className="text-white text-sm">{commentCount}</Text>
         </View>
 
+        {/* Uncomment if you want reshare functionality */}
         {/* <View className="items-center gap-1">
           <Pressable onPress={ReshareVideo}>
             {isResharedVideo ? (
@@ -324,7 +366,7 @@ const InteractOptions = ({
         </View> */}
 
         <View className="items-center gap-1">
-          <Pressable onPress={() => openGifting()}>
+          <Pressable onPress={openGifting}>
             <Image
               className="size-7"
               source={require("../../../../assets/images/rupee.png")}

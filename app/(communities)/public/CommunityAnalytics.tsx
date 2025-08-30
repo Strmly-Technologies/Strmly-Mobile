@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { ChevronLeft, ChevronDown } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';
 import { CONFIG } from '@/Constants/config';
 
@@ -54,7 +54,11 @@ const CommunityAnalytics = () => {
     const [loading, setLoading] = useState(true);
 
     const router = useRouter();
+    const params = useLocalSearchParams();
     const { token } = useAuthStore();
+
+    // Get the community ID from route parameters
+    const communityId = params.communityId as string;
 
     const timeFilterOptions = [
         'Last 7 Days',
@@ -64,8 +68,13 @@ const CommunityAnalytics = () => {
     ];
 
     useEffect(() => {
-        fetchCommunityData();
-    }, [activeTab, timeFilter]);
+        if (communityId) {
+            fetchCommunityData();
+        } else {
+            console.error('❌ No community ID provided');
+            setLoading(false);
+        }
+    }, [activeTab, timeFilter, communityId]);
 
     const fetchTransactionHistory = async (communityId: string) => {
         // Transaction history will be implemented later
@@ -75,6 +84,8 @@ const CommunityAnalytics = () => {
 
     const fetchRecentActivity = async (communityId: string) => {
         try {
+            console.log(`🔍 Fetching recent activity for community: ${communityId}`);
+            
             // Fetch community data using the specific API endpoint
             const communityResponse = await fetch(
                 `${CONFIG.API_BASE_URL}/community/${communityId}`,
@@ -87,6 +98,11 @@ const CommunityAnalytics = () => {
 
             if (communityResponse.ok) {
                 const communityData = await communityResponse.json();
+                console.log(`✅ Community data fetched for ${communityId}:`, {
+                    name: communityData.name,
+                    totalVideos: communityData.long_videos?.length || 0,
+                    totalCreators: communityData.creators?.length || 0
+                });
 
                 // Add recent video uploads from long_videos array
                 if (communityData.long_videos && Array.isArray(communityData.long_videos)) {
@@ -144,9 +160,10 @@ const CommunityAnalytics = () => {
 
             // Sort by most recent and limit to 5 items
             setRecentActivity(recentActivities.slice(0, 5));
+            console.log(`📊 Recent activity set for ${communityId}:`, recentActivities.length, 'items');
 
         } catch (error) {
-            console.error('Error fetching recent activity:', error);
+            console.error(`❌ Error fetching recent activity for ${communityId}:`, error);
             // Set empty array on error to prevent undefined access
             setRecentActivity([]);
         }
@@ -158,92 +175,52 @@ const CommunityAnalytics = () => {
             return;
         }
 
+        if (!communityId) {
+            console.error('❌ No community ID provided');
+            return;
+        }
+
         setLoading(true);
+        console.log(`🔄 Fetching data for community: ${communityId}`);
+        
         try {
-            // First, get user's communities to get a real community ID
-            const userCommunitiesResponse = await fetch(
-                `${CONFIG.API_BASE_URL}/community/user-communities?type=created`,
+            // Fetch data for the specific community ID provided in params
+            const communityResponse = await fetch(
+                `${CONFIG.API_BASE_URL}/community/${communityId}`,
                 {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }
             );
 
-            if (userCommunitiesResponse.ok) {
-                const userCommunitiesData = await userCommunitiesResponse.json();
-                const userCommunities = userCommunitiesData.communities || [];
+            if (communityResponse.ok) {
+                const communityData = await communityResponse.json();
+                console.log(`✅ Community data fetched for ${communityId}:`, {
+                    name: communityData.name,
+                    totalCreators: communityData.creators?.length || 0,
+                    totalVideos: (communityData.long_videos?.length || 0) + (communityData.series?.length || 0),
+                    totalFollowers: communityData.followers?.length || 0
+                });
 
-                if (userCommunities.length > 0) {
-                    // Use the first community the user created
-                    const firstCommunity = userCommunities[0];
+                // Extract data from the API response structure
+                setStats({
+                    communityFee: communityData.analytics?.total_revenue || 0,
+                    totalCreators: communityData.creators?.length || 0,
+                    totalVideos: (communityData.long_videos?.length || 0) + (communityData.series?.length || 0),
+                    totalFollowers: communityData.followers?.length || 0
+                });
 
-                    try {
-                        // Use the specific API endpoint you provided
-                        const communityResponse = await fetch(
-                            `${CONFIG.API_BASE_URL}/community/${firstCommunity._id}`,
-                            {
-                                headers: { 'Authorization': `Bearer ${token}` }
-                            }
-                        );
-
-                        if (communityResponse.ok) {
-                            const communityData = await communityResponse.json();
-                            console.log('✅ Community data fetched:', communityData);
-
-                            // Extract data from the API response structure
-                            setStats({
-                                communityFee: communityData.analytics?.total_revenue || 0,
-                                totalCreators: communityData.creators?.length || 0,
-                                totalVideos: (communityData.long_videos?.length || 0) + (communityData.series?.length || 0),
-                                totalFollowers: communityData.followers?.length || 0
-                            });
-
-                            // Fetch appropriate data based on active tab
-                            if (activeTab === 'revenue') {
-                                // For now, just set empty transactions as you mentioned you'll add this later
-                                setTransactions([]);
-                            } else {
-                                await fetchRecentActivity(firstCommunity._id);
-                            }
-                        } else {
-                            throw new Error('Failed to fetch community data');
-                        }
-                    } catch (apiError) {
-                        console.log('Community API call failed:', apiError);
-                        // Set empty stats on error
-                        setStats({
-                            communityFee: 0,
-                            totalCreators: 0,
-                            totalVideos: 0,
-                            totalFollowers: 0
-                        });
-                        setRecentActivity([]);
-                        setTransactions([]);
-                    }
+                // Fetch appropriate data based on active tab
+                if (activeTab === 'revenue') {
+                    await fetchTransactionHistory(communityId);
                 } else {
-                    // User has no communities
-                    setStats({
-                        communityFee: 0,
-                        totalCreators: 0,
-                        totalVideos: 0,
-                        totalFollowers: 0
-                    });
-                    setRecentActivity([]);
-                    setTransactions([]);
+                    await fetchRecentActivity(communityId);
                 }
             } else {
-                // Fallback to zero stats if can't get user communities
-                setStats({
-                    communityFee: 0,
-                    totalCreators: 0,
-                    totalVideos: 0,
-                    totalFollowers: 0
-                });
-                setRecentActivity([]);
-                setTransactions([]);
+                throw new Error(`Failed to fetch community data: ${communityResponse.status}`);
             }
 
         } catch (error) {
-            console.error('Error fetching community data:', error);
+            console.error(`❌ Error fetching community data for ${communityId}:`, error);
             // Set empty stats on error
             setStats({
                 communityFee: 0,
@@ -266,6 +243,23 @@ const CommunityAnalytics = () => {
         }
         return num.toString();
     };
+
+    // Show error if no community ID
+    if (!communityId) {
+        return (
+            <View className="flex-1 bg-black items-center justify-center">
+                <Text className="text-white text-lg" style={{ fontFamily: 'Poppins' }}>
+                    No community selected
+                </Text>
+                <TouchableOpacity 
+                    onPress={() => router.back()}
+                    className="mt-4 px-6 py-3 bg-blue-600 rounded-lg"
+                >
+                    <Text className="text-white" style={{ fontFamily: 'Poppins' }}>Go Back</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     return (
         <View className="flex-1 bg-black">
