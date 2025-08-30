@@ -20,8 +20,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const {height} = Dimensions.get("screen");
 const PAGE_LIMIT = 10;
 
-const PAGE_LIMIT = 10;
-
 const HistoryPage = () => {
   const [videos, setVideos] = useState<VideoItemType[]>([]);
   const [page, setPage] = useState(1);
