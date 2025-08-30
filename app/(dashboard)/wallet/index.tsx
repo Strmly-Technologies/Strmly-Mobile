@@ -66,13 +66,12 @@ const WalletPage = () => {
   }, [error]);
 
   return (
-    <SafeAreaView style={{ height: height, backgroundColor: "black" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
       <ThemedView
         style={{
-          height: height,
           backgroundColor: showSuccessModal ? "#B0B0B0BB" : "black",
         }}
-        className="relative gap-8 py-4 px-4"
+        className="flex-1 relative gap-8 py-4 px-4"
       >
         {showSuccessModal && (
           <Modal transparent visible={showSuccessModal} animationType="fade">

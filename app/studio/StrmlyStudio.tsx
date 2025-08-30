@@ -307,8 +307,8 @@ const StrmlyStudio = () => {
   }
 
   return (
-    <ThemedView style={{ height: height }}>
-      <SafeAreaView style={{ height }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+      <ThemedView className="flex-1">
         <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         {/* Header */}
@@ -652,8 +652,8 @@ const StrmlyStudio = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
-    </ThemedView>
+      </ThemedView>
+    </SafeAreaView>
   );
 };
 

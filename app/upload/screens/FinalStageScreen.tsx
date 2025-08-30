@@ -110,7 +110,7 @@ const FinalStageScreen: React.FC<FinalStageProps> = ({
         </View>
 
         {/* Autoplay Timing */}
-        <View className="mb-8">
+        {/* <View className="mb-8">
           <Text className="text-white text-lg font-medium mb-3">Autoplay Starts At</Text>
           <TimePicker
             minutes={formData.autoplayStartMinutes}
@@ -124,10 +124,10 @@ const FinalStageScreen: React.FC<FinalStageProps> = ({
           <Text className="text-gray-500 text-xs mt-1">
             💡 Tip: Enter seconds over 59 to auto-convert to minutes (e.g., 75 sec → 1 min 15 sec)
           </Text>
-        </View>
+        </View> */}
 
         {/* Unlock Timing - Only show for paid videos */}
-        {videoDetails.videoType === 'paid' && (
+        {/* {videoDetails.videoType === 'paid' && (
           <View className="mb-8">
             <Text className="text-white text-lg font-medium mb-3">Unlock Full Video From</Text>
             <TimePicker
@@ -143,16 +143,16 @@ const FinalStageScreen: React.FC<FinalStageProps> = ({
               💡 Tip: Enter seconds over 59 to auto-convert to minutes (e.g., 75 sec → 1 min 15 sec)
             </Text>
           </View>
-        )}
+        )} */}
 
         {/* Validation Warning (optional) - Only show for paid videos */}
-        {videoDetails.videoType === 'paid' && unlockTotalSeconds <= autoplayTotalSeconds && (
+        {/* {videoDetails.videoType === 'paid' && unlockTotalSeconds <= autoplayTotalSeconds && (
           <View className="bg-yellow-900 border border-yellow-600 rounded-lg p-3 mb-6">
             <Text className="text-yellow-200 text-sm">
               ⚠️ Unlock time should be after autoplay start time
             </Text>
           </View>
-        )}
+        )} */}
 
         {/* Add some bottom padding for better scrolling */}
         <View className="h-20" />

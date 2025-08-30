@@ -351,8 +351,8 @@ export default function PersonalCommunityPage() {
   };
 
   return (
-    <ThemedView className="flex-1">
-      <SafeAreaView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+      <ThemedView className="flex-1">
         {/* Cover Image */}
         {!isLoading && (
           <View className="h-fit relative">
@@ -592,7 +592,7 @@ export default function PersonalCommunityPage() {
             showsVerticalScrollIndicator={false}
           />
         )}
-      </SafeAreaView>
-    </ThemedView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }

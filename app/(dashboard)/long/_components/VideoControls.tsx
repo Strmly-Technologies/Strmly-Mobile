@@ -7,10 +7,17 @@ import VideoDetails from "./VideoDetails";
 import { VideoItemType } from "@/types/VideosType";
 import { VideoPlayer } from "expo-video";
 import { useFocusEffect } from "expo-router";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { useVideosStore } from "@/store/useVideosStore";
 
 type Props = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
   haveAccess: React.Dispatch<React.SetStateAction<boolean>>;
+  fetchCreator: React.Dispatch<React.SetStateAction<boolean>>;
+  fetchAccess: React.Dispatch<React.SetStateAction<boolean>>;
   haveCreatorPass: boolean;
   haveAccessPass: boolean;
   player: VideoPlayer;
@@ -24,11 +31,15 @@ type Props = {
     shares?: number;
     comments?: number;
   }) => void;
+
+  onToggleFullScreen: ()=> void;
 };
 
 const VideoControls = ({
   haveCreator,
   haveAccess,
+  fetchCreator,
+  fetchAccess,
   haveCreatorPass,
   haveAccessPass,
   player,
@@ -37,9 +48,19 @@ const VideoControls = ({
   setShowCommentsModal,
   onEpisodeChange,
   onStatsUpdate,
+  onToggleFullScreen,
 }: Props) => {
   const [playing, setPlaying] = useState(true);
   const [buffering, setBuffering] = useState(false);
+  const [wantToBuyVideo, setWantToBuyVideo] = useState(false);
+  const insets = useSafeAreaInsets();
+  const {setVideosInZustand} = useVideosStore();
+
+  useEffect(()=> {
+    if(wantToBuyVideo){
+      setVideosInZustand([videoData]);
+    }
+  }, [wantToBuyVideo]);
 
   useFocusEffect(
     useCallback(() => {
@@ -108,11 +129,11 @@ const VideoControls = ({
   return (
     <>
       {(haveCreatorPass || haveAccessPass || videoData.amount === 0) && (
-          <Pressable
-            style={styles.fullScreenPressable}
-            onPress={handleTogglePlayPause}
-          />
-        )}
+        <Pressable
+          style={styles.fullScreenPressable}
+          onPress={handleTogglePlayPause}
+        />
+      )}
       <View style={styles.iconContainer} pointerEvents="none">
         {showPlayPauseIcon &&
           (!playing ? (
@@ -124,7 +145,7 @@ const VideoControls = ({
           <ActivityIndicator size="large" color="white" />
         )}
       </View>
-      <View style={isGlobalPlayer ? styles.interactGlobal : styles.interact}>
+      <View style={[isGlobalPlayer ? styles.interactGlobal : styles.interact, { paddingBottom: insets.bottom + 20 }]}>
         <InteractOptions
           videoId={videoData._id}
           name={videoData.name}
@@ -145,10 +166,19 @@ const VideoControls = ({
           // onGiftUpdate={(newGifts) => onStatsUpdate?.({ gifts: newGifts })}
         />
       </View>
-      <View style={isGlobalPlayer ? styles.detailsGlobal : styles.details}>
+
+      <View
+        style={[
+          isGlobalPlayer ? styles.detailsGlobal : styles.details,
+          { paddingBottom: insets.bottom + 20 },
+        ]}
+      >
         <VideoDetails
           haveCreator={haveCreator}
           haveAccess={haveAccess}
+          fetchCreator={fetchCreator}
+          fetchAccess={fetchAccess}
+          setWantToBuyVideo={setWantToBuyVideo}
           videoId={videoData._id}
           type={videoData.type}
           videoAmount={videoData.amount}
@@ -160,6 +190,7 @@ const VideoControls = ({
           episode_number={videoData?.episode_number}
           createdBy={videoData?.created_by}
           community={videoData?.community}
+          onToggleFullScreen={onToggleFullScreen}
           onEpisodeChange={onEpisodeChange}
         />
       </View>
@@ -174,11 +205,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  interact: { position: "absolute", bottom: "22%", right: 10, zIndex: 5 },
-  interactGlobal: { position: "absolute", bottom: "18%", right: 10, zIndex: 5 },
+  interact: { position: "absolute", bottom: "20%", right: 10, zIndex: 5 },
+  interactGlobal: { position: "absolute", bottom: "16%", right: 10, zIndex: 5 },
   details: {
     position: "absolute",
-    bottom: "2%",
+    bottom: "0%",
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 50,

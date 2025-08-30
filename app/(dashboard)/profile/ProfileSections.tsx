@@ -13,7 +13,10 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { ArrowLeft, ChevronRight } from "lucide-react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import ThemedView from "@/components/ThemedView";
 import { User, Community } from "@/api/profile/profileActions";
 import { useProfileSections } from "./_components/useProfileSections";
@@ -128,12 +131,15 @@ export default function ProfileSections() {
     <TouchableOpacity
       key={community._id}
       className="flex-row items-center justify-between py-4 px-4"
-      onPress={() =>{
+      onPress={() => {
         // console.log(community.founder, user?.id);
         router.push({
-          pathname: community?.founder._id === user?.id ? "/(dashboard)/communities/personal/[id]" : "/(dashboard)/communities/public/[id]",
+          pathname:
+            community?.founder._id === user?.id
+              ? "/(dashboard)/communities/personal/[id]"
+              : "/(dashboard)/communities/public/[id]",
           params: { id: community._id },
-        })
+        });
       }}
     >
       <View className="flex-row items-center flex-1">
@@ -211,170 +217,172 @@ export default function ProfileSections() {
   // getTabTitle is now handled by the hook
 
   return (
-    <ThemedView className="flex-1">
-      <SafeAreaView style={{ height: height }}>
-      <StatusBar barStyle="light-content" backgroundColor="black" />
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "black", paddingTop: insets.top }}
+    >
+      <ThemedView className="flex-1">
+        <StatusBar barStyle="light-content" backgroundColor="black" />
 
-      {/* Header with proper spacing from status bar */}
-      <View
-        className="flex-row items-center justify-between px-4 py-3"
-        style={{ paddingTop: 10 }}
-      >
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft size={24} color="white" />
-        </TouchableOpacity>
-        <Text
-          className="text-white text-lg font-semibold"
-          style={{ fontFamily: "Poppins" }}
+        {/* Header with proper spacing from status bar */}
+        <View
+          className="flex-row items-center justify-between px-4 py-3"
+          style={{ paddingTop: 10 }}
         >
-          {userName}
-        </Text>
-        <View className="w-6" />
-      </View>
-
-      {/* Horizontally Scrollable Tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="flex-grow-0"
-        contentContainerStyle={{ paddingHorizontal: 16 }}
-      >
-        <View className="flex-row space-x-20 py-3">
-          <TouchableOpacity
-            className={`py-2 px-2 ${
-              activeSection === "followers" ? "border-b-2 border-white" : ""
-            }`}
-            onPress={() => changeSection("followers")}
-          >
-            <Text
-              className={`${activeSection === "followers" ? "text-white font-semibold" : "text-gray-400"} whitespace-nowrap text-lg`}
-              style={{ fontFamily: "Poppins" }}
-            >
-              {counts.followers} Followers
-            </Text>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ArrowLeft size={24} color="white" />
           </TouchableOpacity>
-
-          <TouchableOpacity
-            className={`py-2 px-2 ${
-              activeSection === "following" ? "border-b-2 border-white" : ""
-            }`}
-            onPress={() => changeSection("following")}
-          >
-            <Text
-              className={`${activeSection === "following" ? "text-white font-semibold" : "text-gray-400"} whitespace-nowrap text-lg`}
-              style={{ fontFamily: "Poppins" }}
-            >
-              {counts.following} Following
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className={`py-2 px-2 ${
-              activeSection === "myCommunity" ? "border-b-2 border-white" : ""
-            }`}
-            onPress={() => changeSection("myCommunity")}
-          >
-            <Text
-              className={`${activeSection === "myCommunity" ? "text-white font-semibold" : "text-gray-400"} whitespace-nowrap text-lg`}
-              style={{ fontFamily: "Poppins" }}
-            >
-              {counts.myCommunity} My Community
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className={`py-2 px-2 ${
-              activeSection === "community" ? "border-b-2 border-white" : ""
-            }`}
-            onPress={() => changeSection("community")}
-          >
-            <Text
-              className={`${activeSection === "community" ? "text-white font-semibold" : "text-gray-400"} whitespace-nowrap text-lg`}
-              style={{ fontFamily: "Poppins" }}
-            >
-              {counts.community} Community
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-
-      {/* Search Bar - Black background, smaller size, less border radius, no search icon */}
-      <View className="px-6 py-1">
-        <View className="bg-black border border-gray-600 rounded-full px-5 py-1">
-          <TextInput
-            className="text-white text-sm"
-            placeholder="Search..."
-            placeholderTextColor="gray"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
+          <Text
+            className="text-white text-lg font-semibold"
             style={{ fontFamily: "Poppins" }}
-          />
+          >
+            {userName}
+          </Text>
+          <View className="w-6" />
         </View>
-      </View>
 
-      {/* Content */}
-      <ScrollView className="flex-1">
-        {loading ? (
-          <View className="flex-1 items-center justify-center py-20">
-            <ActivityIndicator size="large" color="#F1C40F" />
-            <Text
-              className="text-gray-400 mt-2"
-              style={{ fontFamily: "Poppins" }}
+        {/* Horizontally Scrollable Tabs */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="flex-grow-0"
+          contentContainerStyle={{ paddingHorizontal: 16 }}
+        >
+          <View className="flex-row space-x-20 py-3">
+            <TouchableOpacity
+              className={`py-2 px-2 ${
+                activeSection === "followers" ? "border-b-2 border-white" : ""
+              }`}
+              onPress={() => changeSection("followers")}
             >
-              Loading {getSectionTitle()}...
-            </Text>
-          </View>
-        ) : error ? (
-          <View className="flex-1 items-center justify-center py-20">
-            <Text
-              className="text-red-400 text-center"
-              style={{ fontFamily: "Poppins" }}
+              <Text
+                className={`${activeSection === "followers" ? "text-white font-semibold" : "text-gray-400"} whitespace-nowrap text-lg`}
+                style={{ fontFamily: "Poppins" }}
+              >
+                {counts.followers} Followers
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className={`py-2 px-2 ${
+                activeSection === "following" ? "border-b-2 border-white" : ""
+              }`}
+              onPress={() => changeSection("following")}
             >
-              {error}
-            </Text>
-          </View>
-        ) : filteredData.length === 0 ? (
-          <View className="flex-1 items-center justify-center py-20">
-            <Text
-              className="text-gray-400 text-center"
-              style={{ fontFamily: "Poppins" }}
+              <Text
+                className={`${activeSection === "following" ? "text-white font-semibold" : "text-gray-400"} whitespace-nowrap text-lg`}
+                style={{ fontFamily: "Poppins" }}
+              >
+                {counts.following} Following
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className={`py-2 px-2 ${
+                activeSection === "myCommunity" ? "border-b-2 border-white" : ""
+              }`}
+              onPress={() => changeSection("myCommunity")}
             >
-              {searchQuery ? "No results found" : `No ${activeSection} yet`}
-            </Text>
+              <Text
+                className={`${activeSection === "myCommunity" ? "text-white font-semibold" : "text-gray-400"} whitespace-nowrap text-lg`}
+                style={{ fontFamily: "Poppins" }}
+              >
+                {counts.myCommunity} My Community
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className={`py-2 px-2 ${
+                activeSection === "community" ? "border-b-2 border-white" : ""
+              }`}
+              onPress={() => changeSection("community")}
+            >
+              <Text
+                className={`${activeSection === "community" ? "text-white font-semibold" : "text-gray-400"} whitespace-nowrap text-lg`}
+                style={{ fontFamily: "Poppins" }}
+              >
+                {counts.community} Community
+              </Text>
+            </TouchableOpacity>
           </View>
-        ) : (
-          <View>
-            {filteredData.map((item) => {
-              if (
-                activeSection === "followers" ||
-                activeSection === "following"
-              ) {
-                return renderUserItem(item as User);
-              } else {
-                return renderCommunityItem(item as Community);
-              }
-            })}
+        </ScrollView>
+
+        {/* Search Bar - Black background, smaller size, less border radius, no search icon */}
+        <View className="px-6 py-1">
+          <View className="bg-black border border-gray-600 rounded-full px-5 py-1">
+            <TextInput
+              className="text-white text-sm"
+              placeholder="Search..."
+              placeholderTextColor="gray"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={{ fontFamily: "Poppins" }}
+            />
+          </View>
+        </View>
+
+        {/* Content */}
+        <ScrollView className="flex-1">
+          {loading ? (
+            <View className="flex-1 items-center justify-center py-20">
+              <ActivityIndicator size="large" color="#F1C40F" />
+              <Text
+                className="text-gray-400 mt-2"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Loading {getSectionTitle()}...
+              </Text>
+            </View>
+          ) : error ? (
+            <View className="flex-1 items-center justify-center py-20">
+              <Text
+                className="text-red-400 text-center"
+                style={{ fontFamily: "Poppins" }}
+              >
+                {error}
+              </Text>
+            </View>
+          ) : filteredData.length === 0 ? (
+            <View className="flex-1 items-center justify-center py-20">
+              <Text
+                className="text-gray-400 text-center"
+                style={{ fontFamily: "Poppins" }}
+              >
+                {searchQuery ? "No results found" : `No ${activeSection} yet`}
+              </Text>
+            </View>
+          ) : (
+            <View>
+              {filteredData.map((item) => {
+                if (
+                  activeSection === "followers" ||
+                  activeSection === "following"
+                ) {
+                  return renderUserItem(item as User);
+                } else {
+                  return renderCommunityItem(item as Community);
+                }
+              })}
+            </View>
+          )}
+        </ScrollView>
+
+        {/* Create Community Button (only for My Community tab) */}
+        {activeSection === "myCommunity" && (
+          <View className="absolute bottom-10 left-0 right-0 px-4">
+            <TouchableOpacity
+              className="bg-white rounded-full py-4"
+              onPress={() => router.push("/(communities)/CreateCommunityPage")}
+            >
+              <Text
+                className="text-black text-center text-lg font-semibold"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Create new community
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
-      </ScrollView>
-
-      {/* Create Community Button (only for My Community tab) */}
-      {activeSection === "myCommunity" && (
-        <View className="absolute bottom-5 left-0 right-0 px-4">
-          <TouchableOpacity
-            className="bg-white rounded-full py-4"
-            onPress={() => router.push("/(communities)/CreateCommunityPage")}
-          >
-            <Text
-              className="text-black text-center text-lg font-semibold"
-              style={{ fontFamily: "Poppins" }}
-            >
-              Create new community
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      </SafeAreaView>
-    </ThemedView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }

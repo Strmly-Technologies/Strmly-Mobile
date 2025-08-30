@@ -378,8 +378,8 @@ export default function PublicProfilePageWithId() {
   );
 
   return (
-    <ThemedView style={{ height, flex: 1 }}>
-      <SafeAreaView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+      <ThemedView style={{ flex: 1 }}>
         <FlatList
           data={videos}
           keyExtractor={(item) => item._id}
@@ -768,7 +768,7 @@ export default function PublicProfilePageWithId() {
             </>
           }
         />
-      </SafeAreaView>
-    </ThemedView>
+      </ThemedView>
+    </SafeAreaView>
   );
 }

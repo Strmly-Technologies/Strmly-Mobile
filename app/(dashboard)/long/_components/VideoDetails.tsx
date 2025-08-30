@@ -21,11 +21,15 @@ import Constants from "expo-constants";
 import { router, useFocusEffect } from "expo-router";
 import { useGiftingStore } from "@/store/useGiftingStore";
 import { getProfilePhotoUrl } from "@/utils/profileUtils";
+import { useVideosStore } from "@/store/useVideosStore";
 
 type VideoDetailsProps = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
   haveAccess: React.Dispatch<React.SetStateAction<boolean>>;
-
+  fetchCreator: React.Dispatch<React.SetStateAction<boolean>>;
+  fetchAccess: React.Dispatch<React.SetStateAction<boolean>>;
+  setWantToBuyVideo: React.Dispatch<React.SetStateAction<boolean>>;
+  
   videoId: string;
   name: string;
   type: string;
@@ -79,6 +83,9 @@ type VideoDetailsProps = {
 const VideoDetails = ({
   haveCreator,
   haveAccess,
+  fetchCreator,
+  fetchAccess,
+  setWantToBuyVideo,
   videoId,
   type,
   is_monetized,
@@ -109,6 +116,9 @@ const VideoDetails = ({
   const { token } = useAuthStore();
   const { initiateGifting } = useGiftingStore();
 
+  const { setVideosInZustand, videoType, setVideoType } = useVideosStore();
+  const [seriesVideos, setSeriesVideos] = useState<any>(null);
+
   const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 
   useEffect(() => {
@@ -123,6 +133,8 @@ const VideoDetails = ({
     useCallback(() => {
       const hasAccessPass = async () => {
         const accessId = series && series.price != 0 ? series._id : videoId;
+        console.log(series, videoId);
+        console.log("accessId", accessId);
         try {
           const response = await fetch(
             `${BACKEND_API_URL}/user/has-user-access/${accessId}`,
@@ -148,17 +160,22 @@ const VideoDetails = ({
           setHasAccessPass(
             data.data?.accessData ? data.data.accessData.content_type : null
           );
-          if(data.data?.accessData && data.data.accessData.content_type){
-            haveAccess(true);
-          }
+          // if(data.data?.accessData && data.data.accessData.content_type != null){
+          // }
+          console.log(
+            "have Access",
+            data.data?.accessData?.content_type != undefined
+          );
+          haveAccess(data.data?.accessData?.content_type != undefined);
+          fetchAccess(true);
         } catch (error) {
           console.log(error);
-          Alert.alert(
-            "Error",
-            error instanceof Error
-              ? error.message
-              : "An unknown error occurred while checking video access."
-          );
+          // Alert.alert(
+          //   "Error",
+          //   error instanceof Error
+          //     ? error.message
+          //     : "An unknown error occurred while checking video access."
+          // );
         }
       };
 
@@ -293,8 +310,10 @@ const VideoDetails = ({
             );
           }
 
+          console.log("has creator pass", data.hasCreatorPass);
           setHasCreatorPass(data.hasCreatorPass);
           haveCreator(data.hasCreatorPass);
+          fetchCreator(true);
         } catch (error) {
           console.log(error);
           Alert.alert(
@@ -315,6 +334,90 @@ const VideoDetails = ({
       }
     }, [createdBy._id, token])
   );
+
+  const transformEpisodes = (episodes: any[]): any[] => {
+    return episodes.map((ep) => ({
+      _id: ep._id,
+      name: ep.name,
+      description: ep.description,
+      likes: ep.likes,
+      shares: ep.shares,
+      views: ep.views,
+      fingerprint: ep.fingerprint,
+      audio_fingerprint: ep.audio_fingerprint,
+      duration: ep.duration,
+      duration_formatted: ep.duration_formatted,
+      comments: ep.comments.map((c: any) => c._id ?? c), // normalize comment IDs
+      videoUrl: ep.videoUrl,
+      videoResolutions: ep.videoResolutions,
+      thumbnailUrl: ep.thumbnailUrl,
+      series: { _id: ep.series },
+      episode_number: ep.episode_number ?? null,
+      season_number: ep.season_number ?? 1,
+      is_standalone: ep.is_standalone ?? false,
+      age_restriction: ep.age_restriction,
+      genre: ep.genre,
+      type: ep.type === "Free" ? "Free" : "Paid",
+      amount: ep.amount,
+      Videolanguage: ep.Videolanguage,
+      earned_till_date: ep.earned_till_date,
+      created_by: ep.created_by,
+      updated_by: ep.updated_by,
+      start_time: ep.start_time,
+      display_till_time: ep.display_till_time,
+      visibility: ep.visibility,
+      hidden_reason: ep.hidden_reason,
+      hidden_at: ep.hidden_at,
+      gifts: ep.gifts,
+      gifted_by: ep.gifted_by,
+      liked_by: Array.isArray(ep.liked_by)
+        ? ep.liked_by.map((l: any) => ({
+            user: l.user ?? l,
+            likedAt: l.likedAt,
+            _id: l._id,
+          }))
+        : [],
+      createdAt: ep.createdAt,
+      updatedAt: ep.updatedAt,
+      __v: ep.__v,
+      is_following_creator: ep.is_following_creator,
+      access: {
+        isPlayable: ep.access?.isPlayable ?? false,
+        freeRange: {
+          start_time: ep.access?.freeRange?.start_time ?? ep.start_time,
+          display_till_time:
+            ep.access?.freeRange?.display_till_time ?? ep.display_till_time,
+        },
+        isPurchased: ep.access?.isPurchased ?? false,
+        accessType: ep.access?.accessType ?? "free",
+      },
+      creatorPassDetails: ep.creatorPassDetails,
+      is_liked_video: ep.is_liked_video ?? false,
+    }));
+  };
+
+  const fetchSeriesData = async () => {
+    if (!token || !series?._id) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BACKEND_API_URL}/series/${series._id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) throw new Error("Failed to follow community");
+      const data = await response.json();
+      console.log("series data: ", data.data);
+
+      setSeriesVideos(transformEpisodes(data.data.episodes))
+    } catch (err) {
+      console.log("err", err);
+    }
+  };
 
   return (
     <View className="w-full gap-3.5">
@@ -384,9 +487,10 @@ const VideoDetails = ({
           </TouchableOpacity> */}
         </View>
 
-        {(type !== "Free" || videoAmount != 0 ||
+        {(type !== "Free" ||
+          videoAmount != 0 ||
           (series != null &&
-            (series?.type != "Free" || series?.price != 0))) && (
+           (!videoType ? (series?.type != "Free" || series?.price != 0) : (videoAmount !=0)))) && (
           <View>
             <TouchableOpacity
               onPress={() => {
@@ -407,12 +511,13 @@ const VideoDetails = ({
       <View className="flex-row items-center justify-between relative">
         <View className="flex-row items-center gap-1">
           <Text className="text-white uppercase">{name}</Text>
-          {/* {series !== null && (
+          {series !== null && videoType != "series" && (
             <TouchableOpacity
               className="border border-white rounded-xl px-2 py-0.5"
               onPress={() => {
                 setShowDropdown((prev) => !prev);
                 setShowPriceDropdown(false);
+                fetchSeriesData();
               }}
             >
               <View className="flex-row items-center">
@@ -422,24 +527,24 @@ const VideoDetails = ({
                 <ChevronDownIcon color={"white"} size={12} />
               </View>
             </TouchableOpacity>
-          )} */}
+          )}
         </View>
 
         {/* Full Screen */}
-        {/* <Pressable onPress={onToggleFullScreen}>
+        <Pressable onPress={onToggleFullScreen}>
           <Image
             source={require("../../../../assets/images/fullscreen.png")}
             className={`size-5 ${isFullScreen ? "scale-110" : "scale-100"} ease-in`}
           />
-        </Pressable> */}
+        </Pressable>
 
         {/* Paid Dropdown */}
         {showPriceDropdown && (
           <View className="absolute bottom-14 -right-2 rounded-xl p-2 w-80">
-            {(series != null &&
-            series.type != "Free") || (videoAmount != 0) &&
-            !hasCreatorPass &&
-            creatorPass?.creator_profile.creator_pass_price !== 0 ? (
+            {(series != null && series.type != "Free") ||
+            (videoAmount != 0 &&
+              (hasCreatorPass || !hasCreatorPass) &&
+              creatorPass?.creator_profile.creator_pass_price !== 0) ? (
               <TouchableOpacity
                 className="mb-0.5"
                 onPress={() => {
@@ -449,6 +554,7 @@ const VideoDetails = ({
               >
                 <Pressable
                   onPress={() => {
+                    setWantToBuyVideo(true);
                     initiateGifting(createdBy, videoId);
                     !hasCreatorPass &&
                       router.push({
@@ -478,6 +584,7 @@ const VideoDetails = ({
 
                 <Pressable
                   onPress={() => {
+                    setWantToBuyVideo(true);
                     series &&
                     series?.type !== "Free" &&
                     !hasCreatorPass &&
@@ -536,6 +643,7 @@ const VideoDetails = ({
               >
                 <Pressable
                   onPress={() => {
+                    setWantToBuyVideo(true);
                     (series === null || series?.type === "Free") &&
                     !hasCreatorPass &&
                     creatorPass?.creator_profile.creator_pass_price !== 0
@@ -633,15 +741,21 @@ const VideoDetails = ({
         )}
 
         {/* Episode Dropdown */}
-        {/* {showDropdown && (
+        {showDropdown && (
           <View className="absolute bottom-3.5 left-11 rounded-xl p-2 w-56">
             {series?.episodes.map((ep, idx) => (
               <TouchableOpacity
                 key={ep._id || idx}
                 className="mb-[0.5px]"
                 onPress={() => {
-                  setSelectedEpisodeIndex(ep.episode_number);
+                  setSelectedEpisodeIndex(selectedEpisodeIndex);
                   setShowDropdown(false);
+                  console.log('selectedEpisodeIndex', ep.episode_number);
+                  setVideosInZustand(seriesVideos);
+                  router.push({
+                    pathname: "/(dashboard)/long/GlobalVideoPlayer",
+                    params: { startIndex: ep.episode_number-1, videoType: 'series' },
+                  });
 
                   // Call the episode change callback if provided
                   if (onEpisodeChange && ep) {
@@ -665,7 +779,7 @@ const VideoDetails = ({
               </TouchableOpacity>
             ))}
           </View>
-        )} */}
+        )}
       </View>
     </View>
   );

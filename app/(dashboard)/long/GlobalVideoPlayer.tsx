@@ -11,7 +11,12 @@ import ThemedView from "@/components/ThemedView";
 import { CONFIG } from "@/Constants/config";
 import { VideoItemType } from "@/types/VideosType";
 
-import { Link, router, useLocalSearchParams } from "expo-router";
+import {
+  Link,
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+} from "expo-router";
 import VideoPlayer from "./_components/VideoPlayer";
 import { useVideosStore } from "@/store/useVideosStore";
 import BottomNavBar from "@/components/BottomNavBar";
@@ -29,8 +34,12 @@ const { height: screenHeight } = Dimensions.get("window");
 const VIDEO_HEIGHT = screenHeight;
 
 const GlobalVideoPlayer: React.FC = () => {
-
-  const { startIndex } = useLocalSearchParams<{ startIndex?: string }>();
+  const params = useLocalSearchParams<{
+    startIndex?: string;
+    videoType?: string;
+  }>();
+  const startIndex = params.startIndex;
+  const videoType = params.videoType ?? null;
 
   const [videos, setVideos] = useState<VideoItemType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +50,7 @@ const GlobalVideoPlayer: React.FC = () => {
 
   const [showCommentsModal, setShowCommentsModal] = useState(false);
 
-  const { storedVideos } = useVideosStore();
+  const { storedVideos, setVideoType } = useVideosStore();
 
   const BACKEND_API_URL = CONFIG.API_BASE_URL;
 
@@ -62,8 +71,13 @@ const GlobalVideoPlayer: React.FC = () => {
       setVideos(storedVideos);
       setLoading(false);
     }
-
   }, [storedVideos]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setVideoType(videoType ?? null);
+    }, [videoType])
+  );
 
   // OPTIMIZATION 1: Stabilize the onViewableItemsChanged callback
   // This prevents FlatList from re-rendering just because the parent re-rendered.

@@ -26,7 +26,7 @@ const ModalMessage: React.FC<ModalMessageProps> = ({
       onRequestClose={() => onClose(false)}
     >
       <StyledView className="flex-1 justify-center items-center bg-[#000000A8]">
-        <StyledView className="bg-black border h-auto items-center justify-center border-gray-800 rounded-xl p-6 w-4/5 shadow-lg">
+        <StyledView className="bg-black border h-auto items-center justify-center border-gray-800 rounded-xl p-6 w-[90%] shadow-lg">
           <StyledText className="text-lg text-white mb-4 text-center">
             {text}
           </StyledText>

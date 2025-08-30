@@ -104,20 +104,20 @@ const VerifyEmail = () => {
         if (data.code === "RATE_LIMITED") {
           console.log(data.message);
           setAlert(`Too Many Requests
-             ${data.message}`);
+${data.message}`);
           setShowAlert(true);
           setNeedButton(true);
           setCooldown(60); // Start cooldown
         } else if (data.code === "ALREADY_VERIFIED") {
           console.log(data.message);
           setAlert(`Already Verified
-             ${data.message}`);
+${data.message}`);
           setShowAlert(true);
           setNeedButton(true);
         } else {
           console.log(data);
           setAlert(`Resend Failed
-             ${data.message || "Please try again later"}`);
+${data.message || "Please try again later"}`);
           setShowAlert(true);
           setNeedButton(true);
         }
@@ -125,13 +125,14 @@ const VerifyEmail = () => {
       }
 
       setAlert(`OTP Sent 
-        A new verification code was sent to your email.`);
+A new verification code was sent to your email.`);
       setShowAlert(true);
       setNeedButton(true);
+      setStep(2);
     } catch (error: any) {
       console.log(error);
       setAlert(`Error 
-        ${error.message || "Network error"}`);
+${error.message || "Network error"}`);
       setShowAlert(true);
       setNeedButton(true);
     } finally {

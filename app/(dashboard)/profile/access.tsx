@@ -331,8 +331,8 @@ export default function AccessPage() {
   );
 
   return (
-    <SafeAreaView style={{ height: height, backgroundColor: "black" }}>
-      <View className="flex-1 bg-black">
+    <SafeAreaView style={{ flex:1 , backgroundColor: "black" }}>
+      <View className="flex-1">
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
       {/* Header */}
