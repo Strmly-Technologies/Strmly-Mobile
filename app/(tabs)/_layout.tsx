@@ -9,20 +9,22 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { CONFIG } from "@/Constants/config";
 import { getProfilePhotoUrl } from "@/utils/profileUtils";
 import * as ScreenOrientation from "expo-screen-orientation";
+import { useOrientationStore } from "@/store/useOrientationStore";
 
 export default function TabLayout() {
   const { token, user } = useAuthStore();
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
-  const [isLandscape, setIsLandscape] = useState(false);
+  const {setOrientation, isLandscape} = useOrientationStore();
 
   useEffect(() => {
     // Initial check
     const checkOrientation = async () => {
       const orientation = await ScreenOrientation.getOrientationAsync();
-      setIsLandscape(
+      setOrientation(
         orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
           orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
       );
+
     };
     checkOrientation();
 
@@ -30,7 +32,7 @@ export default function TabLayout() {
     const subscription = ScreenOrientation.addOrientationChangeListener(
       (event) => {
         const o = event.orientationInfo.orientation;
-        setIsLandscape(
+        setOrientation(
           o === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
             o === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
         );

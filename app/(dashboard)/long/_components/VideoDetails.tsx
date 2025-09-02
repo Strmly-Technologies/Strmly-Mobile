@@ -25,9 +25,6 @@ import { useVideosStore } from "@/store/useVideosStore";
 
 type VideoDetailsProps = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
-  haveAccess: React.Dispatch<React.SetStateAction<boolean>>;
-  fetchCreator: React.Dispatch<React.SetStateAction<boolean>>;
-  fetchAccess: React.Dispatch<React.SetStateAction<boolean>>;
   setWantToBuyVideo: React.Dispatch<React.SetStateAction<boolean>>;
   
   videoId: string;
@@ -82,9 +79,6 @@ type VideoDetailsProps = {
 
 const VideoDetails = ({
   haveCreator,
-  haveAccess,
-  fetchCreator,
-  fetchAccess,
   setWantToBuyVideo,
   videoId,
   type,
@@ -166,8 +160,6 @@ const VideoDetails = ({
             "have Access",
             data.data?.accessData?.content_type != undefined
           );
-          haveAccess(data.data?.accessData?.content_type != undefined);
-          fetchAccess(true);
         } catch (error) {
           console.log(error);
           // Alert.alert(
@@ -313,7 +305,6 @@ const VideoDetails = ({
           console.log("has creator pass", data.hasCreatorPass);
           setHasCreatorPass(data.hasCreatorPass);
           haveCreator(data.hasCreatorPass);
-          fetchCreator(true);
         } catch (error) {
           console.log(error);
           Alert.alert(
@@ -750,18 +741,18 @@ const VideoDetails = ({
                 onPress={() => {
                   setSelectedEpisodeIndex(selectedEpisodeIndex);
                   setShowDropdown(false);
-                  console.log('selectedEpisodeIndex', ep.episode_number);
+                  console.log('selectedEpisodeIndex', idx);
                   setVideosInZustand(seriesVideos);
                   router.push({
                     pathname: "/(dashboard)/long/GlobalVideoPlayer",
-                    params: { startIndex: ep.episode_number-1, videoType: 'series' },
+                    params: { startIndex: idx, videoType: 'series' },
                   });
 
                   // Call the episode change callback if provided
-                  if (onEpisodeChange && ep) {
-                    console.log("🎬 Calling onEpisodeChange with episode:", ep);
-                    onEpisodeChange(ep);
-                  }
+                  // if (onEpisodeChange && ep) {
+                  //   console.log("🎬 Calling onEpisodeChange with episode:", ep);
+                  //   onEpisodeChange(ep);
+                  // }
                 }}
               >
                 <View

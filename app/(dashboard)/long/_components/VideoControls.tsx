@@ -9,12 +9,10 @@ import { VideoPlayer } from "expo-video";
 import { useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVideosStore } from "@/store/useVideosStore";
+import { useOrientationStore } from "@/store/useOrientationStore";
 
 type Props = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
-  haveAccess: React.Dispatch<React.SetStateAction<boolean>>;
-  fetchCreator: React.Dispatch<React.SetStateAction<boolean>>;
-  fetchAccess: React.Dispatch<React.SetStateAction<boolean>>;
   haveCreatorPass: boolean;
   haveAccessPass: boolean;
   player: VideoPlayer;
@@ -35,9 +33,6 @@ type Props = {
 
 const VideoControls = ({
   haveCreator,
-  haveAccess,
-  fetchCreator,
-  fetchAccess,
   haveCreatorPass,
   haveAccessPass,
   player,
@@ -51,8 +46,11 @@ const VideoControls = ({
   const [playing, setPlaying] = useState(true);
   const [buffering, setBuffering] = useState(false);
   const [wantToBuyVideo, setWantToBuyVideo] = useState(false);
+  const [showControls, setShowControls] = useState(true);
   const insets = useSafeAreaInsets();
   const { setVideosInZustand } = useVideosStore();
+  const { isLandscape } = useOrientationStore();
+  let hideTimer = React.useRef<NodeJS.Timeout | number | null>(null);
 
   useEffect(() => {
     if (wantToBuyVideo) {
@@ -67,6 +65,32 @@ const VideoControls = ({
       setBuffering(false);
     }, [])
   );
+
+  // auto-hide logic for landscape
+  useEffect(() => {
+    if (isLandscape) {
+      resetHideTimer();
+    } else {
+      clearHideTimer();
+      setShowControls(true); // portrait → always visible
+    }
+    return () => clearHideTimer();
+  }, [isLandscape]);
+
+  const clearHideTimer = () => {
+    if (hideTimer.current) {
+      clearTimeout(hideTimer.current);
+      hideTimer.current = null;
+    }
+  };
+
+  const resetHideTimer = () => {
+    clearHideTimer();
+    setShowControls(true);
+    hideTimer.current = setTimeout(() => {
+      setShowControls(false);
+    }, 5000); // auto-hide after 5s
+  };
 
   // const isPlaying = usePlayerStore((state) => state.isPlaying);
   // const isBuffering = usePlayerStore((state) => state.isBuffering);
@@ -113,12 +137,17 @@ const VideoControls = ({
     try {
       if (playing) {
         await player.pause();
-        setPlaying(false); // optimistic
+        setPlaying(false);
       } else {
         await player.play();
-        setPlaying(true); // optimistic
+        setPlaying(true);
       }
       setShowPlayPauseIcon(true);
+
+      // every tap resets hide timer in landscape
+      if (isLandscape) {
+        resetHideTimer();
+      }
     } catch (e) {
       console.error("play/pause error:", e);
     }
@@ -143,62 +172,77 @@ const VideoControls = ({
           <ActivityIndicator size="large" color="white" />
         )}
       </View>
-      <View
-        style={[
-          isGlobalPlayer ? styles.interactGlobal : styles.interact,
-          { paddingBottom: insets.bottom + 20 },
-        ]}
-      >
-        <InteractOptions
-          videoId={videoData._id}
-          name={videoData.name}
-          creator={videoData.created_by}
-          likes={videoData.likes}
-          gifts={videoData.gifts}
-          shares={videoData.shares}
-          comments={videoData.comments?.length}
-          onCommentPress={
-            setShowCommentsModal ? () => setShowCommentsModal(true) : undefined
-          }
-          onCommentUpdate={(newCount) => {
-            if (onStatsUpdate) {
-              onStatsUpdate({ comments: newCount });
+      {showControls && (
+        <View
+          style={[
+            isGlobalPlayer
+              ? isLandscape
+                ? styles.interactFullScreen
+                : styles.interactGlobal
+              : isLandscape
+                ? styles.interactFullScreen
+                : styles.interact,
+            { paddingBottom: insets.bottom },
+          ]}
+        >
+          <InteractOptions
+            videoId={videoData._id}
+            name={videoData.name}
+            creator={videoData.created_by}
+            likes={videoData.likes}
+            gifts={videoData.gifts}
+            shares={videoData.shares}
+            comments={videoData.comments?.length}
+            onCommentPress={
+              setShowCommentsModal
+                ? () => setShowCommentsModal(true)
+                : undefined
             }
-          }}
-          // onShareUpdate={(newShares, isShared) =>
-          //   onStatsUpdate?.({ shares: newShares })
-          // }
-          // onGiftUpdate={(newGifts) => onStatsUpdate?.({ gifts: newGifts })}
-        />
-      </View>
+            onCommentUpdate={(newCount) => {
+              if (onStatsUpdate) {
+                onStatsUpdate({ comments: newCount });
+              }
+            }}
+            // onShareUpdate={(newShares, isShared) =>
+            //   onStatsUpdate?.({ shares: newShares })
+            // }
+            // onGiftUpdate={(newGifts) => onStatsUpdate?.({ gifts: newGifts })}
+          />
+        </View>
+      )}
 
-      <View
-        style={[
-          isGlobalPlayer ? styles.detailsGlobal : styles.details,
-          { paddingBottom: insets.bottom + 20 },
-        ]}
-      >
-        <VideoDetails
-          haveCreator={haveCreator}
-          haveAccess={haveAccess}
-          fetchCreator={fetchCreator}
-          fetchAccess={fetchAccess}
-          setWantToBuyVideo={setWantToBuyVideo}
-          videoId={videoData._id}
-          type={videoData.type}
-          videoAmount={videoData.amount}
-          is_monetized={videoData.is_monetized}
-          name={videoData.name}
-          series={videoData?.series}
-          is_following_creator={videoData.is_following_creator}
-          creatorPass={videoData?.creatorPassDetails}
-          episode_number={videoData?.episode_number}
-          createdBy={videoData?.created_by}
-          community={videoData?.community}
-          onToggleFullScreen={onToggleFullScreen}
-          onEpisodeChange={onEpisodeChange}
-        />
-      </View>
+      {showControls && (
+        <View
+          style={[
+            isGlobalPlayer
+              ? isLandscape
+                ? styles.detailsFullScreen
+                : styles.detailsGlobal
+              : isLandscape
+                ? styles.detailsFullScreen
+                : styles.details,
+            { paddingBottom: insets.bottom },
+          ]}
+        >
+          <VideoDetails
+            haveCreator={haveCreator}
+            setWantToBuyVideo={setWantToBuyVideo}
+            videoId={videoData._id}
+            type={videoData.type}
+            videoAmount={videoData.amount}
+            is_monetized={videoData.is_monetized}
+            name={videoData.name}
+            series={videoData?.series}
+            is_following_creator={videoData.is_following_creator}
+            creatorPass={videoData?.creatorPassDetails}
+            episode_number={videoData?.episode_number}
+            createdBy={videoData?.created_by}
+            community={videoData?.community}
+            onToggleFullScreen={onToggleFullScreen}
+            onEpisodeChange={onEpisodeChange}
+          />
+        </View>
+      )}
     </>
   );
 };
@@ -210,22 +254,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  interact: { position: "absolute", bottom: "20%", right: 10, zIndex: 5 },
+  interact: { position: "absolute", bottom: "16%", right: 10, zIndex: 5 },
+  interactFullScreen: {
+    position: "absolute",
+    bottom: "20%",
+    right: 15,
+    zIndex: 5,
+  },
   interactGlobal: { position: "absolute", bottom: "16%", right: 10, zIndex: 5 },
   details: {
     position: "absolute",
-    bottom: "0%",
+    bottom: "2%",
     width: "100%",
     paddingHorizontal: 16,
-    marginBottom: 50,
+    marginBottom: 10,
+    zIndex: 5,
+  },
+  detailsFullScreen: {
+    position: "absolute",
+    bottom: "10%",
+    width: "100%",
+    paddingHorizontal: 20,
+    marginBottom: 20,
     zIndex: 5,
   },
   detailsGlobal: {
     position: "absolute",
-    bottom: "0%",
+    bottom: "5%",
     width: "100%",
     paddingHorizontal: 16,
-    marginBottom: 30,
+    marginBottom: 40,
     zIndex: 5,
   },
   progressContainer: {

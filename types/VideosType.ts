@@ -18,6 +18,7 @@ export type VideoItemType = {
   shares: number;
   views: number;
   amount: number;
+  hasCreatorPassOfVideoOwner: boolean;
   access: {
     isPlayable: boolean;
     freeRange: {

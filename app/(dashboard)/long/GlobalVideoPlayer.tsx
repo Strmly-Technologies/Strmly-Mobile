@@ -20,6 +20,7 @@ import {
 import VideoPlayer from "./_components/VideoPlayer";
 import { useVideosStore } from "@/store/useVideosStore";
 import BottomNavBar from "@/components/BottomNavBar";
+import { useOrientationStore } from "@/store/useOrientationStore";
 
 export type GiftType = {
   creator: {
@@ -51,6 +52,7 @@ const GlobalVideoPlayer: React.FC = () => {
   const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const { storedVideos, setVideoType } = useVideosStore();
+  const { isLandscape } = useOrientationStore();
 
   const BACKEND_API_URL = CONFIG.API_BASE_URL;
 
@@ -58,13 +60,18 @@ const GlobalVideoPlayer: React.FC = () => {
 
   useEffect(() => {
     if (videos.length > 0 && startIndex) {
-      // scroll to clicked video on mount
-      flatListRef.current?.scrollToIndex({
-        index: parseInt(startIndex),
-        animated: false,
-      });
+      let index = parseInt(startIndex, 10);
+      if (index >= videos.length) {
+        index = videos.length - 1; // clamp to last valid item
+      }
+      if (index < 0) index = 0; // avoid negative
+      flatListRef.current?.scrollToIndex({ index, animated: false });
     }
   }, [videos, startIndex]);
+
+  useEffect(() => {
+    console.log("start index, videoType", startIndex, videoType);
+  }, [startIndex, videoType]);
 
   useEffect(() => {
     if (storedVideos.length > 0) {
@@ -182,9 +189,8 @@ const GlobalVideoPlayer: React.FC = () => {
   }
 
   return (
-    // <SafeAreaProvider>
-    <ThemedView>
-      <SafeAreaView>
+    <SafeAreaView className="flex-1" edges={[]}>
+      <ThemedView>
         <FlatList
           ref={flatListRef}
           data={videos}
@@ -197,22 +203,28 @@ const GlobalVideoPlayer: React.FC = () => {
           viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
           initialNumToRender={1}
           maxToRenderPerBatch={1}
-          windowSize={3}
+          windowSize={1}
           showsVerticalScrollIndicator={false}
           contentInsetAdjustmentBehavior="automatic" // iOS
           contentContainerStyle={{ paddingBottom: 0 }}
           style={{ height: VIDEO_HEIGHT }}
+          onScrollToIndexFailed={(info) => {
+            console.warn("⚠️ scrollToIndex failed", info);
+            // scroll to last item
+            flatListRef.current?.scrollToIndex({
+              index: videos.length - 1,
+              animated: false,
+            });
+          }}
           // onScrollBeginDrag={() => {
           //   if (showCommentsModal) {
           //     console.log('🚫 VideosFeed: Scroll blocked - comments modal is open');
           //   }
           // }}
         />
-
-        {/* <BottomNavBar /> */}
-      </SafeAreaView>
-    </ThemedView>
-    // </SafeAreaProvider>
+      </ThemedView>
+      <BottomNavBar />
+    </SafeAreaView>
   );
 };
 

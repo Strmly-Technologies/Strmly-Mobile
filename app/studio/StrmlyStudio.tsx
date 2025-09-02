@@ -307,8 +307,8 @@ const StrmlyStudio = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-      <ThemedView className="flex-1">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={['bottom']}>
+      {/* <ThemedView className="flex-1"> */}
         <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         {/* Header */}
@@ -634,7 +634,7 @@ const StrmlyStudio = () => {
         </ScrollView>
 
         {/* Bottom Section */}
-        <View className="absolute px-4 bottom-20 left-0 right-0">
+        <View className="absolute px-4 bottom-10 left-0 right-0">
           {/* Action Button */}
           <TouchableOpacity
             className="bg-gray-200 rounded-full py-4 items-center"
@@ -652,7 +652,7 @@ const StrmlyStudio = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      </ThemedView>
+      {/* </ThemedView> */}
     </SafeAreaView>
   );
 };

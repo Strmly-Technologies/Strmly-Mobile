@@ -28,22 +28,22 @@ const VideoBuyMessage = ({
       transparent={true}
       visible={isVisible}
       onRequestClose={async () => {
-        router.push({
-          pathname: "/(dashboard)/long/GlobalVideoPlayer",
-        });
         onClose(false);
         clearVideoAccessData();
+        // router.push({
+        //   pathname: "/(dashboard)/long/GlobalVideoPlayer",
+        // });
       }} // Allows closing with the back button on Android
     >
       {/* Semi-transparent backdrop */}
       <Pressable
         style={styles.backdrop}
         onPress={async () => {
+          clearVideoAccessData();
+          onClose(false);
           router.push({
             pathname: "/(dashboard)/long/GlobalVideoPlayer",
           });
-          onClose(false);
-          clearVideoAccessData();
         }}
       >
         <View className="bg-black border border-gray-800 items-center justify-center rounded-2xl px-2 py-6">

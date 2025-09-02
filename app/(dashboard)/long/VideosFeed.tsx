@@ -7,7 +7,11 @@ import {
   Pressable,
   View,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import ThemedView from "@/components/ThemedView";
 import { useAuthStore } from "@/store/useAuthStore";
 import { CONFIG } from "@/Constants/config";
@@ -16,6 +20,7 @@ import { Link, router, useFocusEffect } from "expo-router";
 import VideoPlayer from "./_components/VideoPlayer";
 import { clearActivePlayer } from "@/store/usePlayerStore";
 import { useVideosStore } from "@/store/useVideosStore";
+import { useOrientationStore } from "@/store/useOrientationStore";
 
 export type GiftType = {
   creator: {
@@ -27,7 +32,7 @@ export type GiftType = {
 };
 
 const { height: screenHeight } = Dimensions.get("window");
-const BOTTOM_NAV_HEIGHT = -25; // Height of your bottom navigation
+const BOTTOM_NAV_HEIGHT = -50; // Height of your bottom navigation
 
 // Define the height for each video item (adjust as needed)
 const VIDEO_HEIGHT = screenHeight + BOTTOM_NAV_HEIGHT;
@@ -45,13 +50,15 @@ const VideosFeed: React.FC = () => {
   const [isScreenFocused, setIsScreenFocused] = useState(true);
 
   const { token, isLoggedIn } = useAuthStore();
-  const {setVideoType} = useVideosStore();
+  const { setVideoType } = useVideosStore();
   const flatListRef = useRef<FlatList>(null);
   const mountedRef = useRef(true);
 
+  const { isLandscape } = useOrientationStore();
+
   const BACKEND_API_URL = CONFIG.API_BASE_URL;
 
-  // Handle screen focus
+  // Handle screen focus  // initially it's useFocusEffect
   useFocusEffect(
     useCallback(() => {
       // Small delay to prevent rapid focus changes
@@ -239,10 +246,7 @@ const VideosFeed: React.FC = () => {
   // Show loading while checking authentication or fetching videos
   if (loading && isFetchingMore) {
     return (
-      <ThemedView
-        style={{ height: VIDEO_HEIGHT }}
-        className="justify-center items-center"
-      >
+      <ThemedView style={{ flex: 1 }} className="justify-center items-center">
         <ActivityIndicator size="large" color="white" />
         <Text className="text-white mt-4">
           {!token || !isLoggedIn
@@ -258,7 +262,7 @@ const VideosFeed: React.FC = () => {
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
           <ThemedView
-            style={{ height: VIDEO_HEIGHT }}
+            style={{ flex: 1 }}
             className="justify-center items-center px-4"
           >
             <Text className="text-white text-center mb-4">
@@ -294,7 +298,7 @@ const VideosFeed: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+    <SafeAreaView style={{ height: VIDEO_HEIGHT, backgroundColor: "black" }}>
       <ThemedView>
         <FlatList
           ref={flatListRef}
@@ -303,7 +307,7 @@ const VideosFeed: React.FC = () => {
           keyExtractor={keyExtractor}
           getItemLayout={getItemLayout}
           pagingEnabled
-          scrollEnabled={!showCommentsModal}
+          scrollEnabled={!showCommentsModal && !isLandscape}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
           initialNumToRender={1}

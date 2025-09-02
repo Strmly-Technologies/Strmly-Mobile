@@ -29,6 +29,7 @@ import { Text } from "react-native";
 import { useAuthStore } from "@/store/useAuthStore";
 import ModalMessage from "@/components/AuthModalMessage";
 import * as ScreenOrientation from "expo-screen-orientation";
+import { useOrientationStore } from "@/store/useOrientationStore";
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
@@ -74,9 +75,8 @@ const VideoPlayer = ({
   } = useGiftingStore();
 
   const [haveCreator, setHaveCreator] = useState(false);
+  const [checkCreatorPass, setCheckCreatorPass] = useState(false);
   const [haveAccess, setHaveAccess] = useState(false);
-  const [fetchCreator, setFetchCreator] = useState(false);
-  const [fetchAccess, setFetchAccess] = useState(false);
   const [showPaidMessage, setShowPaidMessage] = useState(false);
 
   const [showThumbnail, setShowThumbnail] = useState(true);
@@ -106,7 +106,7 @@ const VideoPlayer = ({
   });
 
   // Full screen:
-  const [showFullScreen, setShowFullScreen] = useState(false);
+  const { setOrientation, isLandscape } = useOrientationStore();
 
   // Create player with proper cleanup
   const player = useVideoPlayer(videoData?.videoUrl || "", (p) => {
@@ -144,29 +144,49 @@ const VideoPlayer = ({
     videoData.comments?.length,
   ]);
 
+  // set Access and Creator pass state of user when data comes
+  useEffect(() => {
+    setHaveAccess(videoData.access.isPurchased);
+    setHaveCreator(videoData.hasCreatorPassOfVideoOwner);
+  }, [videoData.hasCreatorPassOfVideoOwner, videoData.access.isPurchased]);
+
+  // Set Access true if user purchased Creator content
+  useEffect(()=> {
+    if((isPurchasedSeries || isVideoPurchased) && !haveAccess){
+      setHaveAccess(true);
+    }
+  }, [isVideoPurchased, isPurchasedSeries]);
+
+  // Only update creator pass state if he really bought creator pass now.
+  useEffect(()=> {
+    if(checkCreatorPass && !haveCreator && !videoData.hasCreatorPassOfVideoOwner){
+      setHaveCreator(true);
+    }
+  }, [checkCreatorPass, haveCreator, videoData.hasCreatorPassOfVideoOwner]);
+
   // Handle player status changes
   useEffect(() => {
     if (!player || !videoData?.videoUrl) return;
 
     if (videoData.created_by._id !== user?.id && videoData.amount !== 0) {
-      if (fetchAccess && fetchCreator) {
-        if (
-          (!haveCreator &&
-            (videoData.amount != 0 ||
-              (videoData.series && videoData.series.type !== "free"))) ||
-          !haveAccess
-        ) {
-          if (!haveCreator && !haveAccess) {
-            setShowPaidMessage(true);
-            setShowThumbnail(true);
-            return;
-          }
-        }
-      } else {
+      if (!haveCreator && !haveAccess) {
+        setShowPaidMessage(true);
+        setShowThumbnail(true);
         return;
+      } else {
+        setShowPaidMessage(false);
+        setShowThumbnail(false);
       }
     }
-    console.log("video name", videoData.name, haveAccess, haveCreator);
+    console.log(
+      "video name",
+      videoData.name,
+      videoData.hasCreatorPassOfVideoOwner,
+      videoData.access.isPurchased,
+      "have state: ",
+      haveAccess,
+      haveCreator
+    );
 
     const handleStatusChange = ({ status, error }: any) => {
       if (!mountedRef.current) return;
@@ -196,15 +216,14 @@ const VideoPlayer = ({
     videoData?.videoUrl,
     haveCreator,
     haveAccess,
-    fetchAccess,
-    fetchCreator,
     videoData.amount,
+    videoData.created_by._id,
+    user?.id
   ]);
 
   // Handle video playback based on focus and active state
   useEffect(() => {
     if (!player || !videoData?.videoUrl) return;
-    if (!fetchCreator || !fetchAccess) return;
 
     const shouldPlay =
       isReady && isActive && isFocused && !isGifted && !playerError;
@@ -246,11 +265,6 @@ const VideoPlayer = ({
     player,
     playerError,
     videoData?.videoUrl,
-    fetchAccess,
-    fetchCreator,
-    haveAccess,
-    haveCreator,
-    videoData.amount,
   ]);
 
   // Handle gifting state
@@ -273,8 +287,6 @@ const VideoPlayer = ({
     isFocused,
     isReady,
     playerError,
-    haveAccess,
-    haveCreator,
   ]);
 
   // Handle focus changes
@@ -303,8 +315,6 @@ const VideoPlayer = ({
     isReady,
     isGifted,
     playerError,
-    haveAccess,
-    haveCreator,
   ]);
 
   // Handle player store updates
@@ -338,11 +348,6 @@ const VideoPlayer = ({
     player,
     _updateStatus,
     videoData?.videoUrl,
-    haveAccess,
-    haveCreator,
-    fetchAccess,
-    fetchCreator,
-    videoData.amount,
   ]);
 
   // FIX: Handle local stats updates
@@ -402,18 +407,18 @@ const VideoPlayer = ({
 
   const onToggleFullScreen = async () => {
     try {
-      if (showFullScreen) {
+      if (isLandscape) {
         // Exit fullscreen → back to portrait
         await ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.PORTRAIT_UP
         );
-        setShowFullScreen(false);
+        setOrientation(false);
       } else {
         // Enter fullscreen → landscape
         await ScreenOrientation.lockAsync(
           ScreenOrientation.OrientationLock.LANDSCAPE
         );
-        setShowFullScreen(true);
+        setOrientation(true);
       }
     } catch (err) {
       console.error("Orientation toggle error:", err);
@@ -422,7 +427,7 @@ const VideoPlayer = ({
 
   const dynamicStyles = StyleSheet.create({
     container: {
-      height: showFullScreen ? screenWidth : VIDEO_HEIGHT,
+      height: isLandscape ? screenWidth : VIDEO_HEIGHT,
       width: "100%",
       backgroundColor: "#000",
     },
@@ -509,10 +514,7 @@ You do not have permission to view this video.`}
       <VideoControls
         haveCreatorPass={haveCreator}
         haveAccessPass={haveAccess}
-        fetchCreator={setFetchCreator}
-        fetchAccess={setFetchAccess}
-        haveCreator={setHaveCreator}
-        haveAccess={setHaveAccess}
+        haveCreator={setCheckCreatorPass}
         player={player}
         videoData={{
           ...videoData,
@@ -539,7 +541,7 @@ You do not have permission to view this video.`}
         />
       </View> */}
 
-      <View className="z-10 absolute top-10 left-5">
+      <View className={`z-10 absolute left-5 top-14`}>
         <Pressable onPress={() => router.push("/(dashboard)/wallet")}>
           <Image
             source={require("../../../../assets/images/Wallet.png")}
@@ -549,39 +551,47 @@ You do not have permission to view this video.`}
       </View>
 
       {isGifted && (
-        <GiftingMessage
-          isVisible={true}
-          onClose={clearGiftingData}
-          creator={creator}
-          amount={giftSuccessMessage}
-        />
+        <View className="z-10 absolute w-full">
+          <GiftingMessage
+            isVisible={true}
+            onClose={clearGiftingData}
+            creator={creator}
+            amount={giftSuccessMessage}
+          />
+        </View>
       )}
 
       {isVideoPurchased && (
-        <VideoBuyMessage
-          isVisible={true}
-          onClose={clearVideoAccessData}
-          creator={creator}
-          name={videoName}
-          amount={giftSuccessMessage}
-        />
+        <View className="absolute z-10">
+          <VideoBuyMessage
+            isVisible={true}
+            onClose={clearVideoAccessData}
+            creator={creator}
+            name={videoName}
+            amount={giftSuccessMessage}
+          />
+        </View>
       )}
 
       {isPurchasedPass && (
-        <CreatorPassBuyMessage
-          isVisible={true}
-          onClose={clearPassData}
-          creator={creator}
-          amount={giftSuccessMessage}
-        />
+        <View>
+          <CreatorPassBuyMessage
+            isVisible={true}
+            onClose={clearPassData}
+            creator={creator}
+            amount={giftSuccessMessage}
+          />
+        </View>
       )}
 
       {isPurchasedSeries && series && (
-        <SeriesPurchaseMessage
-          isVisible={true}
-          onClose={clearSeriesData}
-          series={series}
-        />
+        <View>
+          <SeriesPurchaseMessage
+            isVisible={true}
+            onClose={clearSeriesData}
+            series={series}
+          />
+        </View>
       )}
 
       {showCommentsModal && setShowCommentsModal && (
