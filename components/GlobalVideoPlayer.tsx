@@ -4,6 +4,7 @@ import {
   Dimensions,
   ActivityIndicator,
   Text,
+  View,
 } from "react-native";
 import ThemedView from "@/components/ThemedView";
 import { VideoItemType } from "@/types/VideosType";
@@ -20,8 +21,7 @@ export type GiftType = {
 };
 
 const { height: screenHeight } = Dimensions.get("screen");
-const BOTTOM_NAV_HEIGHT = 50;
-const VIDEO_HEIGHT = screenHeight - BOTTOM_NAV_HEIGHT;
+const VIDEO_HEIGHT = screenHeight;
 
 const GlobalVideoPlayer: React.FC = () => {
   const [loading] = useState(false); // Set to false since we're not actually loading anything
@@ -44,10 +44,19 @@ const GlobalVideoPlayer: React.FC = () => {
   // This prevents creating a new render function on every parent render.
   const renderItem = useCallback(
     ({ item, index }: { item: VideoItemType; index: number }) => (
-      <VideoPlayer
-        videoData={item}
-        isActive={index === visibleIndex}
-      />
+      <View style={{ 
+        height: VIDEO_HEIGHT, 
+        width: '100%', 
+        overflow: 'hidden',
+        backgroundColor: '#000'
+      }}>
+        <VideoPlayer
+          videoData={item}
+          isActive={index === visibleIndex}
+          isGlobalPlayer={true}
+          containerHeight={VIDEO_HEIGHT}
+        />
+      </View>
     ),
     [visibleIndex]
   );
@@ -65,7 +74,7 @@ const GlobalVideoPlayer: React.FC = () => {
 
   if (loading) {
     return (
-      <ThemedView style={{ height: VIDEO_HEIGHT }} className="justify-center items-center">
+      <ThemedView style={{ flex: 1 }} className="justify-center items-center">
         <ActivityIndicator size="large" color="white" />
       </ThemedView>
     );
@@ -73,7 +82,7 @@ const GlobalVideoPlayer: React.FC = () => {
 
   if (error) {
     return (
-      <ThemedView style={{ height: VIDEO_HEIGHT }} className="justify-center items-center">
+      <ThemedView style={{ flex: 1 }} className="justify-center items-center">
         <Text className="text-white">{error}</Text>
       </ThemedView>
     );
@@ -88,12 +97,25 @@ const GlobalVideoPlayer: React.FC = () => {
         getItemLayout={getItemLayout}
         pagingEnabled
         onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
-        initialNumToRender={2}
-        maxToRenderPerBatch={2}
-        windowSize={3}
+        viewabilityConfig={{ 
+          itemVisiblePercentThreshold: 95,
+          minimumViewTime: 200,
+          waitForInteraction: false
+        }}
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+        windowSize={1}
+        removeClippedSubviews={false}
+        bounces={false}
+        disableIntervalMomentum={true}
+        scrollEventThrottle={16}
+        snapToInterval={VIDEO_HEIGHT}
+        snapToAlignment="start"
+        decelerationRate="fast"
         showsVerticalScrollIndicator={false}
-        style={{ height: VIDEO_HEIGHT }}
+        style={{ flex: 1, backgroundColor: '#000' }}
+        overScrollMode="never" // Android: prevent over-scrolling
+        alwaysBounceVertical={false} // iOS: prevent bouncing
       />
     </ThemedView>
   );

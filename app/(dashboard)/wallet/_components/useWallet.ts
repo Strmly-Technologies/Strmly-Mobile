@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   getWalletDetails,
   createWalletLoadOrder,
@@ -23,15 +23,28 @@ export const useWallet = (token: string) => {
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastFetchTime = useRef<number>(0);
+  const lastFetchedToken = useRef<string>('');
+  const FETCH_COOLDOWN = 2000; // 2 seconds cooldown between fetches
 
   // Fetch wallet details
-  const fetchWalletDetails = async () => {
+  const fetchWalletDetails = useCallback(async (force: boolean = false) => {
+    if (!token) return;
+    
+    // Prevent rapid successive calls unless forced
+    const now = Date.now();
+    if (!force && now - lastFetchTime.current < FETCH_COOLDOWN) {
+      console.log('Skipping wallet fetch due to cooldown');
+      return;
+    }
+    lastFetchTime.current = now;
+    
     try {
-      console.log('hitting....', token)
+      console.log('Fetching wallet details for token:', token.substring(0, 10) + '...');
       setIsLoading(true);
       setError(null);
       const response = await getWalletDetails(token);
-      console.log('hitting....')
+      console.log('Wallet details fetched successfully');
       setWalletData(response.wallet);
     } catch (err: any) {
       console.error('Error fetching wallet details:', err);
@@ -39,7 +52,7 @@ export const useWallet = (token: string) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token]);
 
   // Create load order
   const createLoadOrder = async (amount: number) => {
@@ -208,12 +221,13 @@ export const useWallet = (token: string) => {
 
   // Initialize wallet data on mount
   useEffect(() => {
-    if (token) {
+    if (token && token !== lastFetchedToken.current) {
+      lastFetchedToken.current = token;
       fetchWalletDetails();
       // Skip withdrawal history as endpoint doesn't exist
       // fetchWithdrawals();
     }
-  }, [token]);
+  }, [token, fetchWalletDetails]);
 
   return {
     // State

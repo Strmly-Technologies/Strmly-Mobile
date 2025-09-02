@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';
 import { CONFIG } from '@/Constants/config';
 import { getProfilePhotoUrl } from '@/utils/profileUtils';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface BottomNavBarProps {
   activeTab?: 'home' | 'studio' | 'search' | 'profile';
@@ -14,6 +15,7 @@ interface BottomNavBarProps {
 export default function BottomNavBar({ activeTab }: BottomNavBarProps) {
   const { token, user } = useAuthStore();
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const fetchProfilePhoto = async () => {
@@ -75,10 +77,11 @@ export default function BottomNavBar({ activeTab }: BottomNavBarProps) {
         left: 0,
         right: 0,
         backgroundColor: '#000000',
-        height: 50,
+        height: 50 + insets.bottom,
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
+        paddingBottom: insets.bottom,
         borderTopWidth: 0,
         elevation: 8, // Android shadow
         shadowColor: '#000', // iOS shadow

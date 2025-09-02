@@ -71,6 +71,17 @@ export const useComments = ({ videoId }: UseCommentsProps) => {
       const data = await commentActions.getComments(token, videoId, page, limit);
 
       console.log('✅ Real comments fetched:', data?.comments?.length || 0);
+      
+      // Debug: Log gift counts from API response
+      if (data?.comments?.length > 0) {
+        console.log('💰 API Response Gift Counts:', data.comments.map((c: any) => ({
+          id: c._id,
+          content: c.content?.substring(0, 20) + "...",
+          gifts: c.gifts,
+          donations: c.donations,
+          user: c.user?.name || c.user?.username
+        })));
+      }
 
       // Validate and filter out malformed comments
       const validComments = (data?.comments || []).filter((comment: any) => {

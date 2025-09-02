@@ -20,10 +20,10 @@ import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ChevronLeft } from "lucide-react-native";
 import { createWithdrawalRequest } from "@/api/wallet/walletActions";
+import { useWallet } from "@/app/(dashboard)/wallet/_components/useWallet";
 
 const WithdrawFromWallet = () => {
   const [amount, setAmount] = useState("");
-  const [walletInfo, setWalletInfo] = useState<{ balance?: number }>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +32,7 @@ const WithdrawFromWallet = () => {
   const animatedBottom = useRef(new Animated.Value(insets.bottom)).current;
 
   const { token } = useAuthStore();
+  const { walletData, error: walletError, isLoading: walletLoading, fetchWalletDetails } = useWallet(token || "");
 
   const handleAmountChange = (text: string) => {
     const filtered = text.replace(/[^0-9]/g, "");
@@ -52,7 +53,7 @@ const WithdrawFromWallet = () => {
       return;
     }
 
-    if (walletInfo.balance && withdrawAmount > walletInfo.balance) {
+    if (walletData?.balance && withdrawAmount > walletData.balance) {
       setError("Insufficient balance");
       return;
     }
@@ -122,36 +123,15 @@ const WithdrawFromWallet = () => {
     };
   }, []);
 
-  // Fetch wallet info
+  // Handle wallet errors
   useEffect(() => {
-    const fetchWalletInfo = async () => {
-      if (!token) {
-        return;
-      }
-
-      try {
-        const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_API_URL}/wallet/`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        
-        if (!response.ok) throw new Error("Failed to fetch wallet info");
-        
-        const data = await response.json();
-        console.log("💰 Wallet data:", data.wallet);
-        setWalletInfo(data.wallet || {});
-      } catch (err) {
-        console.error("❌ Error fetching wallet info:", err);
-      }
-    };
-
-    if (token) {
-      fetchWalletInfo();
+    if (walletError) {
+      console.error("❌ Error fetching wallet info:", walletError);
+      setError(walletError);
     }
-  }, [token]);
+  }, [walletError]);
+
+  // Wallet data is automatically fetched by useWallet hook
 
   return (
     <ThemedView className="flex-1 bg-black">
@@ -230,7 +210,7 @@ const WithdrawFromWallet = () => {
 
               <View className="items-center justify-center mt-1">
                 <Text className="text-white text-sm">
-                  Current balance ₹{walletInfo.balance?.toFixed(2) || '0.00'}
+                  Current balance ₹{walletLoading ? "Loading..." : walletData?.balance?.toFixed(2) || '0.00'}
                 </Text>
               </View>
 

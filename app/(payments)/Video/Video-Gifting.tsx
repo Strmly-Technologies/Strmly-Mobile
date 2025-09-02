@@ -26,9 +26,9 @@ import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { useAuthStore } from "@/store/useAuthStore";
 import Constants from "expo-constants";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGiftingStore } from "@/store/useGiftingStore";
 import ModalMessage from "@/components/AuthModalMessage";
+import { useWallet } from "@/app/(dashboard)/wallet/_components/useWallet";
 
 const { height } = Dimensions.get("window");
 const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
@@ -44,12 +44,14 @@ type GiftingData = {
   setIsWantToGift?: (value: boolean) => void;
   setIsGifted?: (value: boolean) => void;
   giftMessage?: string;
+  onGiftSuccess?: () => void;
 };
 
 const VideoContentGifting = ({
   setIsWantToGift,
   setIsGifted,
   giftMessage,
+  onGiftSuccess,
 }: GiftingData) => {
   const {
     mode,
@@ -69,21 +71,17 @@ const VideoContentGifting = ({
   // Use route videoId for comment gifting, prop videoId for video gifting
   const currentVideoId = isCommentGiftMode ? routeVideoId : videoId;
 
-  // Debug log the parameters
-  console.log("🔍 Route parameters:", {
-    mode,
-    commentId,
-    videoId: currentVideoId,
-    propVideoId: videoId,
-    routeVideoId,
-    creatorName,
-    creatorUsername,
-    creatorPhoto,
-    creatorId,
-  });
+  // For comment gifting, construct creator object from route parameters
+  const currentCreator = isCommentGiftMode ? {
+    _id: creatorId as string,
+    username: creatorUsername as string,
+    name: creatorName as string,
+    profile_photo: creatorPhoto as string,
+  } : creator;
+
+
   const [amount, setAmount] = useState("");
   const [userUPI, setUserUPI] = useState("");
-  const [walletInfo, setWalletInfo] = useState<{ balance?: number }>({});
   const [loading, setLoading] = useState(false);
 
   const [step, setStep] = useState<number | null>(null);
@@ -100,7 +98,8 @@ const VideoContentGifting = ({
   // const insets = useSafeAreaInsets();
   // const animatedBottom = useRef(new Animated.Value(insets.bottom)).current;
 
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
+  const { walletData, error: walletError, isLoading: walletLoading, fetchWalletDetails } = useWallet(token || "");
 
   const handleCloseModalMessage = () => {
     setIsWithdrawalComplete(false);
@@ -128,11 +127,7 @@ const VideoContentGifting = ({
   // ------------ Transaction -------------------
 
   const giftVideo = async () => {
-    console.log("🎁 Debug - Gift Video Parameters:", {
-      token: token ? "Present" : "Missing",
-      videoId: videoId || "Missing",
-      amount: amount || "Missing",
-    });
+
 
     if (!token || !videoId) {
       const missingFields = [];
@@ -143,13 +138,19 @@ const VideoContentGifting = ({
       return;
     }
 
+    // Check if user is trying to gift to themselves
+    if (user?.id === currentCreator?._id) {
+      setError("You cannot gift to your own video");
+      return;
+    }
+
     const giftAmount = parseInt(amount);
     if (giftAmount <= 0) {
       setError("Please enter a valid amount");
       return;
     }
 
-    if (walletInfo.balance && giftAmount > walletInfo.balance) {
+    if (walletData?.balance && giftAmount > walletData.balance) {
       setError("Insufficient balance");
       return;
     }
@@ -175,25 +176,23 @@ const VideoContentGifting = ({
       }
 
       const data = await response.json();
-      console.log("✅ Gift Video Success:", data);
+
 
       // Setting data when gifting done
       completeGifting(data.gift.amount);
+      
+      // Refresh wallet data
+      fetchWalletDetails();
 
       router.back();
     } catch (err) {
-      console.error("❌ Gift Video Error:", err);
+
       setError(err instanceof Error ? err.message : "Failed to send gift");
     }
   };
 
   const giftCommentHandler = async () => {
-    console.log("🔍 Debug - Checking required parameters:", {
-      token: token ? "Present" : "Missing",
-      commentId: commentId || "Missing",
-      videoId: currentVideoId || "Missing",
-      amount: amount || "Missing",
-    });
+
 
     if (!token || !commentId || !currentVideoId || !amount) {
       const missingFields = [];
@@ -206,22 +205,40 @@ const VideoContentGifting = ({
       return;
     }
 
+    // Check if user is trying to gift to themselves
+    if (user?.id === creatorId) {
+      setError("You cannot gift to your own comment");
+      return;
+    }
+
     const giftAmount = parseInt(amount);
     if (giftAmount <= 0) {
       setError("Please enter a valid amount");
       return;
     }
 
-    if (walletInfo.balance && giftAmount > walletInfo.balance) {
+    if (walletData?.balance && giftAmount > walletData.balance) {
       setError("Insufficient balance");
       return;
     }
 
     try {
-      console.log("🎁 Gifting comment with:", {
-        commentId,
-        videoId,
+      const requestBody = {
+        commentId: commentId as string,
+        videoId: currentVideoId as string,
+        videoType: "long",
         amount: giftAmount,
+        giftNote: `Gift of ₹${giftAmount}`,
+      };
+
+      console.log("🚀 Making gift-comment API call:", {
+        url: `${BACKEND_API_URL}/interactions/gift-comment`,
+        method: "POST",
+        body: requestBody,
+        headers: {
+          Authorization: `Bearer ${token?.substring(0, 20)}...`,
+          "Content-Type": "application/json",
+        }
       });
 
       // Use direct API call with correct URL format
@@ -233,19 +250,18 @@ const VideoContentGifting = ({
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            commentId: commentId as string,
-            videoId: currentVideoId as string,
-            videoType: "long",
-            amount: giftAmount,
-            giftNote: `Gift of ₹${giftAmount}`,
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to send gift");
+        console.error("❌ API Error Response:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
+        throw new Error(errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -256,11 +272,32 @@ const VideoContentGifting = ({
       setSuccessMessage(
         `Successfully gifted ₹${giftAmount} to ${creatorName || "the creator"}!`
       );
+      
+      // Refresh wallet data
+      fetchWalletDetails();
+      
+      // Call success callback to refresh comments
+      if (onGiftSuccess) {
+        onGiftSuccess();
+      }
+      
+      // Auto-navigate back after 2 seconds
+      setTimeout(() => {
+        router.back();
+      }, 2000);
     } catch (err: any) {
       console.error("❌ Comment gift error:", err);
 
       // Provide more user-friendly error messages
-      if (err.message === "Comment not monetized") {
+      if (err.message === "Invalid or expired token") {
+        setError(
+          "Your session has expired. Please close this screen and try again. If the problem persists, please log out and log back in."
+        );
+        // Optionally, you could automatically log out the user here:
+        // const { logout } = useAuthStore.getState();
+        // logout();
+        // router.replace('/(auth)/Sign-in');
+      } else if (err.message === "Comment author has disabled comment monetization" || err.message === "Comment not monetized") {
         setError(
           "This comment cannot receive gifts. The creator may not have enabled comment monetization for this content."
         );
@@ -287,7 +324,7 @@ const VideoContentGifting = ({
       return;
     }
 
-    if (walletInfo.balance && withdrawAmount > walletInfo.balance) {
+    if (walletData?.balance && withdrawAmount > walletData.balance) {
       setError("Insufficient balance");
       return;
     }
@@ -409,8 +446,8 @@ const VideoContentGifting = ({
       isWithdrawMode,
       isCommentGiftMode,
       amount,
-      videoId,
-      creator,
+      videoId: currentVideoId,
+      creator: currentCreator,
     });
 
     setLoading(true);
@@ -465,36 +502,15 @@ const VideoContentGifting = ({
     };
   }, []);
 
-  // ------ Wallet Status API --------
-
+  // Handle wallet errors
   useEffect(() => {
-    const fetchWalletInfo = async () => {
-      if (!token) {
-        return;
-      }
-
-      try {
-        const response = await fetch(`${BACKEND_API_URL}/wallet/`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) throw new Error("Failed to fetch wallet info");
-        const data = await response.json();
-        console.log("dWallet data---------------", data.wallet);
-        setWalletInfo(data.wallet);
-        // (data.isLiked);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    if (token) {
-      fetchWalletInfo();
+    if (walletError) {
+      console.log("[Error: Failed to fetch wallet info]");
+      setError(walletError);
     }
-  }, [token]);
+  }, [walletError]);
+
+  // Wallet data is automatically fetched by useWallet hook
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
@@ -529,11 +545,11 @@ const VideoContentGifting = ({
                     <View className="w-8" />
                   </View>
                 ) : (
-                  creator && (
+                  currentCreator && (
                     <CreatorInfo
-                      profile={creator?.profile_photo}
-                      name={creator?.name}
-                      username={creator?.username}
+                      profile={currentCreator?.profile_photo}
+                      name={currentCreator?.name}
+                      username={currentCreator?.username}
                     />
                   )
                 )}
@@ -686,8 +702,21 @@ const VideoContentGifting = ({
                 <View className="items-center justify-center mt-1">
                   <Text className="text-white text-sm">
                     {isWithdrawMode ? "Current balance" : "Total balance"} ₹
-                    {walletInfo.balance?.toFixed(2) || "0.00"}
+                    {walletLoading ? "Loading..." : walletData?.balance?.toFixed(2) || "0.00"}
                   </Text>
+                  {walletError && (
+                    <View className="items-center mt-1">
+                      <Text className="text-red-400 text-xs">
+                        Failed to load wallet balance
+                      </Text>
+                      <Pressable
+                        onPress={fetchWalletDetails}
+                        className="mt-1 px-2 py-1 bg-blue-600 rounded"
+                      >
+                        <Text className="text-white text-xs">Retry</Text>
+                      </Pressable>
+                    </View>
+                  )}
                 </View>
 
                 {isWithdrawMode && (

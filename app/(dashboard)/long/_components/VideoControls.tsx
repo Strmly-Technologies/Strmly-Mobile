@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   interactGlobal: { position: "absolute", bottom: "16%", right: 10, zIndex: 5 },
   details: {
     position: "absolute",
-    bottom: "2%",
+    bottom: "0%",
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 10,

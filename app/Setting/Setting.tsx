@@ -34,8 +34,8 @@ const Setting = () => {
     // Provide fallback values
     monetizationHook = {
       monetizationStatus: null,
-      toggleCommentMonetization: async () => {},
-      fetchMonetizationStatus: async () => {},
+      toggleCommentMonetization: async () => { },
+      fetchMonetizationStatus: async () => { },
       loading: false,
     };
   }
@@ -57,7 +57,7 @@ const Setting = () => {
     specialText: false,
     useButtons: false,
     primaryButtonText: "",
-    onPrimaryButtonPress: () => {},
+    onPrimaryButtonPress: () => { },
     secondaryButtonText: "",
     info: "",
     confirmRequest: "",
@@ -200,7 +200,7 @@ By submitting this request, you confirm that you understand and agree to our`,
 
         <View className="mt-14 items-start mx-5 gap-5 w-full">
           {/* Monetization Toggle */}
-          {/* <View className="flex-row items-center justify-between w-full">
+          <View className="flex-row items-center justify-between w-full">
             <Text className="text-white text-lg">
               Activate comment monetization
             </Text>
@@ -221,7 +221,7 @@ By submitting this request, you confirm that you understand and agree to our`,
                 />
               </Pressable>
             )}
-          </View> */}
+          </View>
 
           {/* Action Buttons */}
           <Pressable

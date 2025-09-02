@@ -1,7 +1,6 @@
 import React from "react";
 import { Modal, View, Text, Pressable, StyleSheet, Image } from "react-native";
 import { GiftType } from "../VideoFeed";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGiftingStore } from "@/store/useGiftingStore";
 import { router } from "expo-router";
 
@@ -28,6 +27,9 @@ const VideoBuyMessage = ({
       transparent={true}
       visible={isVisible}
       onRequestClose={async () => {
+        router.push({
+          pathname: "/(dashboard)/long/GlobalVideoPlayer",
+        });
         onClose(false);
         clearVideoAccessData();
         // router.push({

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import { FlatList, Dimensions, ActivityIndicator, Text, Pressable } from "react-native";
+import { FlatList, Dimensions, ActivityIndicator, Text, Pressable, View } from "react-native";
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -12,6 +12,7 @@ import UnifiedVideoPlayer from "@/components/UnifiedVideoPlayer";
 import CommentsSection from "./_components/CommentSection";
 import VideoFeedDebug from "@/components/VideoFeedDebug";
 import VideoContentGifting from "@/app/(payments)/Video/Video-Gifting";
+import VideoPlayer from "./_components/VideoPlayer";
 
 export type GiftType = {
   _id: string;
@@ -30,14 +31,14 @@ const VideoFeed: React.FC = () => {
   const BACKEND_API_URL = CONFIG.API_BASE_URL;
   console.log('🔧 VideoFeed API URL:', BACKEND_API_URL);
   const [screenDimensions, setScreenDimensions] = useState(Dimensions.get("window"));
-  
+
   // Get safe area insets
   const insets = useSafeAreaInsets();
-  
+
   const BOTTOM_NAV_HEIGHT = 50; // Height of the bottom navigation bar
-  
-  // Calculate available height - use full screen height minus bottom nav only
-  const adjustedHeight = screenDimensions.height - BOTTOM_NAV_HEIGHT - insets.bottom;
+
+  // Calculate available height - use full screen height
+  const adjustedHeight = screenDimensions.height;
 
   console.log('Screen height:', screenDimensions.height);
   console.log('Top inset:', insets.top);
@@ -141,7 +142,7 @@ const VideoFeed: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       console.log('🎯 VideoFeed focused - recalculating layout');
-      
+
       // Force layout recalculation with a small delay
       setTimeout(() => {
         const currentDimensions = Dimensions.get("window");
@@ -163,16 +164,40 @@ const VideoFeed: React.FC = () => {
   // OPTIMIZATION 1: Stabilize and throttle the onViewableItemsChanged callback
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
-      const newIndex = viewableItems[0].index;
+      // Find the item that's most visible (highest percentage)
+      const mostVisible = viewableItems.reduce((prev: any, current: any) => {
+        return (current.percent || 0) > (prev.percent || 0) ? current : prev;
+      });
+
+      const newIndex = mostVisible.index;
       // Only update if index actually changed to reduce re-renders
       setVisibleIndex(prevIndex => prevIndex !== newIndex ? newIndex : prevIndex);
     }
   });
 
+  // Add scroll handlers for better snapping
+  const onScrollEndDrag = useCallback((event: any) => {
+    const { contentOffset } = event.nativeEvent;
+    const currentIndex = Math.round(contentOffset.y / adjustedHeight);
+
+    if (currentIndex !== visibleIndex) {
+      setVisibleIndex(Math.max(0, Math.min(currentIndex, videos.length - 1)));
+    }
+  }, [visibleIndex, videos.length, adjustedHeight]);
+
+  const onMomentumScrollEnd = useCallback((event: any) => {
+    const { contentOffset } = event.nativeEvent;
+    const currentIndex = Math.round(contentOffset.y / adjustedHeight);
+
+    if (currentIndex !== visibleIndex) {
+      setVisibleIndex(Math.max(0, Math.min(currentIndex, videos.length - 1)));
+    }
+  }, [visibleIndex, videos.length, adjustedHeight]);
+
   // Handle episode change
   const handleEpisodeChange = useCallback((episodeData: any) => {
     console.log('🎬 VideoFeed: Episode change requested:', episodeData);
-    
+
     if (!episodeData || !episodeData._id) {
       console.error('❌ Invalid episode data:', episodeData);
       return;
@@ -182,7 +207,7 @@ const VideoFeed: React.FC = () => {
     setVideos(prevVideos => {
       const newVideos = [...prevVideos];
       const currentIndex = visibleIndex;
-      
+
       if (currentIndex >= 0 && currentIndex < newVideos.length) {
         // Replace the current video with the selected episode
         newVideos[currentIndex] = {
@@ -195,10 +220,10 @@ const VideoFeed: React.FC = () => {
           views: episodeData.views || 0,
           comments: episodeData.comments || [],
         };
-        
+
         console.log('✅ VideoFeed: Episode switched successfully');
       }
-      
+
       return newVideos;
     });
   }, [visibleIndex]);
@@ -206,19 +231,26 @@ const VideoFeed: React.FC = () => {
   // OPTIMIZATION 2: Memoize the renderItem function with reduced dependencies
   const renderItem = useCallback(
     ({ item, index }: { item: VideoItemType; index: number }) => (
-      <VideoPlayer
-        key={item._id}
-        videoData={item}
-        isActive={index === visibleIndex}
-        containerHeight={adjustedHeight}
-        showCommentsModal={showCommentsModal}
-        setShowCommentsModal={setShowCommentsModal}
-        onEpisodeChange={handleEpisodeChange}
-        onStatsUpdate={(stats) => {
-          // Handle stats update if needed
-          console.log('Video stats updated:', stats);
-        }}
-      />
+      <View style={{
+        height: adjustedHeight,
+        width: '100%',
+        overflow: 'hidden',
+        backgroundColor: '#000'
+      }}>
+        <VideoPlayer
+          key={item._id}
+          videoData={item}
+          isActive={index === visibleIndex}
+          containerHeight={adjustedHeight}
+          showCommentsModal={showCommentsModal}
+          setShowCommentsModal={setShowCommentsModal}
+          onEpisodeChange={handleEpisodeChange}
+          onStatsUpdate={(stats) => {
+            // Handle stats update if needed
+            console.log('Video stats updated:', stats);
+          }}
+        />
+      </View>
     ),
     [visibleIndex, adjustedHeight, handleEpisodeChange, showCommentsModal, setShowCommentsModal]
   );
@@ -237,11 +269,7 @@ const VideoFeed: React.FC = () => {
   if (loading) {
     return (
       <ThemedView style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        flex: 1,
         backgroundColor: 'black'
       }} className="justify-center items-center">
         <ActivityIndicator size="large" color="white" />
@@ -252,11 +280,7 @@ const VideoFeed: React.FC = () => {
   if (error) {
     return (
       <ThemedView style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        flex: 1,
         backgroundColor: 'black'
       }} className="justify-center items-center px-4">
         <Text className="text-white text-center mb-4">Failed to load videos</Text>
@@ -279,9 +303,7 @@ const VideoFeed: React.FC = () => {
   return (
     <ThemedView style={{
       flex: 1,
-      backgroundColor: 'black',
-      paddingTop: insets.top,
-      paddingBottom: insets.bottom
+      backgroundColor: 'black'
     }}>
       <VideoFeedDebug />
       {isGifted && giftingData ? (
@@ -303,22 +325,30 @@ const VideoFeed: React.FC = () => {
           data={videos}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
-          style={{ flex: 1 }}
+          style={{ flex: 1, backgroundColor: '#000' }}
+          overScrollMode="never" // Android: prevent over-scrolling
+          alwaysBounceVertical={false} // iOS: prevent bouncing
           getItemLayout={getItemLayout}
           pagingEnabled
           scrollEnabled={!showCommentsModal}
           onViewableItemsChanged={onViewableItemsChanged.current}
-          viewabilityConfig={{ 
-            itemVisiblePercentThreshold: 80,
-            minimumViewTime: 100 // Reduce sensitivity
+          viewabilityConfig={{
+            itemVisiblePercentThreshold: 95, // Increased for stricter detection
+            minimumViewTime: 200, // Increased for better stability
+            waitForInteraction: false
           }}
           decelerationRate="fast"
           showsVerticalScrollIndicator={false}
           snapToInterval={adjustedHeight}
           snapToAlignment="start"
-          removeClippedSubviews={true} // Performance optimization
-          maxToRenderPerBatch={2} // Render fewer items at once
-          windowSize={3} // Smaller window size
+          removeClippedSubviews={false} // Disable to prevent content bleeding
+          bounces={false} // Disable bouncing to prevent content bleeding
+          disableIntervalMomentum={true} // Prevent momentum scrolling past snap points
+          scrollEventThrottle={16}
+          onScrollEndDrag={onScrollEndDrag}
+          onMomentumScrollEnd={onMomentumScrollEnd}
+          maxToRenderPerBatch={1} // Render only one item at once
+          windowSize={1} // Smaller window size
           initialNumToRender={1} // Only render first item initially
           updateCellsBatchingPeriod={100} // Batch updates
         />

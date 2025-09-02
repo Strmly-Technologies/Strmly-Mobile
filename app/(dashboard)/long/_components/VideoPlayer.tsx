@@ -88,6 +88,14 @@ const VideoPlayer = ({
   const [isReady, setIsReady] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [playerError, setPlayerError] = useState(false);
+  
+  // FIX: Add local state for stats to enable instant updates
+  const [localStats, setLocalStats] = useState({
+    likes: videoData.likes || 0,
+    gifts: videoData.gifts || 0,
+    shares: videoData.shares || 0,
+    comments: videoData.comments?.length || 0,
+  });
 
   const mountedRef = useRef(true);
   const statusListenerRef = useRef<any>(null);
@@ -97,16 +105,25 @@ const VideoPlayer = ({
   const VIDEO_HEIGHT = containerHeight || screenHeight;
   const isFocused = useIsFocused();
 
-  // Comments state
-  const [localStats, setLocalStats] = useState({
-    likes: videoData.likes || 0,
-    gifts: videoData.gifts || 0,
-    shares: videoData.shares || 0,
-    comments: videoData.comments?.length || 0,
-  });
+
+  // FIX: Update local stats when videoData changes (e.g., when switching videos)
+  useEffect(() => {
+    setLocalStats({
+      likes: videoData.likes || 0,
+      gifts: videoData.gifts || 0,
+      shares: videoData.shares || 0,
+      comments: videoData.comments?.length || 0,
+    });
+  }, [videoData._id, videoData.likes, videoData.gifts, videoData.shares, videoData.comments?.length]);
+
+
+
+
 
   // Full screen:
-  const { setOrientation, isLandscape } = useOrientationStore();
+  const [showFullScreen, setShowFullScreen] = useState(false);
+  const {setOrientation, isLandscape} = useOrientationStore();
+
 
   // Create player with proper cleanup
   const player = useVideoPlayer(videoData?.videoUrl || "", (p) => {
@@ -265,6 +282,9 @@ const VideoPlayer = ({
     player,
     playerError,
     videoData?.videoUrl,
+    haveAccess,
+    haveCreator,
+    videoData.amount,
   ]);
 
   // Handle gifting state
@@ -315,6 +335,8 @@ const VideoPlayer = ({
     isReady,
     isGifted,
     playerError,
+    haveAccess,
+    haveCreator,
   ]);
 
   // Handle player store updates
@@ -430,6 +452,8 @@ const VideoPlayer = ({
       height: isLandscape ? screenWidth : VIDEO_HEIGHT,
       width: "100%",
       backgroundColor: "#000",
+      overflow: "hidden", // Prevent content bleeding
+      position: "relative", // Ensure proper positioning
     },
     video: {
       width: "100%",
