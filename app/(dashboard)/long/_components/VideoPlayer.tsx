@@ -1223,6 +1223,16 @@ You do not have permission to view this video.`}
         onStatsUpdate={handleStatsUpdate}
       />
 
+      {/* <View className="absolute left-0 right-0 z-10 px-2" style={!isGlobalPlayer ? { bottom: 42.5 } : { bottom: 0 }}>
+        <VideoProgressBar
+          player={player}
+          isActive={isActive}
+          videoId={videoData._id}
+          duration={videoData.duration || 0}
+          access={videoData.access}
+        />
+      </View> */}
+
       {showWallet && (
         <View className={`z-10 absolute left-5 top-14`}>
           <Pressable onPress={() => router.push("/(dashboard)/wallet")}>
@@ -1294,10 +1304,12 @@ You do not have permission to view this video.`}
           }}
           onCommentAdded={() => {
             const newCommentCount = localStats.comments + 1;
+
             setLocalStats((prev) => ({
               ...prev,
               comments: newCommentCount,
             }));
+              
             if (onStatsUpdate) {
               onStatsUpdate({ comments: newCommentCount });
             }

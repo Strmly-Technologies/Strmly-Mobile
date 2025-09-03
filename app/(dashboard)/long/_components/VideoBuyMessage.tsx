@@ -28,6 +28,9 @@ const VideoBuyMessage = ({
       onRequestClose={async () => {
         onClose(false);
         clearVideoAccessData();
+        // router.push({
+        //   pathname: "/(dashboard)/long/GlobalVideoPlayer",
+        // });
       }} // Allows closing with the back button on Android
     >
       {/* Semi-transparent backdrop */}
