@@ -208,7 +208,7 @@ const CreatorPassBuy = () => {
 
   return (
     <ThemedView className="flex-1 bg-black">
-      <View className="flex-1 justify-between pt-10 px-5">
+      <View className="flex-1 justify-between pt-0 px-5">
         {/* Top section */}
         <View className="mt-5">
           <CreatorInfo
@@ -242,7 +242,7 @@ const CreatorPassBuy = () => {
             position: "absolute",
             left: 0,
             right: 0,
-            bottom: Animated.add(new Animated.Value(80), animatedBottom),
+            bottom: Animated.add(new Animated.Value(50), animatedBottom),
             paddingBottom: insets.bottom,
           }}
           className="gap-2 justify-end"

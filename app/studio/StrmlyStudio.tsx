@@ -307,7 +307,7 @@ const StrmlyStudio = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={['bottom']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       {/* <ThemedView className="flex-1"> */}
         <StatusBar barStyle="light-content" backgroundColor="#000" />
 

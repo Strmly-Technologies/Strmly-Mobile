@@ -62,9 +62,9 @@ const VideoAccess = () => {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "black" }}
-      edges={["top"]}
+      edges={[]}
     >
-      <View className="flex-1 bg-black">
+      <View className="flex-1">
         <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         {/* Header */}

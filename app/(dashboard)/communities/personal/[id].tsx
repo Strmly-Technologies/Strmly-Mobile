@@ -351,7 +351,7 @@ export default function PersonalCommunityPage() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       <ThemedView className="flex-1">
         {/* Cover Image */}
         {!isLoading && (

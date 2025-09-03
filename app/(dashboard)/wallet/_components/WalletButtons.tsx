@@ -1,6 +1,7 @@
 import { View, Text, Pressable, Alert, TextInput, Modal } from "react-native";
 import React, { useState } from "react";
 import AddMoneyModal from "./AddMoneyModal";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface WalletButtonsProps {
   onWithdraw: () => void;
@@ -61,7 +62,7 @@ const WalletButtons: React.FC<WalletButtonsProps> = ({
   };
 
   return (
-    <>
+    <SafeAreaView style={{flex:1}} edges={[]}>
       <View className="gap-3 mb-36">
         <Pressable
           onPress={handleAddToWallet}
@@ -137,7 +138,7 @@ const WalletButtons: React.FC<WalletButtonsProps> = ({
           </View>
         </View>
       </Modal>
-    </>
+    </SafeAreaView>
   );
 };
 

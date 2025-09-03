@@ -62,7 +62,7 @@ const TotalBalanceHistory = ({ closeTBalance }: { closeTBalance: any }) => {
 
   return (
     <View className="absolute -top-2 gap-5 w-full">
-      <SafeAreaView>
+      <SafeAreaView edges={[]}>
         <View className="w-full flex-row items-center justify-between">
           <TouchableOpacity
             onPress={() => closeTBalance(false)}

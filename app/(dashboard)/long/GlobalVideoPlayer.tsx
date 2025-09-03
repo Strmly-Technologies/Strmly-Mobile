@@ -190,7 +190,7 @@ const GlobalVideoPlayer: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1" edges={[]}>
-      <ThemedView>
+      {/* <ThemedView> */}
         <FlatList
           ref={flatListRef}
           data={videos}
@@ -222,8 +222,8 @@ const GlobalVideoPlayer: React.FC = () => {
           //   }
           // }}
         />
-      </ThemedView>
-      <BottomNavBar />
+      {/* </ThemedView> */}
+      {/* <BottomNavBar /> */}
     </SafeAreaView>
   );
 };

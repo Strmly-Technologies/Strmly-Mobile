@@ -350,7 +350,7 @@ const EditProfilePage: React.FC = () => {
 
   return (
     <ThemedView style={EditProfile.container}>
-      <SafeAreaView className="h-full">
+      <SafeAreaView className="h-full" edges={[]}>
         <ScrollView
           contentContainerStyle={{ paddingBottom: 0 }}
           showsVerticalScrollIndicator={false}

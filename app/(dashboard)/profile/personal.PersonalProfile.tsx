@@ -257,8 +257,8 @@ export default function PersonalProfilePage() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-      <ThemedView className="flex-1">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+      {/* <ThemedView className="flex-1"> */}
         {/* Video Grid */}
         <FlatList
           data={videos}
@@ -516,7 +516,7 @@ export default function PersonalProfilePage() {
             </>
           }
         />
-      </ThemedView>
+      {/* </ThemedView> */}
     </SafeAreaView>
   );
 }

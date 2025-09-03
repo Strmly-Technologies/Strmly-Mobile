@@ -2,7 +2,6 @@ import React from "react";
 import { Modal, View, Text, Pressable, StyleSheet, Image } from "react-native";
 import { GiftType } from "../VideoFeed";
 import { useGiftingStore } from "@/store/useGiftingStore";
-import { router } from "expo-router";
 
 type ActionModalProps = {
   isVisible: boolean;
@@ -27,14 +26,8 @@ const VideoBuyMessage = ({
       transparent={true}
       visible={isVisible}
       onRequestClose={async () => {
-        router.push({
-          pathname: "/(dashboard)/long/GlobalVideoPlayer",
-        });
         onClose(false);
         clearVideoAccessData();
-        // router.push({
-        //   pathname: "/(dashboard)/long/GlobalVideoPlayer",
-        // });
       }} // Allows closing with the back button on Android
     >
       {/* Semi-transparent backdrop */}
@@ -43,9 +36,6 @@ const VideoBuyMessage = ({
         onPress={async () => {
           clearVideoAccessData();
           onClose(false);
-          router.push({
-            pathname: "/(dashboard)/long/GlobalVideoPlayer",
-          });
         }}
       >
         <View className="bg-black border border-gray-800 items-center justify-center rounded-2xl px-2 py-6">

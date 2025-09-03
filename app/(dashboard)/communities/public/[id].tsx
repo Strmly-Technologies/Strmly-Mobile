@@ -408,7 +408,7 @@ export default function PublicCommunityPage() {
           <ActivityIndicator size="large" color="white" />
         </View>
       ) : (
-        <SafeAreaView className="flex-1">
+        <SafeAreaView className="flex-1" edges={[]}>
           <FlatList
             ListHeaderComponent={
               <View className="max-w-4xl -mt-24 relative mx-6 pt-24">
@@ -658,12 +658,14 @@ export default function PublicCommunityPage() {
       )}
 
       {isPurchasedCommunityPass && (
-        <CommunityPassBuyMessage
-          isVisible={true}
-          onClose={clearCommunityPassData}
-          creator={creator}
-          amount={giftSuccessMessage}
-        />
+        <View className="z-10 absolute w-full">
+          <CommunityPassBuyMessage
+            isVisible={true}
+            onClose={clearCommunityPassData}
+            creator={creator}
+            amount={giftSuccessMessage}
+          />
+        </View>
       )}
     </ThemedView>
   );

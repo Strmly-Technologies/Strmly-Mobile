@@ -20,10 +20,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const {height} = Dimensions.get("screen");
 const PAGE_LIMIT = 10;
 
-
-
-
-
 const HistoryPage = () => {
   const [videos, setVideos] = useState<VideoItemType[]>([]);
   const [page, setPage] = useState(1);
@@ -123,7 +119,7 @@ const HistoryPage = () => {
   );
 
   return (
-    <SafeAreaView style={{height, backgroundColor: 'black'}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: 'black'}} edges={[]}>
       <ThemedView className="flex-1">
       <ProfileTopbar isMore={false} hashtag={false} name="History" />
 

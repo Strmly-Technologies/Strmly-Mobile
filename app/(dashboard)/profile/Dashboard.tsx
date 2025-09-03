@@ -172,7 +172,7 @@ const Dashboard = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex:1 , backgroundColor: 'black' }}>
+    <SafeAreaView style={{ flex:1 , backgroundColor: 'black' }} edges={[]}>
     <View className="flex-1">
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3">

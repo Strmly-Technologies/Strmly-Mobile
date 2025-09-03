@@ -9,7 +9,10 @@ import {
   Animated,
   Alert,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
 import Constants from "expo-constants";
@@ -22,7 +25,7 @@ const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 
 const VideoBuy = () => {
   const route = useRoute();
-    const { id } = route.params as { id: string };
+  const { id } = route.params as { id: string };
   // const id = "68af09b07e3b646508d07331";
   const [userData, setUserData] = useState<any>(null);
   const [walletInfo, setWalletInfo] = useState<{ balance: number }>();
@@ -200,70 +203,74 @@ const VideoBuy = () => {
   }, [token]);
 
   return (
-    <ThemedView className="flex-1 bg-black">
-      <View className="flex-1 justify-between pt-10 px-5">
-        {/* Top section */}
-        <View className="mt-5">
-          <CreatorInfo
-            profile={userData?.created_by?.profile_photo}
-            name={userData?.created_by?.name}
-            username={userData?.created_by?.username}
-          />
-        </View>
-
-        {/* Middle section */}
-        <View className="items-center">
-          <View className="flex-row items-center justify-center">
-            <Text className="text-4xl text-white">
-              ₹ {userData?.access.price}
-            </Text>
+    <SafeAreaView style={{ flex: 1 }} edges={[]}>
+      <ThemedView className="flex-1 bg-black">
+        <View className="flex-1 justify-between pt-0 px-5">
+          {/* Top section */}
+          <View className="mt-5">
+            <CreatorInfo
+              profile={userData?.created_by?.profile_photo}
+              name={userData?.created_by?.name}
+              username={userData?.created_by?.username}
+            />
           </View>
 
-          {/* Error Message */}
-          {error && (
-            <View className="mt-4">
-              <Text className="text-red-400 text-sm text-center">{error}</Text>
-            </View>
-          )}
-        </View>
-
-        <View></View>
-        <View></View>
-        {/* Animated Bottom section */}
-        <Animated.View
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: Animated.add(new Animated.Value(80), animatedBottom),
-            paddingBottom: insets.bottom,
-          }}
-          className="gap-2 justify-end"
-        >
-          <Pressable
-            disabled={loading}
-            onPress={handleProceed}
-            className={`p-4 rounded-lg items-center justify-center ${
-              loading ? "bg-gray-600" : "bg-[#008A3C]"
-            }`}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text className="text-white text-base font-semibold">
-                Proceed
+          {/* Middle section */}
+          <View className="items-center">
+            <View className="flex-row items-center justify-center">
+              <Text className="text-4xl text-white">
+                ₹ {userData?.access.price}
               </Text>
-            )}
-          </Pressable>
+            </View>
 
-          <View className="items-center justify-center mt-1">
-            <Text className="text-white text-sm">
-              Total balance ₹ {walletInfo?.balance}
-            </Text>
+            {/* Error Message */}
+            {error && (
+              <View className="mt-4">
+                <Text className="text-red-400 text-sm text-center">
+                  {error}
+                </Text>
+              </View>
+            )}
           </View>
-        </Animated.View>
-      </View>
-    </ThemedView>
+
+          <View></View>
+          <View></View>
+          {/* Animated Bottom section */}
+          <Animated.View
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: Animated.add(new Animated.Value(50), animatedBottom),
+              paddingBottom: insets.bottom,
+            }}
+            className="gap-2 justify-end"
+          >
+            <Pressable
+              disabled={loading}
+              onPress={handleProceed}
+              className={`p-4 rounded-lg items-center justify-center ${
+                loading ? "bg-gray-600" : "bg-[#008A3C]"
+              }`}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-white text-base font-semibold">
+                  Proceed
+                </Text>
+              )}
+            </Pressable>
+
+            <View className="items-center justify-center mt-1">
+              <Text className="text-white text-sm">
+                Total balance ₹ {walletInfo?.balance}
+              </Text>
+            </View>
+          </Animated.View>
+        </View>
+      </ThemedView>
+    </SafeAreaView>
   );
 };
 

@@ -15,6 +15,7 @@ type Props = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
   haveCreatorPass: boolean;
   haveAccessPass: boolean;
+  showWallet: React.Dispatch<React.SetStateAction<boolean>>;
   player: VideoPlayer;
   videoData: VideoItemType;
   isGlobalPlayer: boolean;
@@ -35,6 +36,7 @@ const VideoControls = ({
   haveCreator,
   haveCreatorPass,
   haveAccessPass,
+  showWallet,
   player,
   videoData,
   isGlobalPlayer,
@@ -73,6 +75,7 @@ const VideoControls = ({
     } else {
       clearHideTimer();
       setShowControls(true); // portrait → always visible
+      showWallet(true);
     }
     return () => clearHideTimer();
   }, [isLandscape]);
@@ -87,8 +90,10 @@ const VideoControls = ({
   const resetHideTimer = () => {
     clearHideTimer();
     setShowControls(true);
+    showWallet(true);
     hideTimer.current = setTimeout(() => {
       setShowControls(false);
+      showWallet(false);
     }, 5000); // auto-hide after 5s
   };
 
@@ -254,17 +259,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  interact: { position: "absolute", bottom: "16%", right: 10, zIndex: 5 },
+  interact: { position: "absolute", bottom: "20%", right: 10, zIndex: 5 },
   interactFullScreen: {
     position: "absolute",
-    bottom: "20%",
+    bottom: "22%",
     right: 15,
     zIndex: 5,
   },
-  interactGlobal: { position: "absolute", bottom: "16%", right: 10, zIndex: 5 },
+  interactGlobal: { position: "absolute", bottom: "20%", right: 10, zIndex: 5 },
   details: {
     position: "absolute",
-    bottom: "0%",
+    bottom: "7%",
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 10,
@@ -280,7 +285,7 @@ const styles = StyleSheet.create({
   },
   detailsGlobal: {
     position: "absolute",
-    bottom: "5%",
+    bottom: "2%",
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 40,

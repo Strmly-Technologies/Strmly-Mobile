@@ -331,7 +331,7 @@ export default function AccessPage() {
   );
 
   return (
-    <SafeAreaView style={{ flex:1 , backgroundColor: "black" }}>
+    <SafeAreaView style={{ flex:1 , backgroundColor: "black" }} edges={[]}>
       <View className="flex-1">
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
 

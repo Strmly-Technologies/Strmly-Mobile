@@ -89,9 +89,9 @@ const CreatorPassDemo = () => {
   }, [token, id]);
 
   return (
-    <SafeAreaView style={{ height, backgroundColor: "black" }}>
+    <SafeAreaView style={{ flex:1, backgroundColor: "black" }} edges={[]}>
       <View
-        style={{ height: height, backgroundColor: "black" }}
+        style={{ flex: 1 }}
       >
         <StatusBar barStyle="light-content" backgroundColor="#000" />
 

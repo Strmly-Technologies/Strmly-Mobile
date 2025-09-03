@@ -6,6 +6,7 @@ import {
   Text,
   Pressable,
   View,
+  StatusBar,
 } from "react-native";
 import {
   SafeAreaProvider,
@@ -339,58 +340,60 @@ const VideosFeed: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={{ height: VIDEO_HEIGHT, backgroundColor: "black" }}>
-      <ThemedView>
-        <FlatList
-          ref={flatListRef}
-          data={videos}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          getItemLayout={getItemLayout}
-          pagingEnabled
-          scrollEnabled={!showCommentsModal && !isLandscape}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          initialNumToRender={1}
-          maxToRenderPerBatch={1}
-          windowSize={1}
-          removeClippedSubviews={false} // initially true
-          showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="automatic"
-          // onEndReachedThreshold={0.8}
-          // onEndReached={() => {
-          //   if (hasMore && !isFetchingMore && isScreenFocused) {
-          //     fetchTrendingVideos();
-          //   }
-          // }}
-          style={{ height: VIDEO_HEIGHT }}
-          maintainVisibleContentPosition={{
-            minIndexForVisible: 0,
-            autoscrollToTopThreshold: 10,
-          }}
-          // Add loading indicator at the bottom
-          ListFooterComponent={
-            isFetchingMore ? (
-              <View style={{ padding: 20, alignItems: "center" }}>
-                <ActivityIndicator size="small" color="white" />
-              </View>
-            ) : null
-          }
-          // incoming changes
-          snapToInterval={VIDEO_HEIGHT}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          bounces={false} // Disable bouncing to prevent content bleeding
-          scrollEventThrottle={16}
-          disableIntervalMomentum={true} // Prevent momentum scrolling past snap points
-          onScrollEndDrag={onScrollEndDrag}
-          onMomentumScrollEnd={onMomentumScrollEnd}
-          contentContainerStyle={{ backgroundColor: "#000" }}
-          overScrollMode="never" // Android: prevent over-scrolling
-          alwaysBounceVertical={false} // iOS: prevent bouncing
-        />
-      </ThemedView>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+      {/* <ThemedView style={{flex: 1}}> */}
+      <StatusBar barStyle="light-content" backgroundColor="#000" />
+      
+      <FlatList
+        ref={flatListRef}
+        data={videos}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        getItemLayout={getItemLayout}
+        pagingEnabled
+        scrollEnabled={!showCommentsModal && !isLandscape}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+        windowSize={1}
+        removeClippedSubviews={false} // initially true
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        // onEndReachedThreshold={0.8}
+        // onEndReached={() => {
+        //   if (hasMore && !isFetchingMore && isScreenFocused) {
+        //     fetchTrendingVideos();
+        //   }
+        // }}
+        style={{ height: VIDEO_HEIGHT }}
+        maintainVisibleContentPosition={{
+          minIndexForVisible: 0,
+          autoscrollToTopThreshold: 10,
+        }}
+        // Add loading indicator at the bottom
+        ListFooterComponent={
+          isFetchingMore ? (
+            <View style={{ padding: 20, alignItems: "center" }}>
+              <ActivityIndicator size="small" color="white" />
+            </View>
+          ) : null
+        }
+        // incoming changes
+        snapToInterval={VIDEO_HEIGHT}
+        snapToAlignment="start"
+        decelerationRate="normal"
+        bounces={false} // Disable bouncing to prevent content bleeding
+        scrollEventThrottle={16}
+        disableIntervalMomentum={true} // Prevent momentum scrolling past snap points
+        onScrollEndDrag={onScrollEndDrag}
+        onMomentumScrollEnd={onMomentumScrollEnd}
+        contentContainerStyle={{ backgroundColor: "#000" }}
+        overScrollMode="never" // Android: prevent over-scrolling
+        alwaysBounceVertical={false} // iOS: prevent bouncing
+      />
     </SafeAreaView>
+    // </ThemedView>
   );
 };
 

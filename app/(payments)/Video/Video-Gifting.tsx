@@ -513,12 +513,12 @@ const VideoContentGifting = ({
   // Wallet data is automatically fetched by useWallet hook
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       <ThemedView style={{ flex: 1 }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 50}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 60 : isWithdrawMode ? 0 : 40}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View className="flex-1 justify-between px-5">

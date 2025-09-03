@@ -79,9 +79,9 @@ const SeriesAccess = () => {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "black" }}
+      style={{ flex: 1, backgroundColor: "black" }} edges={[]}
     >
-      <View className="flex-1 bg-black">
+      <View className="flex-1">
         <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         {/* Header */}

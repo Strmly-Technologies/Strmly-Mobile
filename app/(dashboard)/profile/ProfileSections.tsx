@@ -218,7 +218,7 @@ export default function ProfileSections() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "black", paddingTop: insets.top }}
+      style={{ flex: 1, backgroundColor: "black" }} edges={[]}
     >
       <ThemedView className="flex-1">
         <StatusBar barStyle="light-content" backgroundColor="black" />
