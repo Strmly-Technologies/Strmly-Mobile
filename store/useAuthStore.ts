@@ -14,7 +14,7 @@ type User = {
   bio?: string;
   dob?: string;
   is_onboarded?: boolean;
-  isVerified?: boolean;
+  is_verified?: boolean;
   location?: string;
   website?: string;
   createdAt?: string;

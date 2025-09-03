@@ -89,18 +89,54 @@ const CreateProfile = () => {
     if (email.includes("@")) checkEmail(email);
   }, [email]);
 
-  const handleRegisterUser = async () => {
+  const handleRegisterEmail = async () => {
     setIsLoading(true);
-    console.log(email)
+    console.log(email);
     try {
-      const res = await fetch(`${BACKEND_API_URL}/auth/register`, {
+      const res = await fetch(`${BACKEND_API_URL}/auth/register/email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username,
           email,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Email Registration failed");
+      }
+
+      console.log("Email Registration successful", data);
+
+      setAlert("OTP sent to your email.");
+      setShowAlert(true);
+      setNeedButton(true);
+      setTimeout(() => setStep(2), 1000);
+    } catch (err: any) {
+      console.error("Email Registration error:", err);
+      setAlert(err.message || "Something went wrong");
+      setShowAlert(true);
+      setNeedButton(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegisterUser = async () => {
+    setIsLoading(true);
+    console.log(email, username, password);
+    try {
+      const res = await fetch(`${BACKEND_API_URL}/auth/register/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          username,
           password,
         }),
       });
@@ -116,10 +152,10 @@ const CreateProfile = () => {
       // Save token and partially registered user
       await useAuthStore.getState().login(data.token, data.user);
 
-      setAlert("OTP sent to your email.");
+      setAlert("Registration successful.");
       setShowAlert(true);
-      setNeedButton(true);
-      setTimeout(() => setStep(4), 1000);
+      setNeedButton(false);
+      setTimeout(() => router.replace("/Interests"), 1000);
     } catch (err: any) {
       console.error("Registration error:", err);
       setAlert(err.message || "Something went wrong");
@@ -152,12 +188,12 @@ const CreateProfile = () => {
       console.log("Verification successful", data);
 
       // Update auth store to mark email_verified
-      useAuthStore.getState().updateUser({ isVerified: true });
+      useAuthStore.getState().updateUser({ is_verified: true });
 
       setAlert("Email verified successfully!");
       setShowAlert(true);
-      setNeedButton(false);
-      setTimeout(() => router.replace("/Interests"), 1000);
+      setNeedButton(true);
+      setTimeout(() => setStep(3), 1000);
     } catch (err: any) {
       console.error("OTP Verification error:", err);
       setAlert(err.message || "Something went wrong");
@@ -173,7 +209,7 @@ const CreateProfile = () => {
 
     try {
       setIsLoading(true);
-      
+
       const res = await fetch(`${BACKEND_API_URL}/auth/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -237,38 +273,7 @@ const CreateProfile = () => {
       return;
     }
 
-    // validation for each step
     if (Step === 1) {
-      if (!username || username.length <= 3) {
-        setAlert("Username must be at least 4 characters");
-        setShowAlert(true);
-        setNeedButton(true);
-        return;
-      }
-
-      if (usernameExists === true) {
-        setAlert("Username already exists");
-        setShowAlert(true);
-        setNeedButton(true);
-        return;
-      }
-
-      if (usernameExists === null) {
-        setAlert("Checking username... please wait");
-        setShowAlert(true);
-        setNeedButton(true);
-        return;
-      }
-    }
-
-    if (Step === 2 && password.length < 6) {
-      setAlert("Password must be at least 6 characters");
-      setShowAlert(true);
-      setNeedButton(true);
-      return;
-    }
-
-    if (Step === 3) {
       if (!email.includes("@") || email.length < 5) {
         setAlert("Please enter a valid email");
         setShowAlert(true);
@@ -291,8 +296,39 @@ const CreateProfile = () => {
       }
     }
 
-    if (Step === 4 && confirmationCode.trim().length < 4) {
+    if (Step === 2 && confirmationCode.trim().length < 4) {
       setAlert("Invalid confirmation code");
+      setShowAlert(true);
+      setNeedButton(true);
+      return;
+    }
+
+    // validation for each step
+    if (Step === 3) {
+      if (!username || username.length <= 3) {
+        setAlert("Username must be at least 4 characters");
+        setShowAlert(true);
+        setNeedButton(true);
+        return;
+      }
+
+      if (usernameExists === true) {
+        setAlert("Username already exists");
+        setShowAlert(true);
+        setNeedButton(true);
+        return;
+      }
+
+      if (usernameExists === null) {
+        setAlert("Checking username... please wait");
+        setShowAlert(true);
+        setNeedButton(true);
+        return;
+      }
+    }
+
+    if (Step === 4 && password.length < 6) {
+      setAlert("Password must be at least 6 characters");
       setShowAlert(true);
       setNeedButton(true);
       return;
@@ -305,35 +341,29 @@ const CreateProfile = () => {
 
   if (Step === 1) {
     return (
-      <ThemedView style={CreateProfileStyles.Container}>
-        <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
-          <TouchableOpacity onPress={() => router.back()}>
+      <ThemedView style={{height: '100%', gap: 10, alignItems: 'center'}}>
+        <View className="items-center justify-between flex-row w-full pt-10 px-4 mb-10">
+          <TouchableOpacity onPress={() => router.back()} className="w-fit">
             <Image
-              className="w-5 h-5 mt-1"
+              className="w-5 h-5"
               source={require("../../assets/images/back.png")}
             />
           </TouchableOpacity>
           <ThemedText className="text-white text-2xl text-center w-full">
-            Create username
+            Enter your email
           </ThemedText>
         </View>
         <TextInput
           style={CreateProfileStyles.Input}
-          placeholder="username"
+          placeholder="Email"
           className="placeholder:text-[#B0B0B0]"
-          value={username}
-          onChangeText={setUsername}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
         />
 
-        {username.length > 3 && usernameExists === false && (
-          <Text className="text-green-500 text-center">Username available</Text>
-        )}
-        {usernameExists && (
-          <Text className="text-red-500 text-center">Username already exists</Text>
-        )}
-
         <TouchableOpacity
-          onPress={() => HandleStep(true)}
+          onPress={handleRegisterEmail}
           style={CreateProfileStyles.button}
           disabled={isLoading}
         >
@@ -357,102 +387,7 @@ const CreateProfile = () => {
   if (Step === 2) {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
-        <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
-          <TouchableOpacity onPress={() => HandleStep(false)} className="w-fit">
-            <Image
-              className="w-5 h-5"
-              source={require("../../assets/images/back.png")}
-            />
-          </TouchableOpacity>
-          <ThemedText className="text-white text-2xl text-center w-full">
-            Create a password
-          </ThemedText>
-        </View>
-        <TextInput
-          style={CreateProfileStyles.Input}
-          placeholder="Password"
-          className="placeholder:text-[#B0B0B0]"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        <TouchableOpacity
-          onPress={() => HandleStep(true)}
-          style={CreateProfileStyles.button}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#000" />
-          ) : (
-            <Text className="font-semibold text-lg">Continue</Text>
-          )}
-        </TouchableOpacity>
-
-        <ModalMessage
-          visible={showAlert}
-          text={alert}
-          needCloseButton={needButton}
-          onClose={setShowAlert}
-        />
-      </ThemedView>
-    );
-  }
-
-  if (Step === 3) {
-    return (
-      <>
-        <ThemedView style={CreateProfileStyles.Container}>
-          <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
-            <TouchableOpacity
-              onPress={() => HandleStep(false)}
-              className="w-fit"
-            >
-              <Image
-                className="w-5 h-5"
-                source={require("../../assets/images/back.png")}
-              />
-            </TouchableOpacity>
-            <ThemedText className="text-white text-2xl text-center w-full">
-              Enter your email
-            </ThemedText>
-          </View>
-          <TextInput
-            style={CreateProfileStyles.Input}
-            placeholder="Email"
-            className="placeholder:text-[#B0B0B0]"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-
-          <TouchableOpacity
-            onPress={handleRegisterUser}
-            style={CreateProfileStyles.button}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#000" />
-            ) : (
-              <Text className="font-semibold text-lg">Verify</Text>
-            )}
-          </TouchableOpacity>
-
-          <ModalMessage
-            visible={showAlert}
-            text={alert}
-            needCloseButton={needButton}
-            onClose={setShowAlert}
-          />
-        </ThemedView>
-      </>
-    );
-  }
-
-  if (Step === 4) {
-    return (
-      <ThemedView style={CreateProfileStyles.Container}>
-        <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
+        <View className="items-center justify-between flex-row w-full pt-10 px-4 mb-10">
           <TouchableOpacity onPress={() => HandleStep(false)}>
             <Image
               className="w-5 h-5 mt-1"
@@ -483,7 +418,7 @@ const CreateProfile = () => {
           {isLoading ? (
             <ActivityIndicator color="#000" />
           ) : (
-            <Text className="font-semibold text-lg">Finish</Text>
+            <Text className="font-semibold text-lg">Verify & Continue</Text>
           )}
         </TouchableOpacity>
 
@@ -494,6 +429,104 @@ const CreateProfile = () => {
             <ThemedText style={CreateProfileStyles.ExtraBold}>
               Resend Code
             </ThemedText>
+          )}
+        </TouchableOpacity>
+
+        <ModalMessage
+          visible={showAlert}
+          text={alert}
+          needCloseButton={needButton}
+          onClose={setShowAlert}
+        />
+      </ThemedView>
+    );
+  }
+
+  if (Step === 3) {
+    return (
+      <ThemedView style={CreateProfileStyles.Container}>
+        <View className="items-center justify-between flex-row w-full px-4 pt-10 mb-10">
+          <TouchableOpacity onPress={() => HandleStep(false)}>
+            <Image
+              className="w-5 h-5 mt-1"
+              source={require("../../assets/images/back.png")}
+            />
+          </TouchableOpacity>
+          <ThemedText className="text-white text-2xl text-center w-full">
+            Create username
+          </ThemedText>
+        </View>
+        <TextInput
+          style={CreateProfileStyles.Input}
+          placeholder="username"
+          className="placeholder:text-[#B0B0B0]"
+          value={username}
+          onChangeText={setUsername}
+        />
+
+        {username.length > 3 && usernameExists === false && (
+          <Text className="text-green-500 text-center">Username available</Text>
+        )}
+        {usernameExists && (
+          <Text className="text-red-500 text-center">
+            Username already exists
+          </Text>
+        )}
+
+        <TouchableOpacity
+          onPress={() => HandleStep(true)}
+          style={CreateProfileStyles.button}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#000" />
+          ) : (
+            <Text className="font-semibold text-lg">Continue</Text>
+          )}
+        </TouchableOpacity>
+
+        <ModalMessage
+          visible={showAlert}
+          text={alert}
+          needCloseButton={needButton}
+          onClose={setShowAlert}
+        />
+      </ThemedView>
+    );
+  }
+
+  if (Step === 4) {
+    return (
+      <ThemedView style={CreateProfileStyles.Container}>
+        <View className="items-center justify-between flex-row w-full pt-10 px-4 mb-10">
+          <TouchableOpacity onPress={() => HandleStep(false)} className="w-fit">
+            <Image
+              className="w-5 h-5"
+              source={require("../../assets/images/back.png")}
+            />
+          </TouchableOpacity>
+          <ThemedText className="text-white text-2xl text-center w-full">
+            Create a password
+          </ThemedText>
+        </View>
+        <TextInput
+          style={CreateProfileStyles.Input}
+          placeholder="Password"
+          className="placeholder:text-[#B0B0B0]"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity
+          onPress={handleRegisterUser}
+          style={CreateProfileStyles.button}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#000" />
+          ) : (
+            <Text className="font-semibold text-lg">Save & Continue</Text>
           )}
         </TouchableOpacity>
 

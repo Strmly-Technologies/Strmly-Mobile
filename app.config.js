@@ -22,7 +22,7 @@ export default {
         backgroundColor: "#000"
       },
       package: "com.anonymous.strmly",
-      softwareKeyboardLayoutMode: "resize",
+      softwareKeyboardLayoutMode: "pan",
       edgeToEdgeEnabled: true
     },
     web: {

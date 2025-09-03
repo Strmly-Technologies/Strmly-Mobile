@@ -2,6 +2,20 @@ import { useState, useCallback } from "react";
 import { UploadFlowState, VideoFormData, FinalStageData } from "../types";
 import { Series } from "../../studio/types";
 import { CONFIG } from "../../../Constants/config";
+import { VideoPlayer } from "expo-video";
+
+export const getVideoDuration = async (uri: string): Promise<number | null> => {
+  try {
+    const player = new VideoPlayer({ uri });
+    await player.loadAsync(); // load metadata
+    const duration = player.duration ?? 0; // duration in seconds
+    await player.unloadAsync(); // clean up
+    return duration;
+  } catch (error) {
+    console.error("❌ Error getting video duration:", error);
+    return null;
+  }
+};
 
 // Interface for draft data
 interface DraftData {
@@ -419,118 +433,118 @@ export const useUploadFlow = () => {
         return false;
       }
 
-      const directUploadFormData = new FormData();
-      directUploadFormData.append("videoFile", {
-        uri: state.selectedFile.uri,
-        type: state.selectedFile.type || "video/mp4",
-        name: state.selectedFile.name || "video.mp4",
-      } as any);
+      // 1️⃣ Step 1: ask backend for presigned URL
+      const fileName = state.selectedFile.name || "video.mp4";
+      const contentType = state.selectedFile.type || "video/mp4";
+      const fileSize = state.selectedFile.size || 0;
 
-      // Add metadata
-      directUploadFormData.append(
-        "name",
-        state.videoDetails.title || "Untitled Video"
-      );
-      directUploadFormData.append(
-        "description",
-        state.videoDetails.description || "No description"
-      );
-      directUploadFormData.append(
-        "genre",
-        state.finalStageData.genre || "Action"
-      );
-      directUploadFormData.append(
-        "type",
-        state.videoDetails.videoType === "paid" ? "Paid" : "Free"
-      );
-      directUploadFormData.append("language", "english");
-      directUploadFormData.append("age_restriction", "false");
-      directUploadFormData.append(
-        "start_time",
-        (
-          state.finalStageData.autoplayStartMinutes * 60 +
-          state.finalStageData.autoplayStartSeconds
-        ).toString()
-      );
-      directUploadFormData.append(
-        "display_till_time",
-        (
-          state.finalStageData.unlockFromMinutes * 60 +
-          state.finalStageData.unlockFromSeconds
-        ).toString()
-      );
-      directUploadFormData.append(
-        "is_standalone",
-        state.videoFormat === "single" ? "true" : "false"
+      const presignResponse = await fetch(
+        `${CONFIG.API_BASE_URL}/videos/get-url`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ fileName, contentType, fileSize }),
+        }
       );
 
-      if (state.videoDetails.videoType === "paid") {
-        directUploadFormData.append(
-          "amount",
-          state.videoDetails.amount.toString()
-        );
-      }
-     
-      if (
-        state.videoDetails.community &&
-        state.videoDetails.community !== "none"
-      ) {
-        directUploadFormData.append(
-          "communityId",
-          state.videoDetails.community
-        );
-      }
-      if (state.videoFormat === "episode" && state.selectedSeries) {
-        directUploadFormData.append("seriesId", state.selectedSeries.id);
-        directUploadFormData.append("episodeNumber", "1");
+      if (!presignResponse.ok) {
+        throw new Error("Failed to get upload URL");
       }
 
-      console.log("Direct Upload Form Data:", directUploadFormData);
-      // 🚀 Use XMLHttpRequest for upload with progress
+      const { uploadUrl, s3Key } = await presignResponse.json();
+      console.log("✅ Got presigned URL + s3Key:", uploadUrl, s3Key);
+
+      // 2️⃣ Step 2: upload file directly to S3
       const uploadPromise = new Promise<boolean>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
+        xhr.open("PUT", uploadUrl); // PUT request to presigned URL
+        xhr.setRequestHeader("Content-Type", contentType);
 
-        xhr.open("POST", `${CONFIG.API_BASE_URL}/videos/upload`);
-        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-
-        // Track progress
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
-            const percent = Math.min(
-              100,
-              Math.round((event.loaded / event.total) * 100)
-            );
+            const percent = Math.round((event.loaded / event.total) * 100);
             setState((prev) => ({ ...prev, uploadProgress: percent }));
           }
         };
 
         xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const response = JSON.parse(xhr.responseText);
-              console.log("✅ Upload success:", response);
-              setState((prev) => ({
-                ...prev,
-                uploadProgress: 100,
-                isUploading: false,
-              }));
-              resolve(true);
-            } catch (err) {
-              reject(new Error("Failed to parse upload response"));
-            }
+          if (xhr.status === 200) {
+            console.log("✅ Upload to S3 success");
+            resolve(true);
           } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`));
+            reject(new Error(`S3 upload failed with ${xhr.status}`));
           }
         };
 
-        xhr.onerror = () => {
-          reject(new Error("Network error during upload"));
-        };
+        xhr.onerror = () => reject(new Error("Network error during upload"));
 
-        xhr.send(directUploadFormData);
+        xhr.send({
+          uri: state.selectedFile.uri,
+          type: contentType,
+          name: fileName,
+        } as any); // RN fetch blob / polyfill may be needed
       });
 
-      return await uploadPromise;
+      await uploadPromise;
+
+      // 3️⃣ Step 3: notify backend to process video
+      const metadata = {
+        s3Key,
+        name: state.videoDetails.title || "Untitled Video",
+        description: state.videoDetails.description || "No description",
+        genre: state.finalStageData.genre || "Action",
+        type: state.videoDetails.videoType === "paid" ? "Paid" : "Free",
+        language: "english",
+        age_restriction: "false",
+        start_time:
+          state.finalStageData.autoplayStartMinutes * 60 +
+          state.finalStageData.autoplayStartSeconds,
+        display_till_time:
+          state.finalStageData.unlockFromMinutes * 60 +
+          state.finalStageData.unlockFromSeconds,
+        is_standalone: state.videoFormat === "single" ? "true" : "false",
+      };
+
+      if (state.videoDetails.videoType === "paid") {
+        metadata.amount = state.videoDetails.amount;
+      }
+      if (state.videoDetails.community) {
+        metadata.communityId = state.videoDetails.community;
+      }
+      if (state.videoFormat === "episode" && state.selectedSeries) {
+        metadata.seriesId = state.selectedSeries.id;
+        metadata.episodeNumber = "1";
+      }
+
+      const processResponse = await fetch(
+        `${CONFIG.API_BASE_URL}/videos/process-uploaded`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(metadata),
+        }
+      );
+
+      if (!processResponse.ok) {
+        throw new Error("Failed to process uploaded video");
+      }
+
+      const result = await processResponse.json();
+      console.log("✅ Video processed:", result);
+
+      setState((prev) => ({
+        ...prev,
+        uploadProgress: 100,
+        isUploading: false,
+      }));
+
+      return true;
     } catch (error) {
       console.error("Upload error:", error);
       setState((prev) => ({

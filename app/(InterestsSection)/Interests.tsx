@@ -11,6 +11,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { useAuthStore } from "@/store/useAuthStore";
 import Constants from "expo-constants";
@@ -265,6 +266,7 @@ const Interests = () => {
   if (Step === 1) {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
+        <StatusBar backgroundColor={'black'} />
         <ThemedView style={CreateProfileStyles.TopBar}>
           <TouchableOpacity
             onPress={() => router.back()}
@@ -424,13 +426,14 @@ const Interests = () => {
           ];
     return (
       <ThemedView style={CreateProfileStyles.Container}>
+        <StatusBar backgroundColor={'black'} />
         <View style={CreateProfileStyles.TopBar}>
           <TouchableOpacity
             onPress={() => {
               HandleStep(false);
               Step === 2 ? setInterests([]) : setInterests2([]);
             }}
-            className="items-start w-full absolute top-20 z-10 left-5"
+            className="items-start w-full absolute top-10 z-10 left-5"
           >
             <Image
               source={require("../../assets/images/back.png")}
@@ -438,7 +441,7 @@ const Interests = () => {
             />
           </TouchableOpacity>
         </View>
-        <ScrollView contentContainerStyle={{ padding: 16, marginTop: 50 }}>
+        <ScrollView contentContainerStyle={{ padding: 16, marginTop: 20 }}>
           <ThemedText style={CreateProfileStyles.Heading}>
             Your Interests
           </ThemedText>
@@ -451,7 +454,7 @@ const Interests = () => {
             {renderGrid(items)}
           </View>
         </ScrollView>
-        <View className="absolute bottom-0 left-0 right-0 px-4 pb-20">
+        <View className="px-4 w-full pb-10">
           <TouchableOpacity
             disabled={
               (Step === 2 ? Interests.length !== 3 : Interests2.length !== 3) ||

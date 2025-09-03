@@ -200,7 +200,7 @@ ${error.message || "Network error"}`);
     return (
       <>
         <ThemedView style={CreateProfileStyles.Container}>
-          <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
+          <View className="items-center justify-between flex-row w-full pt-10 px-4 mb-10">
             <TouchableOpacity
               onPress={() => router.back()}
               className="w-fit"
@@ -249,7 +249,7 @@ ${error.message || "Network error"}`);
   if (Step === 2) {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
-        <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
+        <View className="items-center justify-between flex-row w-full pt-10 px-4 mb-10">
           <TouchableOpacity onPress={() => HandleStep(false)}>
             <Image
               className="w-5 h-5 mt-1"

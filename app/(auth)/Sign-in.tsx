@@ -121,7 +121,7 @@ const SignIn = () => {
     return (
       <Pressable
         onPress={() => router.back()}
-        className="absolute left-5 top-20"
+        className="absolute left-5 top-10"
       >
         <Image
           source={require("../../assets/images/back.png")}

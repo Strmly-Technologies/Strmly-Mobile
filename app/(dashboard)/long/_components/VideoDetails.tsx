@@ -400,7 +400,7 @@ const VideoDetails = ({
           "Content-Type": "application/json",
         },
       });
-      if (!response.ok) throw new Error("Failed to follow community");
+      if (!response.ok) throw new Error("Failed to fetch series data");
       const data = await response.json();
       console.log("series data: ", data.data);
 
