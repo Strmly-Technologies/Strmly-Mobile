@@ -2,6 +2,20 @@ import { useState, useCallback } from "react";
 import { UploadFlowState, VideoFormData, FinalStageData } from "../types";
 import { Series } from "../../studio/types";
 import { CONFIG } from "../../../Constants/config";
+import { VideoPlayer } from "expo-video";
+
+export const getVideoDuration = async (uri: string): Promise<number | null> => {
+  try {
+    const player = new VideoPlayer({ uri });
+    await player.loadAsync(); // load metadata
+    const duration = player.duration ?? 0; // duration in seconds
+    await player.unloadAsync(); // clean up
+    return duration;
+  } catch (error) {
+    console.error("❌ Error getting video duration:", error);
+    return null;
+  }
+};
 
 // Interface for draft data
 interface DraftData {
