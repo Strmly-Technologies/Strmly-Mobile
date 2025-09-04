@@ -71,6 +71,7 @@ const VideosFeed: React.FC = () => {
           router.replace("/(auth)/Sign-up");
           return;
         }
+        console.log('token: ', token);
 
         // Re-initialize if videos are empty and we should have data
         if (videos.length === 0 && !loading && !error) {
@@ -292,6 +293,7 @@ const VideosFeed: React.FC = () => {
   if (loading && isFetchingMore) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
+        <StatusBar barStyle="light-content" backgroundColor="#000" />
         <ActivityIndicator size="large" color="white" />
         <Text className="text-white mt-4">
           {!token || !isLoggedIn
@@ -306,6 +308,7 @@ const VideosFeed: React.FC = () => {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+          <StatusBar barStyle="light-content" backgroundColor="#000" />
           <ThemedView
             style={{ flex: 1 }}
             className="justify-center items-center px-4"
@@ -328,6 +331,7 @@ const VideosFeed: React.FC = () => {
   if (videos.length === 0) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
+        <StatusBar barStyle="light-content" backgroundColor="#000" />
         <Text className="text-lg text-white">No Videos Available</Text>
         <Text className="text-lg text-white">
           Want to Upload your own{" "}
@@ -357,7 +361,7 @@ const VideosFeed: React.FC = () => {
         initialNumToRender={1}
         maxToRenderPerBatch={1}
         windowSize={1}
-        removeClippedSubviews={false} // initially true
+        removeClippedSubviews={true}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
         // onEndReachedThreshold={0.8}

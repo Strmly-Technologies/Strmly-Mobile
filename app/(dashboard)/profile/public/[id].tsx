@@ -359,7 +359,7 @@ export default function PublicProfilePageWithId() {
         setVideosInZustand(videos);
         router.push({
           pathname: "/(dashboard)/long/GlobalVideoPlayer",
-          params: { startIndex: index.toString() },
+          params: { startIndex: index },
         });
       }}
     >

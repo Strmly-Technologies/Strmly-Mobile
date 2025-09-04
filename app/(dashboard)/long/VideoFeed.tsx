@@ -238,6 +238,7 @@ const VideoFeed: React.FC = () => {
         backgroundColor: '#000'
       }}>
         <VideoPlayer
+        isGlobalPlayer={false}
           key={item._id}
           videoData={item}
           isActive={index === visibleIndex}

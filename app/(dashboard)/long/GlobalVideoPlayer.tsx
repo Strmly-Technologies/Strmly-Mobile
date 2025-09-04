@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   FlatList,
   Dimensions,
@@ -10,26 +10,10 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ThemedView from "@/components/ThemedView";
 import { CONFIG } from "@/Constants/config";
 import { VideoItemType } from "@/types/VideosType";
-
-import {
-  Link,
-  router,
-  useFocusEffect,
-  useLocalSearchParams,
-} from "expo-router";
+import { Link, useFocusEffect, useLocalSearchParams } from "expo-router";
 import VideoPlayer from "./_components/VideoPlayer";
 import { useVideosStore } from "@/store/useVideosStore";
-import BottomNavBar from "@/components/BottomNavBar";
 import { useOrientationStore } from "@/store/useOrientationStore";
-
-export type GiftType = {
-  creator: {
-    _id: string;
-    username: string;
-    profile_photo: string;
-  };
-  videoId: string;
-};
 
 const { height: screenHeight } = Dimensions.get("window");
 const VIDEO_HEIGHT = screenHeight;
@@ -45,40 +29,27 @@ const GlobalVideoPlayer: React.FC = () => {
   const [videos, setVideos] = useState<VideoItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [visibleIndex, setVisibleIndex] = useState(
-    startIndex ? parseInt(startIndex) : 0
-  );
-
+  const [visibleIndex, setVisibleIndex] = useState(0);
+  const [nowRenderVideo, setNowRenderVideo] = useState(false);
   const [showCommentsModal, setShowCommentsModal] = useState(false);
 
   const { storedVideos, setVideoType } = useVideosStore();
   const { isLandscape } = useOrientationStore();
-
-  const BACKEND_API_URL = CONFIG.API_BASE_URL;
-
-  const flatListRef = React.useRef<FlatList>(null);
-
-  useEffect(() => {
-    if (videos.length > 0 && startIndex) {
-      let index = parseInt(startIndex, 10);
-      if (index >= videos.length) {
-        index = videos.length - 1; // clamp to last valid item
-      }
-      if (index < 0) index = 0; // avoid negative
-      flatListRef.current?.scrollToIndex({ index, animated: false });
-    }
-  }, [videos, startIndex]);
-
-  useEffect(() => {
-    console.log("start index, videoType", startIndex, videoType);
-  }, [startIndex, videoType]);
+  const flatListRef = useRef<FlatList>(null);
+  const debounceRef = useRef<NodeJS.Timeout | number | null>(null);
 
   useEffect(() => {
     if (storedVideos.length > 0) {
       setVideos(storedVideos);
+      const index = Math.min(
+        Math.max(parseInt(startIndex ?? "0", 10), 0),
+        storedVideos.length - 1
+      );
+      setVisibleIndex(index);
       setLoading(false);
+      setNowRenderVideo(true);
     }
-  }, [storedVideos]);
+  }, [storedVideos, startIndex]);
 
   useFocusEffect(
     useCallback(() => {
@@ -86,42 +57,56 @@ const GlobalVideoPlayer: React.FC = () => {
     }, [videoType])
   );
 
-  // OPTIMIZATION 1: Stabilize the onViewableItemsChanged callback
-  // This prevents FlatList from re-rendering just because the parent re-rendered.
   const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
-    if (viewableItems.length > 0) {
-      const currentIndex = viewableItems[0].index;
-      setVisibleIndex(currentIndex);
-    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (viewableItems.length > 0) {
+        const currentIndex = viewableItems[0].index;
+        setVisibleIndex(currentIndex);
+      }
+    }, 100);
   }, []);
 
-  // OPTIMIZATION 2: Memoize the renderItem function
-  // This prevents creating a new render function on every parent render.
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 95,
+    minimumViewTime: 100,
+    waitForInteraction: true,
+  }).current;
+
   const renderItem = useCallback(
-    ({ item, index }: { item: VideoItemType; index: number }) => (
-      <VideoPlayer
-        videoData={item}
-        isActive={index === visibleIndex}
-        isGlobalPlayer={true}
-        showCommentsModal={showCommentsModal}
-        setShowCommentsModal={setShowCommentsModal}
-      />
-    ),
+    ({ item, index }: { item: VideoItemType; index: number }) => {
+      if (index !== visibleIndex) {
+        return <ThemedView style={{ height: VIDEO_HEIGHT }} />;
+      }
+
+      return (
+        <VideoPlayer
+          key={`video-${item._id}`}
+          videoData={item}
+          isActive={index === visibleIndex}
+          isGlobalPlayer={true}
+          showCommentsModal={showCommentsModal}
+          setShowCommentsModal={setShowCommentsModal}
+        />
+      );
+    },
     [visibleIndex, showCommentsModal]
   );
 
-  // OPTIMIZATION 3: Use consistent VIDEO_HEIGHT for layout calculations
-  // This ensures all videos have the same height and prevents layout issues
   const getItemLayout = useCallback(
     (_data: any, index: number) => ({
       length: VIDEO_HEIGHT,
       offset: VIDEO_HEIGHT * index,
       index,
     }),
-    [router]
+    []
   );
 
-  // Show loading while checking authentication or fetching videos
+  const keyExtractor = useCallback(
+    (item: VideoItemType, index: number) => `${item._id}-${index}`,
+    []
+  );
+
   if (loading) {
     return (
       <SafeAreaProvider>
@@ -149,13 +134,10 @@ const GlobalVideoPlayer: React.FC = () => {
             <Text className="text-white text-center mb-4">
               Oops something went wrong!
             </Text>
-            {/* <Text className="text-red-400 text-center text-sm mb-4">
-              {error}
-            </Text> */}
             <Pressable
               onPress={() => {
-                setLoading(() => true);
-                setError(() => null);
+                setLoading(true);
+                setError(null);
               }}
               className="bg-blue-600 px-4 py-2 rounded"
             >
@@ -190,40 +172,39 @@ const GlobalVideoPlayer: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1" edges={[]}>
-      {/* <ThemedView> */}
         <FlatList
           ref={flatListRef}
           data={videos}
           renderItem={renderItem}
-          keyExtractor={(item) => item._id}
+          keyExtractor={keyExtractor}
           getItemLayout={getItemLayout}
+          initialScrollIndex={visibleIndex}
           pagingEnabled
-          scrollEnabled={!showCommentsModal}
+          scrollEnabled={!showCommentsModal && !isLandscape}
           onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
+          viewabilityConfig={viewabilityConfig}
           initialNumToRender={1}
           maxToRenderPerBatch={1}
           windowSize={1}
+          // updateCellsBatchingPeriod={100}
+          removeClippedSubviews={true}
           showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="automatic" // iOS
-          contentContainerStyle={{ paddingBottom: 0 }}
+          contentInsetAdjustmentBehavior="automatic"
           style={{ height: VIDEO_HEIGHT }}
-          onScrollToIndexFailed={(info) => {
-            console.warn("⚠️ scrollToIndex failed", info);
-            // scroll to last item
-            flatListRef.current?.scrollToIndex({
-              index: videos.length - 1,
-              animated: false,
-            });
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+            autoscrollToTopThreshold: 10,
           }}
-          // onScrollBeginDrag={() => {
-          //   if (showCommentsModal) {
-          //     console.log('🚫 VideosFeed: Scroll blocked - comments modal is open');
-          //   }
-          // }}
+          snapToInterval={VIDEO_HEIGHT}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          bounces={false}
+          scrollEventThrottle={16}
+          disableIntervalMomentum={true}
+          contentContainerStyle={{ backgroundColor: "#000" }}
+          overScrollMode="never"
+          alwaysBounceVertical={false}
         />
-      {/* </ThemedView> */}
-      {/* <BottomNavBar /> */}
     </SafeAreaView>
   );
 };

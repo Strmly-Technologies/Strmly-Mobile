@@ -11,6 +11,37 @@ import Slider from "@react-native-community/slider";
 import { VideoItemType } from "@/types/VideosType";
 import { useEvent } from "expo";
 
+// const video: VideoItemType[] = [
+//   {
+//     videoUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+//     duration: 60,
+//     videoResolutions: null
+//   },
+//   {
+//     videoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+//     duration: 60,
+//     videoResolutions: {
+//       "360p": { url: "https://sample-videos.com/video123/mp4/360/big_buck_bunny_360p_1mb.mp4" },
+//       "720p": { url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" },
+//     },
+//   },
+//   {
+//     videoUrl: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
+//     duration: 10,
+//     videoResolutions: {
+//       "720p": { url: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4" },
+//       "1080p": { url: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4" },
+//     },
+//   },
+//   {
+//     videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+//     duration: 30,
+//     videoResolutions: {
+//       "480p": { url: "https://www.w3schools.com/html/mov_bbb.mp4" },
+//     },
+//   },
+// ];
+
 const SPEEDS = [1.0, 1.2, 1.5, 2.0];
 const { width, height } = Dimensions.get("window");
 
