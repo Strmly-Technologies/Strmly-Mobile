@@ -79,6 +79,12 @@ export const useAuthStore = create<AuthStore>()(
       setHasHydrated: () => set({ hasHydrated: true }),
 
       login: async (token: string, user?: User) => {
+        console.log(`🔐 Auth Store Login:
+          - Token received: ${!!token}
+          - Token length: ${token?.length || 0}
+          - User: ${user?.username || 'No user'}
+          - User ID: ${user?.id || 'No ID'}`);
+        
         set({
           token,
           user: user || null,
@@ -109,6 +115,12 @@ export const useAuthStore = create<AuthStore>()(
       name: "auth-storage",
       storage: secureStorage,
       onRehydrateStorage: () => (state) => {
+        console.log(`🔄 Auth Store Rehydrated:
+          - Has state: ${!!state}
+          - Token exists: ${!!state?.token}
+          - Token length: ${state?.token?.length || 0}
+          - User: ${state?.user?.username || 'No user'}
+          - Is logged in: ${state?.isLoggedIn || false}`);
         state?.setHasHydrated();
       },
     }

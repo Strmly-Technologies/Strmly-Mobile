@@ -6,7 +6,9 @@ export interface Comment {
   videoId: string
   repliesCount: number
   timestamp: string
+  createdAt?: string // Add optional createdAt for backward compatibility
   donations: number
+  gifts?: number // Add optional gifts field
   upvotes: number
   downvotes: number
   user: {

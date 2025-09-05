@@ -179,18 +179,20 @@ const VideoFeed: React.FC = () => {
   const onScrollEndDrag = useCallback((event: any) => {
     const { contentOffset } = event.nativeEvent;
     const currentIndex = Math.round(contentOffset.y / adjustedHeight);
+    const clampedIndex = Math.max(0, Math.min(currentIndex, videos.length - 1));
 
-    if (currentIndex !== visibleIndex) {
-      setVisibleIndex(Math.max(0, Math.min(currentIndex, videos.length - 1)));
+    if (clampedIndex !== visibleIndex) {
+      setVisibleIndex(clampedIndex);
     }
   }, [visibleIndex, videos.length, adjustedHeight]);
 
   const onMomentumScrollEnd = useCallback((event: any) => {
     const { contentOffset } = event.nativeEvent;
     const currentIndex = Math.round(contentOffset.y / adjustedHeight);
+    const clampedIndex = Math.max(0, Math.min(currentIndex, videos.length - 1));
 
-    if (currentIndex !== visibleIndex) {
-      setVisibleIndex(Math.max(0, Math.min(currentIndex, videos.length - 1)));
+    if (clampedIndex !== visibleIndex) {
+      setVisibleIndex(clampedIndex);
     }
   }, [visibleIndex, videos.length, adjustedHeight]);
 
@@ -234,14 +236,15 @@ const VideoFeed: React.FC = () => {
       <View style={{
         height: adjustedHeight,
         width: '100%',
-        overflow: 'hidden',
-        backgroundColor: '#000'
+        backgroundColor: '#000',
+        position: 'relative'
       }}>
         <VideoPlayer
         isGlobalPlayer={false}
           key={item._id}
           videoData={item}
           isActive={index === visibleIndex}
+          isGlobalPlayer={false}
           containerHeight={adjustedHeight}
           showCommentsModal={showCommentsModal}
           setShowCommentsModal={setShowCommentsModal}
@@ -327,31 +330,32 @@ const VideoFeed: React.FC = () => {
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
           style={{ flex: 1, backgroundColor: '#000' }}
-          overScrollMode="never" // Android: prevent over-scrolling
-          alwaysBounceVertical={false} // iOS: prevent bouncing
+          contentContainerStyle={{ backgroundColor: '#000' }}
           getItemLayout={getItemLayout}
-          pagingEnabled
+          pagingEnabled={true}
           scrollEnabled={!showCommentsModal}
           onViewableItemsChanged={onViewableItemsChanged.current}
           viewabilityConfig={{
-            itemVisiblePercentThreshold: 95, // Increased for stricter detection
-            minimumViewTime: 200, // Increased for better stability
+            itemVisiblePercentThreshold: 99,
+            minimumViewTime: 300,
             waitForInteraction: false
           }}
           decelerationRate="fast"
           showsVerticalScrollIndicator={false}
           snapToInterval={adjustedHeight}
           snapToAlignment="start"
-          removeClippedSubviews={false} // Disable to prevent content bleeding
-          bounces={false} // Disable bouncing to prevent content bleeding
-          disableIntervalMomentum={true} // Prevent momentum scrolling past snap points
+          removeClippedSubviews={true}
+          bounces={false}
+          disableIntervalMomentum={true}
           scrollEventThrottle={16}
           onScrollEndDrag={onScrollEndDrag}
           onMomentumScrollEnd={onMomentumScrollEnd}
-          maxToRenderPerBatch={1} // Render only one item at once
-          windowSize={1} // Smaller window size
-          initialNumToRender={1} // Only render first item initially
-          updateCellsBatchingPeriod={100} // Batch updates
+          maxToRenderPerBatch={1}
+          windowSize={3}
+          initialNumToRender={1}
+          updateCellsBatchingPeriod={100}
+          overScrollMode="never"
+          alwaysBounceVertical={false}
         />
       )}
 

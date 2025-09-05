@@ -98,6 +98,9 @@ const VideoPlayer = ({
     comments: videoData.comments?.length || 0,
   });
 
+  // Comments refresh trigger
+  const [commentsRefreshTrigger, setCommentsRefreshTrigger] = useState(0);
+
   const mountedRef = useRef(true);
   const statusListenerRef = useRef<any>(null);
   const timeListenerRef = useRef<any>(null);
@@ -105,6 +108,21 @@ const VideoPlayer = ({
 
   const VIDEO_HEIGHT = containerHeight || screenHeight;
   const isFocused = useIsFocused();
+
+
+  // FIX: Update local stats when videoData changes (e.g., when switching videos)
+  useEffect(() => {
+    setLocalStats({
+      likes: videoData.likes || 0,
+      gifts: videoData.gifts || 0,
+      shares: videoData.shares || 0,
+      comments: videoData.comments?.length || 0,
+    });
+  }, [videoData._id, videoData.likes, videoData.gifts, videoData.shares, videoData.comments?.length]);
+
+
+
+
 
   // Full screen:
   const { setOrientation, isLandscape } = useOrientationStore();
@@ -446,7 +464,6 @@ const VideoPlayer = ({
       height: isLandscape ? screenWidth : VIDEO_HEIGHT,
       width: "100%",
       backgroundColor: "#000",
-      overflow: "hidden",
       position: "relative",
     },
     video: {
@@ -459,6 +476,7 @@ const VideoPlayer = ({
       resizeMode: "cover",
     },
     spinner: {
+      position: "absolute",
       top: "50%",
       left: "50%",
       marginLeft: -20,
@@ -477,25 +495,6 @@ const VideoPlayer = ({
       </View>
     );
   }
-
-  //   if (showPaidMessage) {
-  //     return (
-  //       <View style={dynamicStyles.container}>
-  //         <Image
-  //           source={{ uri: videoData.thumbnailUrl }}
-  //           style={dynamicStyles.thumbnail}
-  //         />
-
-  //         <ModalMessage
-  //           visible={true}
-  //           text={`Access Denied
-  // You do not have permission to view this video.`}
-  //           needCloseButton={true}
-  //           onClose={() => setShowPaidMessage(false)}
-  //         />
-  //       </View>
-  //     );
-  //   }
 
   if (!videoData?.videoUrl) {
     return <View style={dynamicStyles.container} />;
@@ -576,6 +575,10 @@ You do not have permission to view this video.`}
         }}
         isGlobalPlayer={isGlobalPlayer}
         setShowCommentsModal={setShowCommentsModal}
+        onCommentsModalOpen={() => {
+          console.log('💰 Comments modal opened, triggering refresh');
+          setCommentsRefreshTrigger(prev => prev + 1);
+        }}
         onEpisodeChange={onEpisodeChange}
         onToggleFullScreen={onToggleFullScreen}
         onStatsUpdate={handleStatsUpdate}
@@ -648,8 +651,10 @@ You do not have permission to view this video.`}
 
       {showCommentsModal && setShowCommentsModal && (
         <CommentsSection
+          key={`comments-${videoData._id}`} // Stable key per video
           onClose={() => setShowCommentsModal(false)}
           videoId={videoData._id}
+          refreshTrigger={commentsRefreshTrigger} // Pass refresh trigger
           onPressUsername={(userId) => {
             try {
               router.push(`/(dashboard)/profile/public/${userId}`);

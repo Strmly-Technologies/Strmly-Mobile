@@ -153,16 +153,24 @@ const InteractOptions = ({
             }
           );
 
-          if (!response.ok)
+          if (!response.ok) {
+            if (response.status === 401) {
+              console.log("Token expired, user needs to re-authenticate");
+              // Don't log error for expired tokens to reduce noise
+              return;
+            }
             throw new Error("Failed while checking video like status");
+          }
 
           const data = await response.json();
           console.log("check like response:", data);
           
           setLike(data.likes);
           setIsLikedVideo(data.isLiked);
-        } catch (err) {
-          console.log("Error checking like status:", err);
+        } catch (err: any) {
+          if (!err.message?.includes("401") && !err.message?.includes("token")) {
+            console.log("Error checking like status:", err);
+          }
         }
       };
 
@@ -191,8 +199,15 @@ const InteractOptions = ({
               },
             }
           );
-          if (!response.ok)
+          
+          if (!response.ok) {
+            if (response.status === 401) {
+              console.log("Token expired, user needs to re-authenticate");
+              // Don't log error for expired tokens to reduce noise
+              return;
+            }
             throw new Error("Failed while checking video gifting status");
+          }
             
           const data = await response.json();
           console.log("check gifting response:", data);
@@ -202,8 +217,10 @@ const InteractOptions = ({
           if (onGiftUpdate) {
             onGiftUpdate(data.data);
           }
-        } catch (err) {
-          console.log("Error checking gift status:", err);
+        } catch (err: any) {
+          if (!err.message?.includes("401") && !err.message?.includes("token")) {
+            console.log("Error checking gift status:", err);
+          }
         }
       };
 
@@ -232,14 +249,23 @@ const InteractOptions = ({
             body: JSON.stringify({ videoId: videoId }),
           }
         );
-        if (!response.ok)
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.log("Token expired, user needs to re-authenticate");
+            // Don't log error for expired tokens to reduce noise
+            return;
+          }
           throw new Error("Failed while checking reshare status");
+        }
           
         const data = await response.json();
         console.log("reshare status:", data.isReshared);
         setIsResharedVideo(data.isReshared);
-      } catch (err) {
-        console.log("Error checking reshare status:", err);
+      } catch (err: any) {
+        if (!err.message?.includes("401") && !err.message?.includes("token")) {
+          console.log("Error checking reshare status:", err);
+        }
       }
     };
 

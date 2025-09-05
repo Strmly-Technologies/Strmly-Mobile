@@ -11,16 +11,16 @@ import {
   Alert,
   Keyboard,
   Platform,
-  KeyboardAvoidingView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useFocusEffect } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useComments } from "./useComments";
 import { Comment } from "@/types/Comments";
 import { useMonetization } from "./useMonetization";
 import { router } from "expo-router";
 import { getProfilePhotoUrl } from "@/utils/profileUtils";
+import { useCallback } from "react";
+import { useFocusEffect, useIsFocused, useNavigation } from "@react-navigation/native";
 
 interface CommentsSectionProps {
   onClose: () => void;
@@ -28,11 +28,41 @@ interface CommentsSectionProps {
   onPressUsername?: (userId: string) => void;
   onPressTip?: (commentId: string) => void;
   onCommentAdded?: () => void;
+  refreshTrigger?: number; // Add prop to trigger refresh
 }
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SHEET_MAX_HEIGHT = SCREEN_HEIGHT * 0.6;
 const BOTTOM_NAV_HEIGHT = 70;
+
+// Helper function to format timestamp like Instagram
+const formatTimestamp = (timestamp: string | Date): string => {
+  const now = new Date();
+  const date = new Date(timestamp);
+  const diffMs = now.getTime() - date.getTime();
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  const diffWeeks = Math.floor(diffDays / 7);
+
+  if (diffSeconds < 60) {
+    return "now";
+  } else if (diffMinutes < 60) {
+    return `${diffMinutes}m`;
+  } else if (diffHours < 24) {
+    return `${diffHours}h`;
+  } else if (diffDays < 7) {
+    return `${diffDays}d`;
+  } else if (diffWeeks < 4) {
+    return `${diffWeeks}w`;
+  } else {
+    // For older posts, show month/day
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${month}/${day}`;
+  }
+};
 
 const CommentsSection = ({
   onClose,
@@ -40,6 +70,7 @@ const CommentsSection = ({
   onPressUsername,
   onPressTip,
   onCommentAdded,
+  refreshTrigger,
 }: CommentsSectionProps) => {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,8 +82,26 @@ const CommentsSection = ({
   const [repliesData, setRepliesData] = useState<{ [key: string]: any[] }>({});
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [lastGiftedCommentId, setLastGiftedCommentId] = useState<string | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(true);
+  const lastGiftedCommentRef = useRef<string | null>(null);
+
+  // Debug logging for lastGiftedCommentId changes
+  useEffect(() => {
+    console.log('💰 lastGiftedCommentId changed to:', lastGiftedCommentId);
+    lastGiftedCommentRef.current = lastGiftedCommentId;
+  }, [lastGiftedCommentId]);
+
+  // Debug logging for focus changes
+  useEffect(() => {
+    console.log('💰 isFocused changed to:', isFocused);
+  }, [isFocused]);
+
   const inputRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+  const isFocused = useIsFocused();
+  const navigation = useNavigation();
+
   const insets = useSafeAreaInsets();
   const { commentMonetizationEnabled, loading: monetizationLoading } =
     useMonetization(false);
@@ -82,6 +131,101 @@ const CommentsSection = ({
     }
   }, [videoId, fetchComments]);
 
+  // Add a more aggressive refresh when the component mounts or becomes visible
+  useEffect(() => {
+    const refreshTimer = setTimeout(() => {
+      if (videoId && isFocused) {
+        console.log('💰 Aggressive refresh - ensuring we have latest comment data');
+        fetchComments();
+      }
+    }, 500);
+
+    return () => clearTimeout(refreshTimer);
+  }, [videoId, isFocused, fetchComments]);
+
+  // Refresh when refreshTrigger changes (when modal is reopened)
+  useEffect(() => {
+    if (videoId && refreshTrigger && refreshTrigger > 0) {
+      console.log('💰 CommentSection refresh triggered - fetching latest comment data with gift amounts');
+      fetchComments();
+    }
+  }, [refreshTrigger, videoId, fetchComments]);
+
+  // Track modal visibility
+  useEffect(() => {
+    setIsModalVisible(true);
+    return () => setIsModalVisible(false);
+  }, []);
+
+  // Define handleGiftSuccess function first
+  const handleGiftSuccess = useCallback(async () => {
+    try {
+      console.log('💰 Gift successful, refreshing all comments to get latest amounts');
+      await fetchComments();
+    } catch (error) {
+      console.error('❌ Error refreshing comments after gift:', error);
+    }
+  }, [fetchComments]);
+
+  // Listen for when we return from gift screen using app state
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (lastGiftedCommentId) {
+      console.log('💰 Starting to watch for return from gift screen...');
+      
+      // Check every 500ms if we're back and focused
+      intervalId = setInterval(() => {
+        if (isFocused && lastGiftedCommentId) {
+          console.log('💰 Detected return from gift screen, refreshing comments');
+          handleGiftSuccess();
+          setLastGiftedCommentId(null);
+        }
+      }, 500);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [lastGiftedCommentId, isFocused, handleGiftSuccess]);
+
+  // Listen for navigation state changes to detect return from gift screen
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('💰 Navigation focus event triggered. videoId:', videoId, 'lastGiftedCommentId:', lastGiftedCommentId);
+      if (videoId && lastGiftedCommentId) {
+        console.log('💰 Returning from gift screen via navigation listener, refreshing all comments to get latest amounts');
+        handleGiftSuccess();
+        setLastGiftedCommentId(null); // Clear the flag
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, videoId, lastGiftedCommentId, handleGiftSuccess]);
+
+  // Listen for screen focus to refresh comments after returning from gift screen
+  useFocusEffect(
+    useCallback(() => {
+      console.log('💰 useFocusEffect triggered. videoId:', videoId, 'lastGiftedCommentId:', lastGiftedCommentId);
+      if (videoId && lastGiftedCommentId) {
+        console.log('💰 Returning from gift screen, refreshing all comments to get latest amounts');
+        handleGiftSuccess();
+        setLastGiftedCommentId(null); // Clear the flag
+      }
+    }, [videoId, lastGiftedCommentId, handleGiftSuccess])
+  );
+
+  // Listen for screen focus changes to refresh comments when modal becomes visible
+  useEffect(() => {
+    if (isFocused && isModalVisible && lastGiftedCommentId) {
+      console.log('💰 Modal became visible after gift, refreshing comments');
+      handleGiftSuccess();
+      setLastGiftedCommentId(null);
+    }
+  }, [isFocused, isModalVisible, lastGiftedCommentId, handleGiftSuccess]);
+
   // Debug logging for monetization and gift counts
   useEffect(() => {
     if (comments.length > 0) {
@@ -90,12 +234,11 @@ const CommentsSection = ({
         commentsCount: comments.length,
         monetizedComments: comments.filter((c) => c.is_monetized).length,
       });
-      
+
       // Debug gift counts
       console.log("💰 Comment Gift Counts:", comments.map(c => ({
         id: c._id,
         content: c.content?.substring(0, 20) + "...",
-        gifts: c.gifts,
         donations: c.donations,
         user: c.user?.name
       })));
@@ -196,7 +339,6 @@ const CommentsSection = ({
     if (inputRef.current) {
       inputRef.current.focus();
     }
-
   };
 
   const handleCancelReply = () => {
@@ -274,6 +416,8 @@ const CommentsSection = ({
     }
   };
 
+
+
   const renderReply = (reply: any, parentCommentId: string) => (
     <View key={reply._id} style={{ marginLeft: 56, marginBottom: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
@@ -293,13 +437,18 @@ const CommentsSection = ({
           </TouchableOpacity>
 
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <TouchableOpacity onPress={() => onPressUsername?.(reply.user?.id)}>
-              <Text
-                style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "600" }}
-              >
-                {reply.user?.name || "Anonymous User"}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <TouchableOpacity onPress={() => onPressUsername?.(reply.user?.id)}>
+                <Text
+                  style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "600" }}
+                >
+                  {reply.user?.name || "Anonymous User"}
+                </Text>
+              </TouchableOpacity>
+              <Text style={{ color: "#9E9E9E", fontSize: 12 }}>
+                {formatTimestamp(reply.timestamp || reply.createdAt)}
               </Text>
-            </TouchableOpacity>
+            </View>
             <Text style={{ color: "#FFFFFF", fontSize: 16, marginTop: 2 }}>
               {reply.content || "No content"}
             </Text>
@@ -401,15 +550,20 @@ const CommentsSection = ({
             </TouchableOpacity>
 
             <View style={{ flex: 1, marginLeft: 12 }}>
-              <TouchableOpacity
-                onPress={() => onPressUsername?.(item.user?.id)}
-              >
-                <Text
-                  style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "600" }}
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <TouchableOpacity
+                  onPress={() => onPressUsername?.(item.user?.id)}
                 >
-                  {item.user?.name || "Anonymous User"}
+                  <Text
+                    style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "600" }}
+                  >
+                    {item.user?.name || "Anonymous User"}
+                  </Text>
+                </TouchableOpacity>
+                <Text style={{ color: "#9E9E9E", fontSize: 12 }}>
+                  {formatTimestamp(item.timestamp || item.createdAt)}
                 </Text>
-              </TouchableOpacity>
+              </View>
               <Text style={{ color: "#FFFFFF", fontSize: 16, marginTop: 2 }}>
                 {item.content || "No content"}
               </Text>
@@ -429,6 +583,12 @@ const CommentsSection = ({
             {commentMonetizationEnabled && item.is_monetized && (
               <TouchableOpacity
                 onPress={() => {
+                  console.log('🎯 GIFT BUTTON PRESSED! CommentId:', item._id);
+                  // Store the comment ID for refreshing when we return
+                  setLastGiftedCommentId(item._id);
+                  console.log('💰 Navigating to gift screen, will refresh on return. CommentId:', item._id);
+                  console.log('💰 lastGiftedCommentId set to:', item._id);
+
                   // Navigate to VideoContentGifting with comment parameters
                   router.push({
                     pathname: "/(payments)/Video/Video-Gifting",
@@ -453,11 +613,13 @@ const CommentsSection = ({
                 <MaterialIcons
                   name="currency-rupee"
                   size={20}
-                  color="#FFD24D"
+                  color={item.donations && item.donations > 0 ? "#FFD24D" : "#FFFFFF"}
                 />
                 <Text style={{ color: "#9E9E9E", fontSize: 12, marginTop: 2 }}>
                   {item.donations || 0}
                 </Text>
+                {/* Debug: Show what we're rendering */}
+                {console.log('🎨 Rendering gift count for comment:', item._id, 'donations:', item.donations)}
               </TouchableOpacity>
             )}
 
@@ -611,7 +773,6 @@ const CommentsSection = ({
           maxHeight: SCREEN_HEIGHT * 0.8,
         }}
       >
-
         {/* Drag handle */}
         <View
           style={{ alignItems: "center", paddingTop: 12, paddingBottom: 8 }}
@@ -631,6 +792,12 @@ const CommentsSection = ({
           <Text style={{ color: "#FFFFFF", fontSize: 22, fontWeight: "700" }}>
             Comments
           </Text>
+          {/* Debug indicator */}
+          {lastGiftedCommentId && (
+            <Text style={{ color: "#FFD24D", fontSize: 12, marginTop: 4 }}>
+              🎁 Waiting for gift return: {lastGiftedCommentId.substring(0, 8)}...
+            </Text>
+          )}
         </View>
 
         {/* Comments List */}
@@ -779,7 +946,6 @@ const CommentsSection = ({
         </View>
       </View>
     </View>
-
   );
 };
 

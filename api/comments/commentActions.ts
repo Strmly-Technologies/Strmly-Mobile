@@ -20,8 +20,8 @@ const throttleRequest = async (key: string) => {
 };
 
 export interface CommentAPIResponse {
-  message: string;
-  comment?: Comment;
+  message?: string;
+  comment?: Comment | any; // Allow any for backend response mapping
   comments?: Comment[];
   replies?: reply[];
   pagination?: {
@@ -269,6 +269,8 @@ export class CommentAPI {
 
     return response.json();
   }
+
+
 }
 
 // Convenience functions for easier usage

@@ -20,6 +20,7 @@ type Props = {
   videoData: VideoItemType;
   isGlobalPlayer: boolean;
   setShowCommentsModal?: (visible: boolean) => void;
+  onCommentsModalOpen?: () => void; // Add callback for when comments modal is opened
   onEpisodeChange?: (episodeData: any) => void;
 
   onStatsUpdate?: (stats: {
@@ -41,6 +42,7 @@ const VideoControls = ({
   videoData,
   isGlobalPlayer,
   setShowCommentsModal,
+  onCommentsModalOpen,
   onEpisodeChange,
   onStatsUpdate,
   onToggleFullScreen,
@@ -200,7 +202,10 @@ const VideoControls = ({
             comments={videoData.comments?.length}
             onCommentPress={
               setShowCommentsModal
-                ? () => setShowCommentsModal(true)
+                ? () => {
+                    setShowCommentsModal(true);
+                    onCommentsModalOpen?.(); // Trigger refresh when modal opens
+                  }
                 : undefined
             }
             onCommentUpdate={(newCount) => {

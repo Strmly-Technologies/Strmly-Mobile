@@ -97,6 +97,15 @@ export const useComments = ({ videoId }: UseCommentsProps) => {
       }));
 
       console.log('✅ Valid comments after filtering:', validComments.length);
+      
+      // Debug: Log what we're about to set in state
+      console.log('💰 Setting comments state with gift amounts:', validComments.map((c: any) => ({
+        id: c._id,
+        content: c.content?.substring(0, 20) + "...",
+        donations: c.donations,
+        user: c.user?.name || c.user?.username
+      })));
+      
       setComments(validComments);
     } catch (err: any) {
       console.log('❌ Error fetching real comments:', err.message);
@@ -358,6 +367,8 @@ export const useComments = ({ videoId }: UseCommentsProps) => {
       throw err;
     }
   }, [token, videoId]);
+
+
 
   return {
     comments,
