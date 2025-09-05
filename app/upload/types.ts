@@ -1,12 +1,15 @@
 // Types for the video upload flow
 // These interfaces define the data structures used throughout the upload process
 
+import { ImagePickerAsset } from "expo-image-picker";
+
 export interface VideoFormData {
   title: string;
   community: string | null;
   format: 'Netflix' | 'YouTube' | null;
   videoType: 'free' | 'paid' | null;
   amount?: number; // Price for paid videos
+  thumbnail: ImagePickerAsset | null;
 }
 
 export interface FinalStageData {

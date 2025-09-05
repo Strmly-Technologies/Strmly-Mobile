@@ -7,11 +7,10 @@ import {
   StatusBar,
   Alert,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { Audio } from "expo-av";
 
 interface FileSelectScreenProps {
   onFileSelected: (file: any) => void;
@@ -38,32 +37,6 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
       player.volume = 1;
     }
   });
-
-  const getVideoDuration = async (uri: string): Promise<number> => {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri },
-      { shouldPlay: false }
-    );
-    const status = await sound.getStatusAsync();
-    const durationSec = Math.floor((status.durationMillis || 0) / 1000);
-    console.log(durationSec);
-
-    await sound.unloadAsync(); // cleanup
-    return durationSec;
-  };
-
-  // Track player status
-  useEffect(() => {
-    if (player && selectedFile) {
-      const subscription = player.addListener("playingChange", (isPlaying) => {
-        setIsPlaying(isPlaying);
-      });
-
-      return () => {
-        subscription.remove();
-      };
-    }
-  }, [player, selectedFile]);
 
   // Handle file selection
   const handleFileSelect = async () => {
@@ -97,13 +70,6 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
           );
           return;
         }
-
-        const duration = await getVideoDuration(file.uri);
-
-        const enrichedFile = {
-          ...file,
-          duration,
-        };
 
         setSelectedFile(file);
         // Immediately notify parent component about file selection

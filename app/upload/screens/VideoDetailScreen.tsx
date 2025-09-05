@@ -1,23 +1,32 @@
-import React, { useState } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import FormField from '../components/FormField';
-import Dropdown from '../components/Dropdown';
-import ContinueButton from '../components/ContinueButton';
-import { VideoDetailProps } from '../types';
-import { formatOptions, videoTypeOptions } from '../data/dropdownOptions';
-import { useCommunities } from '../hooks/useCommunities';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StatusBar,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Image,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import FormField from "../components/FormField";
+import Dropdown from "../components/Dropdown";
+import ContinueButton from "../components/ContinueButton";
+import { VideoDetailProps } from "../types";
+import { formatOptions, videoTypeOptions } from "../data/dropdownOptions";
+import { useCommunities } from "../hooks/useCommunities";
+import * as ImagePicker from "expo-image-picker";
 
 /**
  * Video Detail Screen
  * Multi-step form for video metadata configuration
- * 
+ *
  * Backend Integration Notes:
  * - Form data should be validated on both client and server
  * - Consider auto-saving drafts as user types
  * - Implement proper error handling for API failures
  * - Add loading states for dropdown data fetching
- * 
+ *
  * API Endpoints:
  * - GET /api/communities (for community dropdown)
  * - GET /api/formats (for format dropdown)
@@ -32,14 +41,31 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
   selectedSeries,
 
   videoFormat,
-  isEditingDraft
+  isEditingDraft,
 }) => {
   const [communityDropdownOpen, setCommunityDropdownOpen] = useState(false);
   const [formatDropdownOpen, setFormatDropdownOpen] = useState(false);
   const [videoTypeDropdownOpen, setVideoTypeDropdownOpen] = useState(false);
 
   // Fetch communities dynamically
-  const { communities: communityOptions, loading: communitiesLoading, error: communitiesError } = useCommunities();
+  const {
+    communities: communityOptions,
+    loading: communitiesLoading,
+    error: communitiesError,
+  } = useCommunities();
+
+  const [thumbnail, setThumbnail] = useState(formData.thumbnail || null);
+
+  const pickThumbnail = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets?.length > 0) {
+      onFormChange({ ...formData, thumbnail: result.assets[0] });
+    }
+  };
 
   // Handle title change
   const handleTitleChange = (title: string) => {
@@ -54,62 +80,84 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
 
   // Handle format selection
   const handleFormatSelect = (format: string) => {
-    onFormChange({ ...formData, format: format as 'Netflix' | 'YouTube' });
+    onFormChange({ ...formData, format: format as "Netflix" | "YouTube" });
     setFormatDropdownOpen(false);
   };
 
   // Handle video type selection
   const handleVideoTypeSelect = (videoType: string) => {
-    onFormChange({ ...formData, videoType: videoType as 'free' | 'paid' });
+    onFormChange({ ...formData, videoType: videoType as "free" | "paid" });
     setVideoTypeDropdownOpen(false);
   };
 
   // Auto-set video type and price from selected series
   React.useEffect(() => {
-    if (selectedSeries && videoFormat === 'episode') {
+    if (selectedSeries && videoFormat === "episode") {
       // Inherit video type and price from series
-      const seriesVideoType = selectedSeries.accessType === 'paid' ? 'paid' : 'free';
-      const seriesPrice = selectedSeries.accessType === 'paid' ? selectedSeries.price : undefined;
-      
+      const seriesVideoType =
+        selectedSeries.accessType === "paid" ? "paid" : "free";
+      const seriesPrice =
+        selectedSeries.accessType === "paid" ? selectedSeries.price : undefined;
+
       // Only update if different from current values
-      if (formData.videoType !== seriesVideoType || formData.amount !== seriesPrice) {
+      if (
+        formData.videoType !== seriesVideoType ||
+        formData.amount !== seriesPrice
+      ) {
         onFormChange({
           ...formData,
           videoType: seriesVideoType,
-          amount: seriesPrice
+          amount: seriesPrice,
         });
       }
     }
-  }, [selectedSeries, videoFormat, formData.videoType, formData.amount, onFormChange]);
+  }, [
+    selectedSeries,
+    videoFormat,
+    formData.videoType,
+    formData.amount,
+    onFormChange,
+  ]);
 
   // Check if current step is valid
   const isStepValid = () => {
     switch (step) {
       case 1:
-        return formData.title.trim() !== '' && formData.community !== null;
+        return formData.title.trim() !== "" && formData.community !== null;
       case 2:
-        return formData.title.trim() !== '' &&
+        return (
+          formData.title.trim() !== "" &&
           formData.community !== null &&
-          formData.format !== null;
+          formData.format !== null
+        );
       case 3:
-        const basicValidation = formData.title.trim() !== '' &&
+        const basicValidation =
+          formData.title.trim() !== "" &&
           formData.community !== null &&
           formData.format !== null &&
           formData.videoType !== null;
 
+        // Require thumbnail
+        const hasThumbnail = !!formData.thumbnail;
+
         // For episodes with selected series, validation is simpler since pricing is inherited
-        if (videoFormat === 'episode' && selectedSeries) {
-          return basicValidation;
+        if (videoFormat === "episode" && selectedSeries) {
+          return basicValidation && hasThumbnail;
         }
 
         // Additional validation for paid videos (single videos only)
-        if (formData.videoType === 'paid') {
+        if (formData.videoType === "paid") {
           const hasValidAmount = formData.amount && formData.amount > 0;
-          console.log('💰 Paid video validation - amount:', formData.amount, 'isValid:', hasValidAmount);
+          console.log(
+            "💰 Paid video validation - amount:",
+            formData.amount,
+            "isValid:",
+            hasValidAmount
+          );
           return basicValidation && hasValidAmount;
         }
 
-        return basicValidation;
+        return basicValidation && hasThumbnail;
       default:
         return false;
     }
@@ -125,7 +173,7 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
           <Ionicons name="chevron-back" size={24} color="white" />
         </TouchableOpacity>
         <Text className="text-white text-xl font-medium">
-          {isEditingDraft ? 'Edit Draft' : 'Video detail'}
+          {isEditingDraft ? "Edit Draft" : "Video detail"}
         </Text>
         <View className="w-6" />
       </View>
@@ -139,9 +187,9 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
 
         {/* Title Field */}
         <FormField
-          label={videoFormat === 'episode' ? 'Episode Title' : 'Title'}
+          label={videoFormat === "episode" ? "Episode Title" : "Title"}
           value={formData.title}
-          placeholder={videoFormat === 'episode' ? 'Episode 1' : 'Title'}
+          placeholder={videoFormat === "episode" ? "Episode 1" : "Title"}
           onChangeText={handleTitleChange}
         />
 
@@ -155,11 +203,19 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
             </View>
           ) : communitiesError ? (
             <View className="bg-red-900/20 border border-red-500 rounded-lg p-4">
-              <Text className="text-red-400 text-sm">No community Available</Text>
+              <Text className="text-red-400 text-sm">
+                No community Available
+              </Text>
             </View>
           ) : null}
           <Dropdown
-            value={formData.community ? communityOptions.find(option => option.value === formData.community)?.label || formData.community : null}
+            value={
+              formData.community
+                ? communityOptions.find(
+                    (option) => option.value === formData.community
+                  )?.label || formData.community
+                : null
+            }
             placeholder="Select"
             options={communityOptions}
             onSelect={handleCommunitySelect}
@@ -172,7 +228,9 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
         {/* Format Dropdown - Show from step 2 onwards */}
         {step >= 2 && (
           <View className="mb-8">
-            <Text className="text-white text-lg font-medium mb-3">Format That Fits Your Content</Text>
+            <Text className="text-white text-lg font-medium mb-3">
+              Format That Fits Your Content
+            </Text>
             <Dropdown
               value={formData.format}
               placeholder="Select"
@@ -185,61 +243,110 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
         )}
 
         {/* Video Type Dropdown - Show from step 3 onwards, but hide if episode with selected series */}
-        {step >= 3 && !(videoFormat === 'episode' && selectedSeries) && (
-          <View className="mb-8">
-            <Text className="text-white text-lg font-medium mb-3">Video Type</Text>
-            <Dropdown
-              value={formData.videoType}
-              placeholder="Select"
-              options={videoTypeOptions}
-              onSelect={handleVideoTypeSelect}
-              isOpen={videoTypeDropdownOpen}
-              onToggle={() => setVideoTypeDropdownOpen(!videoTypeDropdownOpen)}
-            />
-
-            {/* Price Input - Show only when Paid is selected */}
-            {formData.videoType === 'paid' && (
-              <View className="mt-4">
-                <FormField
-                  label="Price (₹)"
-                  value={formData.amount?.toString() || ''}
-                  placeholder="Enter price (e.g., 10)"
-                  onChangeText={(text) => {
-                    let amount: number | undefined;
-                    if (text.trim() === '') {
-                      amount = undefined;
-                    } else {
-                      const parsed = parseFloat(text);
-                      amount = isNaN(parsed) ? undefined : parsed;
-                    }
-                    console.log('💰 Price input changed:', text, '-> amount:', amount, 'isValid:', amount && amount > 0);
-                    onFormChange({ ...formData, amount });
-                  }}
-                  keyboardType="numeric"
-                  error={formData.videoType === 'paid' && (!formData.amount || formData.amount <= 0) ? 'Price must be greater than 0' : undefined}
+        {step >= 3 && (
+          <>
+            {!(videoFormat === "episode" && selectedSeries) && (
+              <View className="mb-8">
+                <Text className="text-white text-lg font-medium mb-3">
+                  Video Type
+                </Text>
+                <Dropdown
+                  value={formData.videoType}
+                  placeholder="Select"
+                  options={videoTypeOptions}
+                  onSelect={handleVideoTypeSelect}
+                  isOpen={videoTypeDropdownOpen}
+                  onToggle={() =>
+                    setVideoTypeDropdownOpen(!videoTypeDropdownOpen)
+                  }
                 />
+
+                {/* Price Input - Show only when Paid is selected */}
+                {formData.videoType === "paid" && (
+                  <View className="mt-4">
+                    <FormField
+                      label="Price (₹)"
+                      value={formData.amount?.toString() || ""}
+                      placeholder="Enter price (e.g., 10)"
+                      onChangeText={(text) => {
+                        let amount: number | undefined;
+                        if (text.trim() === "") {
+                          amount = undefined;
+                        } else {
+                          const parsed = parseFloat(text);
+                          amount = isNaN(parsed) ? undefined : parsed;
+                        }
+                        console.log(
+                          "💰 Price input changed:",
+                          text,
+                          "-> amount:",
+                          amount,
+                          "isValid:",
+                          amount && amount > 0
+                        );
+                        onFormChange({ ...formData, amount });
+                      }}
+                      keyboardType="numeric"
+                      error={
+                        formData.videoType === "paid" &&
+                        (!formData.amount || formData.amount <= 0)
+                          ? "Price must be greater than 0"
+                          : undefined
+                      }
+                    />
+                  </View>
+                )}
               </View>
             )}
-          </View>
-        )}
 
-        {/* Series Information Display - Show when episode with selected series */}
-       
+            <View className="mb-8">
+              <Text className="text-white text-lg font-medium mb-3">
+                Thumbnail
+              </Text>
+              {formData.thumbnail ? (
+                <TouchableOpacity onPress={pickThumbnail}>
+                  <Image
+                    source={{ uri: formData.thumbnail.uri }}
+                    style={{ width: 120, height: 80, borderRadius: 8 }}
+                  />
+                  <Text className="text-gray-400 mt-2">Tap to change</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={pickThumbnail}
+                  className="bg-gray-800 p-4 rounded-lg items-center"
+                >
+                  <Ionicons name="image-outline" size={32} color="white" />
+                  <Text className="text-white mt-2">Select Thumbnail</Text>
+                </TouchableOpacity>
+              )}
+
+              {!formData.thumbnail && (
+                <Text className="text-red-400 mt-2 text-sm">
+                  Thumbnail is required
+                </Text>
+              )}
+            </View>
+          </>
+        )}
 
         {/* Add some bottom padding for better scrolling */}
         <View className="h-32" />
       </ScrollView>
 
       {/* Continue Button */}
-      <View className="absolute bottom-0 left-0 right-0 bg-black pt-4 px-4" style={{ paddingBottom: 16 }}>
+      <View
+        className="absolute bottom-0 left-0 right-0 bg-black pt-4 px-4"
+        style={{ paddingBottom: 16 }}
+      >
         <ContinueButton
           title={
-            // For episodes with series, always show Continue
-            (videoFormat === 'episode' && selectedSeries) ? 'Continue' :
-            // For single paid videos without valid amount, show price prompt
-            (formData.videoType === 'paid' && (!formData.amount || formData.amount <= 0)) ? 'Enter Price to Continue' :
-            // Default continue text
-            'Continue'
+            videoFormat === "episode" && selectedSeries
+              ? "Continue"
+              : formData.videoType === "paid" &&
+                  (!formData.amount || formData.amount <= 0)
+                ? "Enter Price to Continue"
+                : "Continue"
           }
           onPress={onContinue}
           disabled={!isStepValid()}
