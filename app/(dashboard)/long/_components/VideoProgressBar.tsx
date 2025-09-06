@@ -163,13 +163,13 @@ const VideoProgressBar = ({
   };
 
   // Progress %
-  // const progress = duration > 0 ? currentTime / duration : 0;
+  const progress = duration > 0 ? currentTime / duration : 0;
 
   if (duration <= 0) return null;
 
   return (
     <>
-      {/* <View
+      <View
       style={styles.progressBarContainer}
       onLayout={handleProgressBarLayout}
     >
@@ -179,7 +179,7 @@ const VideoProgressBar = ({
         style={styles.touchArea}
         onPress={(event) => handleSeek(event.nativeEvent.locationX)}
       />
-    </View> */}
+    </View>
     </>
   );
 };

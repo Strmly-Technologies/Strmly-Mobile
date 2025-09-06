@@ -749,12 +749,6 @@ export default function PublicProfilePageWithId() {
                       </TouchableOpacity>
                     </View> */}
 
-                    {isLoadingVideos && (
-                      <View className="w-full h-96 flex-1 items-center justify-center mt-20">
-                        <ActivityIndicator size="large" color="white" />
-                      </View>
-                    )}
-
                     {videos.length === 0 && !isLoadingVideos && (
                       <View className="items-center h-20 justify-center">
                         <Text className="text-white text-xl text-center">
@@ -766,6 +760,13 @@ export default function PublicProfilePageWithId() {
                 </View>
               )}
             </>
+          }
+          ListFooterComponent={
+            isLoadingVideos ? (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <ActivityIndicator size="large" color="white" />
+              </View>
+            ) : null
           }
         />
       </ThemedView>

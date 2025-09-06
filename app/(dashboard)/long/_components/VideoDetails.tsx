@@ -26,7 +26,7 @@ import { useVideosStore } from "@/store/useVideosStore";
 type VideoDetailsProps = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
   setWantToBuyVideo: React.Dispatch<React.SetStateAction<boolean>>;
-  
+
   videoId: string;
   name: string;
   type: string;
@@ -101,6 +101,11 @@ const VideoDetails = ({
   const [isFollowCreator, setIsFollowCreator] = useState<boolean>(false);
   const [hasCreatorPass, setHasCreatorPass] = useState<boolean>(false);
   const [hasAccessPass, setHasAccessPass] = useState<string | null>(null);
+
+  const [isOpenedEpisodes, setIsOpenedEpisodes] = useState<boolean>(false);
+  const [isLoadingSeriesVideos, setIsLoadingSeriesVideos] =
+    useState<boolean>(false);
+
   const [isFollowCreatorLoading, setIsFollowCreatorLoading] =
     useState<boolean>(false);
   const [isFollowCommunity, setIsFollowCommunity] = useState<boolean>(false);
@@ -126,7 +131,10 @@ const VideoDetails = ({
   useFocusEffect(
     useCallback(() => {
       const hasAccessPass = async () => {
-        const accessId = series && series.price != 0 ? series._id : videoId;
+        const accessId =
+          series && series.price != 0
+            ? series._id + "?type=series"
+            : videoId + "?type=video";
         console.log(series, videoId);
         console.log("accessId", accessId);
         try {
@@ -392,6 +400,7 @@ const VideoDetails = ({
       return;
     }
 
+    setIsLoadingSeriesVideos(true);
     try {
       const response = await fetch(`${BACKEND_API_URL}/series/${series._id}`, {
         method: "GET",
@@ -404,9 +413,12 @@ const VideoDetails = ({
       const data = await response.json();
       console.log("series data: ", data.data);
 
-      setSeriesVideos(transformEpisodes(data.data.episodes))
+      setSeriesVideos(transformEpisodes(data.data.episodes));
+      setIsOpenedEpisodes(true);
     } catch (err) {
       console.log("err", err);
+    } finally {
+      setIsLoadingSeriesVideos(false);
     }
   };
 
@@ -481,7 +493,9 @@ const VideoDetails = ({
         {(type !== "Free" ||
           videoAmount != 0 ||
           (series != null &&
-           (!videoType ? (series?.type != "Free" || series?.price != 0) : (videoAmount !=0)))) && (
+            (!videoType
+              ? series?.type != "Free" || series?.price != 0
+              : videoAmount != 0))) && (
           <View>
             <TouchableOpacity
               onPress={() => {
@@ -505,10 +519,13 @@ const VideoDetails = ({
           {series !== null && videoType != "series" && (
             <TouchableOpacity
               className="border border-white rounded-xl px-2 py-0.5"
+              disabled={isLoadingSeriesVideos}
               onPress={() => {
                 setShowDropdown((prev) => !prev);
                 setShowPriceDropdown(false);
-                fetchSeriesData();
+                !isOpenedEpisodes && seriesVideos == null
+                  ? fetchSeriesData()
+                  : setIsOpenedEpisodes(false);
               }}
             >
               <View className="flex-row items-center">
@@ -532,9 +549,10 @@ const VideoDetails = ({
         {/* Paid Dropdown */}
         {showPriceDropdown && (
           <View className="absolute bottom-14 -right-2 rounded-xl p-2 w-80">
-            {(series != null && series.type != "Free") ||
+            {(series != null &&
+              series.type != "Free" &&
+              creatorPass?.creator_profile.creator_pass_price !== 0) ||
             (videoAmount != 0 &&
-              (hasCreatorPass || !hasCreatorPass) &&
               creatorPass?.creator_profile.creator_pass_price !== 0) ? (
               <TouchableOpacity
                 className="mb-0.5"
@@ -738,14 +756,15 @@ const VideoDetails = ({
               <TouchableOpacity
                 key={ep._id || idx}
                 className="mb-[0.5px]"
+                disabled={isLoadingSeriesVideos}
                 onPress={() => {
                   setSelectedEpisodeIndex(selectedEpisodeIndex);
                   setShowDropdown(false);
-                  console.log('selectedEpisodeIndex', idx);
+                  console.log("selectedEpisodeIndex", idx);
                   setVideosInZustand(seriesVideos);
                   router.push({
                     pathname: "/(dashboard)/long/GlobalVideoPlayer",
-                    params: { startIndex: idx, videoType: 'series' },
+                    params: { startIndex: idx, videoType: "series" },
                   });
 
                   // Call the episode change callback if provided

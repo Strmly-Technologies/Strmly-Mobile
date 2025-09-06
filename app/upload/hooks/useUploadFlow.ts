@@ -520,21 +520,19 @@ export const useUploadFlow = () => {
       });
 
       // append thumbnail if exists
-      if (state.videoDetails.thumbnail) {
-        formData.append("thumbnail", {
-          uri: state.videoDetails.thumbnail.uri,
-          name: state.videoDetails.thumbnail.fileName ?? "thumbnail.jpg",
-          type: state.videoDetails.thumbnail.mimeType ?? "image/jpeg",
-        } as any);
-      }
+      // if (state.videoDetails.thumbnail) {
+      //   formData.append("thumbnail", {
+      //     uri: state.videoDetails.thumbnail.uri,
+      //     name: state.videoDetails.thumbnail.fileName ?? "thumbnail.jpg",
+      //     type: state.videoDetails.thumbnail.mimeType ?? "image/jpeg",
+      //   } as any);
+      // }
 
       if (state.videoFormat === "episode" && state.selectedSeries) {
         // override what metadata already set
         formData.append("seriesId", state.selectedSeries.id.toString()); // ✅ correct
         formData.append("episodeNumber", "1"); // ✅ correct
       }
-
-      console.log(formData);
 
       const processResponse = await fetch(
         `${CONFIG.API_BASE_URL}/videos/process-upload`,

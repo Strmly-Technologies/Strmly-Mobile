@@ -39,6 +39,7 @@ const SeriesPassBuy = () => {
   useEffect(() => {
     const hasSeriesPass = async () => {
       try {
+        console.log('series', series)
         const response = await fetch(
           `${BACKEND_API_URL}/user/has-user-access/${series?._id}`,
           {

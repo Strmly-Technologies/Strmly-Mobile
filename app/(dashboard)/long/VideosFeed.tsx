@@ -33,7 +33,7 @@ export type GiftType = {
 };
 
 const { height: screenHeight } = Dimensions.get("window");
-const BOTTOM_NAV_HEIGHT = 50; // Height of your bottom navigation
+const BOTTOM_NAV_HEIGHT = -50; // Height of your bottom navigation
 
 // Define the height for each video item (adjust as needed)
 const VIDEO_HEIGHT = screenHeight;
@@ -181,7 +181,6 @@ const VideosFeed: React.FC = () => {
   }, [token, isLoggedIn]);
 
   // Handle viewable items change with debouncing
-  // Handle viewable items change with debouncing
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: any) => {
       if (viewableItems.length > 0 && isScreenFocused) {
@@ -189,7 +188,7 @@ const VideosFeed: React.FC = () => {
         const mostVisible = viewableItems.reduce((prev: any, current: any) => {
           return (current.percent || 0) > (prev.percent || 0) ? current : prev;
         });
-        
+
         const currentIndex = mostVisible.index;
         if (currentIndex !== visibleIndex && currentIndex !== undefined) {
           setVisibleIndex(currentIndex);
@@ -205,58 +204,52 @@ const VideosFeed: React.FC = () => {
   );
 
   // Add scroll handler to ensure proper snapping
-  const onScrollEndDrag = useCallback((event: any) => {
-    const { contentOffset } = event.nativeEvent;
-    const currentIndex = Math.round(contentOffset.y / VIDEO_HEIGHT);
-    const clampedIndex = Math.max(0, Math.min(currentIndex, videos.length - 1));
-    
-    // Force scroll to exact position if not aligned
-    if (Math.abs(contentOffset.y - (clampedIndex * VIDEO_HEIGHT)) > 10 && flatListRef.current) {
-      flatListRef.current.scrollToIndex({
-        index: clampedIndex,
-        animated: true,
-      });
-    }
-    
-    if (clampedIndex !== visibleIndex) {
-      setVisibleIndex(clampedIndex);
-    }
-  }, [visibleIndex, videos.length]);
+  const onScrollEndDrag = useCallback(
+    (event: any) => {
+      const { contentOffset } = event.nativeEvent;
+      const currentIndex = Math.round(contentOffset.y / VIDEO_HEIGHT);
 
-  const onMomentumScrollEnd = useCallback((event: any) => {
-    const { contentOffset } = event.nativeEvent;
-    const currentIndex = Math.round(contentOffset.y / VIDEO_HEIGHT);
-    const clampedIndex = Math.max(0, Math.min(currentIndex, videos.length - 1));
-    
-    // Force scroll to exact position if not aligned
-    if (Math.abs(contentOffset.y - (clampedIndex * VIDEO_HEIGHT)) > 10 && flatListRef.current) {
-      flatListRef.current.scrollToIndex({
-        index: clampedIndex,
-        animated: false,
-      });
-    }
-    
-    if (clampedIndex !== visibleIndex) {
-      setVisibleIndex(clampedIndex);
-    }
-  }, [visibleIndex, videos.length]);
+      // Ensure we're at the correct position
+      if (currentIndex !== visibleIndex && flatListRef.current) {
+        flatListRef.current.scrollToIndex({
+          index: Math.max(0, Math.min(currentIndex, videos.length - 1)),
+          animated: true,
+        });
+      }
+    },
+    [visibleIndex, videos.length]
+  );
+
+  const onMomentumScrollEnd = useCallback(
+    (event: any) => {
+      const { contentOffset } = event.nativeEvent;
+      const currentIndex = Math.round(contentOffset.y / VIDEO_HEIGHT);
+
+      if (currentIndex !== visibleIndex) {
+        setVisibleIndex(Math.max(0, Math.min(currentIndex, videos.length - 1)));
+      }
+    },
+    [visibleIndex, videos.length]
+  );
 
   // Stable viewability config - more strict to prevent bleeding
   const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 99, // Very strict - only consider visible when 99% is shown
-    minimumViewTime: 300, // Longer minimum view time for stability
+    itemVisiblePercentThreshold: 95, // Increased from 80 to 95 for stricter detection
+    minimumViewTime: 200, // Increased from 200 to 200ms for better stability
     waitForInteraction: false,
   }).current;
 
   // Memoize render item with proper container
   const renderItem = useCallback(
     ({ item, index }: { item: VideoItemType; index: number }) => (
-      <View style={{ 
-        height: VIDEO_HEIGHT, 
-        width: '100%', 
-        backgroundColor: '#000',
-        position: 'relative'
-      }}>
+      <View
+        style={{
+          height: VIDEO_HEIGHT,
+          width: "100%",
+          overflow: "hidden",
+          backgroundColor: "#000",
+        }}
+      >
         <VideoPlayer
           isGlobalPlayer={false}
           videoData={item}
@@ -335,7 +328,7 @@ const VideosFeed: React.FC = () => {
     );
   }
 
- if (videos.length === 0) {
+  if (videos.length === 0) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
         <StatusBar barStyle="light-content" backgroundColor="#000" />
@@ -352,6 +345,7 @@ const VideosFeed: React.FC = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+      {/* <ThemedView style={{flex: 1}}> */}
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       
       <FlatList
@@ -360,7 +354,7 @@ const VideosFeed: React.FC = () => {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         getItemLayout={getItemLayout}
-        pagingEnabled={true}
+        pagingEnabled
         scrollEnabled={!showCommentsModal && !isLandscape}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
@@ -369,27 +363,41 @@ const VideosFeed: React.FC = () => {
         windowSize={1}
         removeClippedSubviews={true}
         showsVerticalScrollIndicator={false}
-        snapToInterval={VIDEO_HEIGHT}
-        snapToAlignment="start"
-        decelerationRate="normal"
-        bounces={false}
-        scrollEventThrottle={16}
-        disableIntervalMomentum={true}
-        onScrollEndDrag={onScrollEndDrag}
-        onMomentumScrollEnd={onMomentumScrollEnd}
-        style={{ flex: 1, backgroundColor: '#000' }}
-        contentContainerStyle={{ backgroundColor: '#000' }}
-        overScrollMode="never"
-        alwaysBounceVertical={false}
+        contentInsetAdjustmentBehavior="automatic"
+        // onEndReachedThreshold={0.8}
+        // onEndReached={() => {
+        //   if (hasMore && !isFetchingMore && isScreenFocused) {
+        //     fetchTrendingVideos();
+        //   }
+        // }}
+        style={{ height: VIDEO_HEIGHT }}
+        maintainVisibleContentPosition={{
+          minIndexForVisible: 0,
+          autoscrollToTopThreshold: 10,
+        }}
+        // Add loading indicator at the bottom
         ListFooterComponent={
           isFetchingMore ? (
-            <View style={{ height: VIDEO_HEIGHT, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+            <View style={{ padding: 20, alignItems: "center" }}>
               <ActivityIndicator size="small" color="white" />
             </View>
           ) : null
         }
+        // incoming changes
+        snapToInterval={VIDEO_HEIGHT}
+        snapToAlignment="start"
+        decelerationRate="normal"
+        bounces={false} // Disable bouncing to prevent content bleeding
+        scrollEventThrottle={16}
+        disableIntervalMomentum={true} // Prevent momentum scrolling past snap points
+        onScrollEndDrag={onScrollEndDrag}
+        onMomentumScrollEnd={onMomentumScrollEnd}
+        contentContainerStyle={{ backgroundColor: "#000" }}
+        overScrollMode="never" // Android: prevent over-scrolling
+        alwaysBounceVertical={false} // iOS: prevent bouncing
       />
     </SafeAreaView>
+    // </ThemedView>
   );
 };
 

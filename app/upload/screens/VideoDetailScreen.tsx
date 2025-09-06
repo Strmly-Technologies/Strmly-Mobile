@@ -138,11 +138,14 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
           formData.videoType !== null;
 
         // Require thumbnail
-        const hasThumbnail = !!formData.thumbnail;
+        // const hasThumbnail = !!formData.thumbnail;
 
         // For episodes with selected series, validation is simpler since pricing is inherited
+        // if (videoFormat === "episode" && selectedSeries) {
+        //   return basicValidation && hasThumbnail;
+        // }
         if (videoFormat === "episode" && selectedSeries) {
-          return basicValidation && hasThumbnail;
+          return basicValidation;
         }
 
         // Additional validation for paid videos (single videos only)
@@ -157,7 +160,8 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
           return basicValidation && hasValidAmount;
         }
 
-        return basicValidation && hasThumbnail;
+        // return basicValidation && hasThumbnail;
+        return basicValidation;
       default:
         return false;
     }
@@ -299,7 +303,7 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
               </View>
             )}
 
-            <View className="mb-8">
+            {/* <View className="mb-8">
               <Text className="text-white text-lg font-medium mb-3">
                 Thumbnail
               </Text>
@@ -326,7 +330,7 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
                   Thumbnail is required
                 </Text>
               )}
-            </View>
+            </View> */}
           </>
         )}
 
