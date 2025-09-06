@@ -534,6 +534,8 @@ export const useUploadFlow = () => {
         formData.append("episodeNumber", "1"); // ✅ correct
       }
 
+      console.log(formData);
+
       const processResponse = await fetch(
         `${CONFIG.API_BASE_URL}/videos/process-upload`,
         {
