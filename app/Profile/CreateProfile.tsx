@@ -17,6 +17,8 @@ import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
 import Constants from "expo-constants";
 import ModalMessage from "@/components/AuthModalMessage";
+import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
+import { useNavigation } from "expo-router";
 
 const CreateProfile = () => {
   const [Step, setStep] = useState(1);
@@ -49,6 +51,7 @@ const CreateProfile = () => {
     "Inter-ExtraBold": require("../../assets/fonts/inter/Inter-ExtraBold.ttf"),
   });
 
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 
   const checkUsername = useCallback(
@@ -155,7 +158,14 @@ const CreateProfile = () => {
       setAlert("Registration successful.");
       setShowAlert(true);
       setNeedButton(false);
-      setTimeout(() => router.replace("/Interests"), 1000);
+
+      setTimeout(
+        () =>
+          navigation.reset({
+            routes: [{ name: "(InterestsSection)/Interests" }],
+          }),
+        1000
+      );
     } catch (err: any) {
       console.error("Registration error:", err);
       setAlert(err.message || "Something went wrong");
@@ -341,7 +351,7 @@ const CreateProfile = () => {
 
   if (Step === 1) {
     return (
-      <ThemedView style={{height: '100%', gap: 10, alignItems: 'center'}}>
+      <ThemedView style={{ height: "100%", gap: 10, alignItems: "center" }}>
         <View className="items-center justify-between flex-row w-full pt-10 px-4 mb-10">
           <TouchableOpacity onPress={() => router.back()} className="w-fit">
             <Image

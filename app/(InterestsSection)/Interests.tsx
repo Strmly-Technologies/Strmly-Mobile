@@ -15,11 +15,12 @@ import {
 } from "react-native";
 import { useAuthStore } from "@/store/useAuthStore";
 import Constants from "expo-constants";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { set } from "lodash";
 import ModalMessage from "@/components/AuthModalMessage";
+import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 
 const Interests = () => {
   const [Step, setStep] = useState(1);
@@ -46,6 +47,8 @@ const Interests = () => {
     "Inter-ExtraBold": require("../../assets/fonts/inter/Inter-ExtraBold.ttf"),
   });
 
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
   const submitInterests = async () => {
     if (!token || Interests.length !== 3) return;
 
@@ -59,8 +62,8 @@ const Interests = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          interest1 : Interests,
-          interest2 : Interests2,
+          interest1: Interests,
+          interest2: Interests2,
         }),
       });
 
@@ -76,7 +79,13 @@ const Interests = () => {
       setAlert("Your interests have been updated successfully!");
       setNeedButton(true);
       setShowAlert(true);
-      router.replace("/(tabs)/home");
+      setTimeout(
+        () =>
+          navigation.reset({
+            routes: [{ name: "(tabs)" }],
+          }),
+        1000
+      );
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Failed to update interests";
@@ -266,7 +275,7 @@ const Interests = () => {
   if (Step === 1) {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
-        <StatusBar backgroundColor={'black'} />
+        <StatusBar backgroundColor={"black"} />
         <ThemedView style={CreateProfileStyles.TopBar}>
           <TouchableOpacity
             onPress={() => router.back()}
@@ -426,7 +435,7 @@ const Interests = () => {
           ];
     return (
       <ThemedView style={CreateProfileStyles.Container}>
-        <StatusBar backgroundColor={'black'} />
+        <StatusBar backgroundColor={"black"} />
         <View style={CreateProfileStyles.TopBar}>
           <TouchableOpacity
             onPress={() => {

@@ -18,7 +18,7 @@ export default {
     android: {
       versionCode: 3,
       adaptiveIcon: {
-        foregroundImage: "./assets/images/logo3.png",
+        foregroundImage: "./assets/images/logo3.jpg",
         backgroundColor: "#000"
       },
       package: "com.anonymous.strmly",
@@ -28,14 +28,14 @@ export default {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/logo3.png"
+      favicon: "./assets/images/logo3.jpg"
     },
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/logo3.png",
+          image: "./assets/images/logo3.jpg",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#000"
