@@ -27,8 +27,8 @@ export const CONFIG = {
   PAYMENT_METHOD: 'google_play_billing',
   
   // Default profile photos
-  DEFAULT_USER_PROFILE_PHOTO: 'https://strmly-videos-dev-mumbai.s3.ap-south-1.amazonaws.com/defaut_user_profile_photo.jpg',
-  DEFAULT_COMMUNITY_PROFILE_PHOTO: 'https://strmly-videos-dev-mumbai.s3.ap-south-1.amazonaws.com/default_commuity_profile_photo.jpg'
+  DEFAULT_USER_PROFILE_PHOTO: 'https://strmly-videos-dev-mumbai.s3.ap-south-1.amazonaws.com/PHOTO-2025-09-08-23-44-29.jpg',
+  DEFAULT_COMMUNITY_PROFILE_PHOTO: 'https://strmly-videos-dev-mumbai.s3.ap-south-1.amazonaws.com/PHOTO-2025-09-08-23-44-29-2.jpg'
 };
 
 export default CONFIG;

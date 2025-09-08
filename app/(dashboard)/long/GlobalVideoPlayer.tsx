@@ -39,7 +39,7 @@ const GlobalVideoPlayer: React.FC = () => {
   const debounceRef = useRef<NodeJS.Timeout | number | null>(null);
 
   useEffect(() => {
-    if (storedVideos.length > 0) {
+    if (storedVideos.length > 0 && videos.length == 0) {
       setVideos(storedVideos);
       const index = Math.min(
         Math.max(parseInt(startIndex ?? "0", 10), 0),
