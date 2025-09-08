@@ -20,7 +20,11 @@ import { useMonetization } from "./useMonetization";
 import { router } from "expo-router";
 import { getProfilePhotoUrl } from "@/utils/profileUtils";
 import { useCallback } from "react";
-import { useFocusEffect, useIsFocused, useNavigation } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from "@react-navigation/native";
 
 interface CommentsSectionProps {
   onClose: () => void;
@@ -82,20 +86,17 @@ const CommentsSection = ({
   const [repliesData, setRepliesData] = useState<{ [key: string]: any[] }>({});
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [lastGiftedCommentId, setLastGiftedCommentId] = useState<string | null>(null);
+  const [lastGiftedCommentId, setLastGiftedCommentId] = useState<string | null>(
+    null
+  );
   const [isModalVisible, setIsModalVisible] = useState(true);
   const lastGiftedCommentRef = useRef<string | null>(null);
 
   // Debug logging for lastGiftedCommentId changes
   useEffect(() => {
-    console.log('💰 lastGiftedCommentId changed to:', lastGiftedCommentId);
+    console.log("💰 lastGiftedCommentId changed to:", lastGiftedCommentId);
     lastGiftedCommentRef.current = lastGiftedCommentId;
   }, [lastGiftedCommentId]);
-
-  // Debug logging for focus changes
-  useEffect(() => {
-    console.log('💰 isFocused changed to:', isFocused);
-  }, [isFocused]);
 
   const inputRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -119,6 +120,11 @@ const CommentsSection = ({
     downvoteReply,
   } = useComments({ videoId });
 
+  // Debug logging for focus changes
+  useEffect(() => {
+    console.log("💰 isFocused changed to:", isFocused);
+  }, [isFocused]);
+
   useEffect(() => {
     if (videoId) fetchComments();
   }, [videoId, fetchComments]);
@@ -126,7 +132,9 @@ const CommentsSection = ({
   // Refresh comments every time the modal is opened
   useEffect(() => {
     if (videoId) {
-      console.log('💰 CommentSection opened - refreshing comments to get latest gift counts');
+      console.log(
+        "💰 CommentSection opened - refreshing comments to get latest gift counts"
+      );
       fetchComments();
     }
   }, [videoId, fetchComments]);
@@ -135,7 +143,9 @@ const CommentsSection = ({
   useEffect(() => {
     const refreshTimer = setTimeout(() => {
       if (videoId && isFocused) {
-        console.log('💰 Aggressive refresh - ensuring we have latest comment data');
+        console.log(
+          "💰 Aggressive refresh - ensuring we have latest comment data"
+        );
         fetchComments();
       }
     }, 500);
@@ -146,7 +156,9 @@ const CommentsSection = ({
   // Refresh when refreshTrigger changes (when modal is reopened)
   useEffect(() => {
     if (videoId && refreshTrigger && refreshTrigger > 0) {
-      console.log('💰 CommentSection refresh triggered - fetching latest comment data with gift amounts');
+      console.log(
+        "💰 CommentSection refresh triggered - fetching latest comment data with gift amounts"
+      );
       fetchComments();
     }
   }, [refreshTrigger, videoId, fetchComments]);
@@ -160,24 +172,28 @@ const CommentsSection = ({
   // Define handleGiftSuccess function first
   const handleGiftSuccess = useCallback(async () => {
     try {
-      console.log('💰 Gift successful, refreshing all comments to get latest amounts');
+      console.log(
+        "💰 Gift successful, refreshing all comments to get latest amounts"
+      );
       await fetchComments();
     } catch (error) {
-      console.error('❌ Error refreshing comments after gift:', error);
+      console.error("❌ Error refreshing comments after gift:", error);
     }
   }, [fetchComments]);
 
   // Listen for when we return from gift screen using app state
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    
+    let intervalId: NodeJS.Timeout | number;
+
     if (lastGiftedCommentId) {
-      console.log('💰 Starting to watch for return from gift screen...');
-      
+      console.log("💰 Starting to watch for return from gift screen...");
+
       // Check every 500ms if we're back and focused
       intervalId = setInterval(() => {
         if (isFocused && lastGiftedCommentId) {
-          console.log('💰 Detected return from gift screen, refreshing comments');
+          console.log(
+            "💰 Detected return from gift screen, refreshing comments"
+          );
           handleGiftSuccess();
           setLastGiftedCommentId(null);
         }
@@ -193,10 +209,17 @@ const CommentsSection = ({
 
   // Listen for navigation state changes to detect return from gift screen
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      console.log('💰 Navigation focus event triggered. videoId:', videoId, 'lastGiftedCommentId:', lastGiftedCommentId);
+    const unsubscribe = navigation.addListener("focus", () => {
+      console.log(
+        "💰 Navigation focus event triggered. videoId:",
+        videoId,
+        "lastGiftedCommentId:",
+        lastGiftedCommentId
+      );
       if (videoId && lastGiftedCommentId) {
-        console.log('💰 Returning from gift screen via navigation listener, refreshing all comments to get latest amounts');
+        console.log(
+          "💰 Returning from gift screen via navigation listener, refreshing all comments to get latest amounts"
+        );
         handleGiftSuccess();
         setLastGiftedCommentId(null); // Clear the flag
       }
@@ -208,9 +231,16 @@ const CommentsSection = ({
   // Listen for screen focus to refresh comments after returning from gift screen
   useFocusEffect(
     useCallback(() => {
-      console.log('💰 useFocusEffect triggered. videoId:', videoId, 'lastGiftedCommentId:', lastGiftedCommentId);
+      console.log(
+        "💰 useFocusEffect triggered. videoId:",
+        videoId,
+        "lastGiftedCommentId:",
+        lastGiftedCommentId
+      );
       if (videoId && lastGiftedCommentId) {
-        console.log('💰 Returning from gift screen, refreshing all comments to get latest amounts');
+        console.log(
+          "💰 Returning from gift screen, refreshing all comments to get latest amounts"
+        );
         handleGiftSuccess();
         setLastGiftedCommentId(null); // Clear the flag
       }
@@ -220,7 +250,7 @@ const CommentsSection = ({
   // Listen for screen focus changes to refresh comments when modal becomes visible
   useEffect(() => {
     if (isFocused && isModalVisible && lastGiftedCommentId) {
-      console.log('💰 Modal became visible after gift, refreshing comments');
+      console.log("💰 Modal became visible after gift, refreshing comments");
       handleGiftSuccess();
       setLastGiftedCommentId(null);
     }
@@ -236,12 +266,15 @@ const CommentsSection = ({
       });
 
       // Debug gift counts
-      console.log("💰 Comment Gift Counts:", comments.map(c => ({
-        id: c._id,
-        content: c.content?.substring(0, 20) + "...",
-        donations: c.donations,
-        user: c.user?.name
-      })));
+      console.log(
+        "💰 Comment Gift Counts:",
+        comments.map((c) => ({
+          id: c._id,
+          content: c.content?.substring(0, 20) + "...",
+          donations: c.donations,
+          user: c.user?.name,
+        }))
+      );
     }
   }, [commentMonetizationEnabled, comments]);
 
@@ -252,7 +285,7 @@ const CommentsSection = ({
         console.log("🎹 Keyboard Show Event:", {
           height: event.endCoordinates.height,
           screenY: event.endCoordinates.screenY,
-          platform: Platform.OS
+          platform: Platform.OS,
         });
         // Set both keyboard height and input focused state together
         setKeyboardHeight(event.endCoordinates.height);
@@ -416,8 +449,6 @@ const CommentsSection = ({
     }
   };
 
-
-
   const renderReply = (reply: any, parentCommentId: string) => (
     <View key={reply._id} style={{ marginLeft: 56, marginBottom: 12 }}>
       <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
@@ -437,8 +468,12 @@ const CommentsSection = ({
           </TouchableOpacity>
 
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <TouchableOpacity onPress={() => onPressUsername?.(reply.user?.id)}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              <TouchableOpacity
+                onPress={() => onPressUsername?.(reply.user?.id)}
+              >
                 <Text
                   style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "600" }}
                 >
@@ -550,12 +585,18 @@ const CommentsSection = ({
             </TouchableOpacity>
 
             <View style={{ flex: 1, marginLeft: 12 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+              >
                 <TouchableOpacity
                   onPress={() => onPressUsername?.(item.user?.id)}
                 >
                   <Text
-                    style={{ color: "#FFFFFF", fontSize: 14, fontWeight: "600" }}
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: 14,
+                      fontWeight: "600",
+                    }}
                   >
                     {item.user?.name || "Anonymous User"}
                   </Text>
@@ -583,11 +624,14 @@ const CommentsSection = ({
             {commentMonetizationEnabled && item.is_monetized && (
               <TouchableOpacity
                 onPress={() => {
-                  console.log('🎯 GIFT BUTTON PRESSED! CommentId:', item._id);
+                  console.log("🎯 GIFT BUTTON PRESSED! CommentId:", item._id);
                   // Store the comment ID for refreshing when we return
                   setLastGiftedCommentId(item._id);
-                  console.log('💰 Navigating to gift screen, will refresh on return. CommentId:', item._id);
-                  console.log('💰 lastGiftedCommentId set to:', item._id);
+                  console.log(
+                    "💰 Navigating to gift screen, will refresh on return. CommentId:",
+                    item._id
+                  );
+                  console.log("💰 lastGiftedCommentId set to:", item._id);
 
                   // Navigate to VideoContentGifting with comment parameters
                   router.push({
@@ -613,13 +657,14 @@ const CommentsSection = ({
                 <MaterialIcons
                   name="currency-rupee"
                   size={20}
-                  color={item.donations && item.donations > 0 ? "#FFD24D" : "#FFFFFF"}
+                  color={
+                    item.donations && item.donations > 0 ? "#FFD24D" : "#FFFFFF"
+                  }
                 />
                 <Text style={{ color: "#9E9E9E", fontSize: 12, marginTop: 2 }}>
                   {item.donations || 0}
                 </Text>
                 {/* Debug: Show what we're rendering */}
-                {console.log('🎨 Rendering gift count for comment:', item._id, 'donations:', item.donations)}
               </TouchableOpacity>
             )}
 
@@ -758,15 +803,17 @@ const CommentsSection = ({
           position: "absolute",
           left: 0,
           right: 0,
-          ...(isInputFocused && keyboardHeight > 0 ? {
-            // When keyboard is open, position so the input sits above keyboard
-            bottom: keyboardHeight + 50,
-            height: Math.min(SCREEN_HEIGHT * 0.5, SCREEN_HEIGHT - keyboardHeight - 50),
-          } : {
-            // When keyboard is closed, normal positioning
-            bottom: BOTTOM_NAV_HEIGHT,
-            height: SHEET_MAX_HEIGHT,
-          }),
+          ...(isInputFocused && keyboardHeight > 0
+            ? {
+                // When keyboard is open, position so the input sits above keyboard
+                bottom: keyboardHeight*0.3,
+                height: SHEET_MAX_HEIGHT
+              }
+            : {
+                // When keyboard is closed, normal positioning
+                bottom: 50,
+                height: SHEET_MAX_HEIGHT,
+              }),
           backgroundColor: "#0E0E0E",
           borderTopLeftRadius: 36,
           borderTopRightRadius: 36,
@@ -795,7 +842,8 @@ const CommentsSection = ({
           {/* Debug indicator */}
           {lastGiftedCommentId && (
             <Text style={{ color: "#FFD24D", fontSize: 12, marginTop: 4 }}>
-              🎁 Waiting for gift return: {lastGiftedCommentId.substring(0, 8)}...
+              🎁 Waiting for gift return: {lastGiftedCommentId.substring(0, 8)}
+              ...
             </Text>
           )}
         </View>
@@ -806,7 +854,7 @@ const CommentsSection = ({
           style={{ flex: 1 }}
           contentContainerStyle={{
             flexGrow: 1,
-            paddingBottom: 20
+            paddingBottom: 20,
           }}
           showsVerticalScrollIndicator={false}
           bounces={true}
