@@ -4,7 +4,6 @@ import {
   View,
   Image,
   TouchableOpacity,
-  StatusBar,
   Alert,
 } from "react-native";
 import React, { useState } from "react";
@@ -121,8 +120,6 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack}>

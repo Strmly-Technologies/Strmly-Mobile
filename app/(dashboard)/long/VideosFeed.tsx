@@ -6,12 +6,10 @@ import {
   Text,
   Pressable,
   View,
-  StatusBar,
 } from "react-native";
 import {
   SafeAreaProvider,
   SafeAreaView,
-  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import ThemedView from "@/components/ThemedView";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -250,6 +248,7 @@ const VideosFeed: React.FC = () => {
           backgroundColor: "#000",
         }}
       >
+        
         <VideoPlayer
           isGlobalPlayer={false}
           videoData={item}
@@ -293,7 +292,6 @@ const VideosFeed: React.FC = () => {
   if (loading && isFetchingMore) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
         <ActivityIndicator size="large" color="white" />
         <Text className="text-white mt-4">
           {!token || !isLoggedIn
@@ -308,7 +306,6 @@ const VideosFeed: React.FC = () => {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
-          <StatusBar barStyle="light-content" backgroundColor="#000" />
           <ThemedView
             style={{ flex: 1 }}
             className="justify-center items-center px-4"
@@ -331,7 +328,6 @@ const VideosFeed: React.FC = () => {
   if (videos.length === 0) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
         <Text className="text-lg text-white">No Videos Available</Text>
         <Text className="text-lg text-white">
           Want to Upload your own{" "}
@@ -346,7 +342,6 @@ const VideosFeed: React.FC = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       {/* <ThemedView style={{flex: 1}}> */}
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
       
       <FlatList
         ref={flatListRef}

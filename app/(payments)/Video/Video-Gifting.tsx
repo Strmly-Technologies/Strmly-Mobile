@@ -710,7 +710,7 @@ const VideoContentGifting = ({
                         Failed to load wallet balance
                       </Text>
                       <Pressable
-                        onPress={fetchWalletDetails}
+                        onPress={()=> fetchWalletDetails()}
                         className="mt-1 px-2 py-1 bg-blue-600 rounded"
                       >
                         <Text className="text-white text-xs">Retry</Text>

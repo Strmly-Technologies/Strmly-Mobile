@@ -9,7 +9,6 @@ import {
   Linking,
   FlatList,
   Dimensions,
-  BackHandler,
 } from "react-native";
 import {
   LinkIcon,

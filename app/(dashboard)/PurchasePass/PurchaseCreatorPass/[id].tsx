@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StatusBar,
   Alert,
   Dimensions,
 } from "react-native";
@@ -93,8 +92,6 @@ const CreatorPassDemo = () => {
       <View
         style={{ flex: 1 }}
       >
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
-
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 pt-10 py-3">
           <TouchableOpacity onPress={() => router.back()}>

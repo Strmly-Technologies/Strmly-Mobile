@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import {
   X,
   Unlock,
@@ -65,8 +65,6 @@ const VideoAccess = () => {
       edges={[]}
     >
       <View className="flex-1">
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
-
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 mt-12">
           <TouchableOpacity onPress={() => router.back()}>

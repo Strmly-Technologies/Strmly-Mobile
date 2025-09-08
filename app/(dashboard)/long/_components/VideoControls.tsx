@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   interact: { position: "absolute", bottom: "20%", right: 10, zIndex: 5 },
   interactFullScreen: {
     position: "absolute",
-    bottom: "22%",
+    bottom: "18%",
     right: 15,
     zIndex: 5,
   },
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   },
   detailsFullScreen: {
     position: "absolute",
-    bottom: "10%",
+    bottom: "0%",
     width: "100%",
     paddingHorizontal: 20,
     marginBottom: 20,

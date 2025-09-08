@@ -6,7 +6,6 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
-  StatusBar,
   Alert,
   Dimensions,
 } from "react-native";
@@ -333,7 +332,6 @@ export default function AccessPage() {
   return (
     <SafeAreaView style={{ flex:1 , backgroundColor: "black" }} edges={[]}>
       <View className="flex-1">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
 
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 pt-4 pb-4">

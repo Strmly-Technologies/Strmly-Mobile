@@ -6,7 +6,6 @@ import { Signinstyles } from "@/styles/signin";
 import {
   Image,
   Platform,
-  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -95,8 +94,7 @@ const SignUp = () => {
   if (!fontsLoaded) return null;
 
   return (
-    <ThemedView style={Signinstyles.Container} className="px-4">
-      <StatusBar backgroundColor={'black'}/>
+    <ThemedView style={Signinstyles.Container} className="px-4">      
       <Image
         source={require("../../assets/images/logo2.png")}
         className="size-20 text-white"

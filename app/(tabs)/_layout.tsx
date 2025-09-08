@@ -14,35 +14,7 @@ import { useOrientationStore } from "@/store/useOrientationStore";
 export default function TabLayout() {
   const { token, user } = useAuthStore();
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
-  const {setOrientation, isLandscape} = useOrientationStore();
-
-  useEffect(() => {
-    // Initial check
-    const checkOrientation = async () => {
-      const orientation = await ScreenOrientation.getOrientationAsync();
-      setOrientation(
-        orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
-          orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
-      );
-
-    };
-    checkOrientation();
-
-    // Subscribe to changes
-    const subscription = ScreenOrientation.addOrientationChangeListener(
-      (event) => {
-        const o = event.orientationInfo.orientation;
-        setOrientation(
-          o === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
-            o === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
-        );
-      }
-    );
-
-    return () => {
-      ScreenOrientation.removeOrientationChangeListener(subscription);
-    };
-  }, []);
+  const {isLandscape} = useOrientationStore();
 
   useEffect(() => {
     const fetchProfilePhoto = async () => {

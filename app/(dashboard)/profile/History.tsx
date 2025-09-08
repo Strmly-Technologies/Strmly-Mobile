@@ -17,7 +17,7 @@ import { VideoItemType } from "@/types/VideosType";
 import { useVideosStore } from "@/store/useVideosStore";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const {height} = Dimensions.get("screen");
+const { height } = Dimensions.get("screen");
 const PAGE_LIMIT = 10;
 
 const HistoryPage = () => {
@@ -94,7 +94,13 @@ const HistoryPage = () => {
   };
 
   /** 🔹 Render Grid Item */
-  const renderGridItem = ({ item, index }: { item: VideoItemType; index: number }) => (
+  const renderGridItem = ({
+    item,
+    index,
+  }: {
+    item: VideoItemType;
+    index: number;
+  }) => (
     <TouchableOpacity
       className="relative aspect-[9/16] flex-1 rounded-sm overflow-hidden"
       onPress={() =>
@@ -119,39 +125,43 @@ const HistoryPage = () => {
   );
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: 'black'}} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       <ThemedView className="flex-1">
-      <ProfileTopbar isMore={false} hashtag={false} name="History" />
+        <ProfileTopbar isMore={false} hashtag={false} name="History" />
 
-      {isLoading && videos.length === 0 ? (
-        // 🔹 Loader for first load
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="white" />
-        </View>
-      ) : videos.length === 0 ? (
-        // 🔹 Empty state
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-white text-lg">No history found</Text>
-        </View>
-      ) : (
-        // 🔹 Video Grid
-        <FlatList
-          data={videos}
-          keyExtractor={(item) => item._id}
-          renderItem={renderGridItem}
-          numColumns={3}
-          contentContainerStyle={{ paddingTop: 20 }}
-          showsVerticalScrollIndicator={false}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            isLoading && videos.length > 0 ? (
-              <ActivityIndicator size="small" color="white" className="my-4" />
-            ) : null
-          }
-        />
-      )}
-    </ThemedView>
+        {isLoading && videos.length === 0 ? (
+          // 🔹 Loader for first load
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator size="large" color="white" />
+          </View>
+        ) : videos.length === 0 ? (
+          // 🔹 Empty state
+          <View className="flex-1 items-center justify-center">
+            <Text className="text-white text-lg">No history found</Text>
+          </View>
+        ) : (
+          // 🔹 Video Grid
+          <FlatList
+            data={videos}
+            keyExtractor={(item) => item._id}
+            renderItem={renderGridItem}
+            numColumns={3}
+            contentContainerStyle={{ paddingTop: 20 }}
+            showsVerticalScrollIndicator={false}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              isLoading && videos.length > 0 ? (
+                <ActivityIndicator
+                  size="small"
+                  color="white"
+                  className="my-4"
+                />
+              ) : null
+            }
+          />
+        )}
+      </ThemedView>
     </SafeAreaView>
   );
 };

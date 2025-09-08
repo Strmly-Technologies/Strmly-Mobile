@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 import {
   View,
   Text,
@@ -19,10 +18,9 @@ interface AddMoneyModalProps {
   onClose: () => void;
   onSuccess: (amount: number) => void;
   onCreateOrder: (amount: number) => Promise<any>;
-
   onVerifyPayment: (
     orderId: string,
-    paymentId: string,
+    productId: string,
     purchaseToken: string,
     amount: number
   ) => Promise<any>;
@@ -31,14 +29,13 @@ interface AddMoneyModalProps {
 
 const quickAmounts = [10, 50, 100, 200, 500];
 
-
 const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
   visible,
   onClose,
   onSuccess,
   onCreateOrder,
   onVerifyPayment,
-  onError
+  onError,
 }) => {
   const [amount, setAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -56,7 +53,6 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
 
   const handleAddMoney = async () => {
     const validation = validateAmount(amount);
-    console.log("Validating amount:", amount, validation);
     if (!validation.isValid) {
       Alert.alert("Error", validation.error);
       return;
@@ -64,11 +60,9 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
 
     const numAmount = parseFloat(amount);
     setIsProcessing(true);
-    console.log("Processing add money for amount:", numAmount);
 
     try {
       const order = await onCreateOrder(numAmount);
-      console.log("Order created:", order, numAmount);
       if (!order) throw new Error("Failed to create wallet load order");
 
       const billingResponse = await initiateGooglePlayBilling({
@@ -76,26 +70,23 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
         currency: "INR",
       });
 
+      // ✅ FIX: check productId instead of signature
       if (
-        !billingResponse?.orderId ||
         !billingResponse?.purchaseToken ||
-        !billingResponse?.signature
+        !billingResponse?.productId
       ) {
         throw new Error("Incomplete billing response");
       }
 
       await onVerifyPayment(
-        billingResponse.orderId,
+        billingResponse.orderId ?? "",
         billingResponse.productId,
         billingResponse.purchaseToken,
         numAmount
       );
 
       onSuccess(numAmount);
-      Alert.alert(
-        "Success",
-        `₹${numAmount} added to your wallet successfully!`
-      );
+      Alert.alert("Success", `₹${numAmount} added to your wallet successfully!`);
       setTimeout(() => {
         onClose();
       }, 2000);
@@ -140,7 +131,7 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
           {amount && (
             <TextInput
               value={amount}
-              readOnly
+              editable={false} // keep input non-editable
               placeholderTextColor="#666"
               keyboardType="numeric"
               className="bg-gray-800 text-white p-4 rounded-lg mb-6 text-lg"

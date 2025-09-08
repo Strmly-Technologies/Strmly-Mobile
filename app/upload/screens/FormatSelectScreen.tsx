@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -29,7 +29,6 @@ const FormatSelectScreen: React.FC<FormatSelectScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
       
       {/* Header */}
       <View style={styles.header}>

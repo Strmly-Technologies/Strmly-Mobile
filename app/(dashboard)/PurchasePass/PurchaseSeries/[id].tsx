@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StatusBar, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import {
   X,
   Unlock,
@@ -82,7 +82,6 @@ const SeriesAccess = () => {
       style={{ flex: 1, backgroundColor: "black" }} edges={[]}
     >
       <View className="flex-1">
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3">

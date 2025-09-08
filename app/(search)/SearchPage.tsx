@@ -10,7 +10,6 @@ import {
   Image,
   StyleSheet,
   ImageBackground,
-  StatusBar,
   ScrollView,
   BackHandler,
 } from "react-native";
@@ -459,7 +458,6 @@ const renderAccountItem = ({ item }: { item: any }) => {
   return (
     <SafeAreaView style={{ height: page_height, backgroundColor: "black" }}>
       <View style={{ ...styles.container, height: page_height }}>
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         <TextInput
           placeholder="Search"

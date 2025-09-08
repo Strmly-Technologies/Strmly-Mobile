@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Series } from '../../studio/types';
@@ -104,8 +104,6 @@ const EpisodeSelectionScreen: React.FC<EpisodeSelectionScreenProps> = ({
   if (loading && series.length === 0) {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
-
         <View style={styles.header}>
           <TouchableOpacity onPress={onBack}>
             <Ionicons name="chevron-back" size={24} color="white" />
@@ -124,8 +122,6 @@ const EpisodeSelectionScreen: React.FC<EpisodeSelectionScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
-
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack}>
           <Ionicons name="chevron-back" size={24} color="white" />

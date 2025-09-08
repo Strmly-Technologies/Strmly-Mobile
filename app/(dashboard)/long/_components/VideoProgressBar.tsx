@@ -3,14 +3,15 @@ import {
   View,
   StyleSheet,
   LayoutChangeEvent,
+  PanResponder,
   Text,
-  Pressable,
 } from "react-native";
 import { VideoPlayer } from "expo-video";
 import { useAuthStore } from "@/store/useAuthStore";
 import Constants from "expo-constants";
 
 const PROGRESS_BAR_HEIGHT = 4; // Thicker progress bar like YouTube/TikTok
+const KNOB_SIZE = 14;
 
 type AccessType = {
   isPlayable: boolean;
@@ -31,6 +32,13 @@ type Props = {
   access: AccessType;
 };
 
+const formatTime = (seconds: number) => {
+  if (!seconds || isNaN(seconds)) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+};
+
 const VideoProgressBar = ({
   videoId,
   player,
@@ -39,7 +47,14 @@ const VideoProgressBar = ({
   access,
 }: Props) => {
   const [currentTime, setCurrentTime] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragTime, setDragTime] = useState<number | null>(null);
+
+  const dragTimeRef = useRef<number | null>(null);
   const progressBarContainerWidth = useRef<number>(0);
+
+  const progressBarRef = useRef<View>(null);
+  const [progressBarX, setProgressBarX] = useState(0);
 
   const initialStartTime = access?.freeRange?.start_time ?? 0;
   const hasSeekedInitially = useRef(false);
@@ -47,18 +62,7 @@ const VideoProgressBar = ({
   const { token } = useAuthStore();
   const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
 
-  useEffect(() => {
-    console.log(
-      "freeRange start:",
-      initialStartTime,
-      "duration:",
-      duration,
-      "for video:",
-      videoId
-    );
-  }, [initialStartTime, videoId]);
-
-  // ✅ API logic (untouched)
+  // ✅ API calls (untouched)
   const saveVideoToHistory = useCallback(async () => {
     if (!token || !videoId) return;
     try {
@@ -118,7 +122,7 @@ const VideoProgressBar = ({
     if (!isActive) hasTriggered2Percent.current = false;
   }, [isActive]);
 
-  // ✅ Sync current time with interval (like working file)
+  // ✅ Sync current time
   useEffect(() => {
     if (!isActive) return;
     const interval = setInterval(() => {
@@ -127,7 +131,7 @@ const VideoProgressBar = ({
     return () => clearInterval(interval);
   }, [isActive, player]);
 
-  // ✅ Handle initial seek if freeRange applies
+  // ✅ Handle initial seek
   useEffect(() => {
     if (isActive && !hasSeekedInitially.current && initialStartTime > 0) {
       hasSeekedInitially.current = true;
@@ -137,66 +141,101 @@ const VideoProgressBar = ({
     }
   }, [isActive, initialStartTime, player]);
 
-  // Layout width
+  // ✅ Layout width
   const handleProgressBarLayout = (event: LayoutChangeEvent) => {
     progressBarContainerWidth.current = event.nativeEvent.layout.width;
+    progressBarRef.current?.measure((x, y, width, height, pageX) => {
+      setProgressBarX(pageX);
+    });
   };
 
-  // ✅ Seek function (same as working file)
-  const handleSeek = (locationX: number) => {
-    const containerWidth = progressBarContainerWidth.current;
-    if (!duration || !player || containerWidth <= 0) return;
+  // ✅ Drag handling with PanResponder
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => setIsDragging(true),
+      onPanResponderMove: (_, gestureState) => {
+        const containerWidth = progressBarContainerWidth.current;
+        if (containerWidth <= 0) return;
 
-    const seekPercentage = Math.max(0, Math.min(1, locationX / containerWidth));
-    const newTimeSeconds = seekPercentage * duration;
+        const relativeX = gestureState.moveX - progressBarX;
+        const clampedX = Math.max(0, Math.min(containerWidth, relativeX));
 
-    player.currentTime = newTimeSeconds;
-    setCurrentTime(newTimeSeconds);
-    player.play();
-    console.log(
-      "hit...",
-      seekPercentage,
-      newTimeSeconds,
-      "for video:",
-      videoId
-    );
-  };
+        const seekPercentage = clampedX / containerWidth;
+        const newTime = seekPercentage * duration;
 
-  // Progress %
-  const progress = duration > 0 ? currentTime / duration : 0;
+        dragTimeRef.current = newTime;
+        setDragTime(newTime);
+      },
+      onPanResponderRelease: async () => {
+        const finalTime = dragTimeRef.current;
+        if (finalTime != null) {
+          player.currentTime = finalTime;
+          setCurrentTime(finalTime);
+          player.play();
+        }
+        setIsDragging(false);
+        setDragTime(null);
+        dragTimeRef.current = null;
+      },
+    })
+  ).current;
+
+  const effectiveTime = isDragging && dragTime != null ? dragTime : currentTime;
+  const progress = duration > 0 ? Math.min(effectiveTime / duration, 1) : 0;
 
   if (duration <= 0) return null;
 
   return (
-    <>
-      <View
+    <View
+      ref={progressBarRef}
       style={styles.progressBarContainer}
       onLayout={handleProgressBarLayout}
+      {...panResponder.panHandlers}
     >
+      {/* Background bar */}
       <View style={styles.progressBarBackground} />
+
+      {/* Filled progress */}
       <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
-      <Pressable
-        style={styles.touchArea}
-        onPress={(event) => handleSeek(event.nativeEvent.locationX)}
-      />
+
+      {/* Knob (only while dragging) */}
+      {isDragging && (
+        <View
+          style={[
+            styles.knob,
+            { left: `${progress * 100}%`, marginLeft: -KNOB_SIZE / 2 },
+          ]}
+        />
+      )}
+
+      {/* Tooltip above knob */}
+      {isDragging && dragTime != null && (
+        <View
+          style={[
+            styles.tooltip,
+            { left: `${progress * 100}%`, marginLeft: -25 },
+          ]}
+        >
+          <Text style={styles.tooltipText}>{formatTime(dragTime)}</Text>
+        </View>
+      )}
     </View>
-    </>
   );
 };
 
 const styles = StyleSheet.create({
   progressBarContainer: {
     width: "100%",
-    height: 20,
+    height: 30,
     justifyContent: "center",
-    zIndex: 10,
     position: "relative",
   },
   progressBarBackground: {
     position: "absolute",
     width: "100%",
     height: PROGRESS_BAR_HEIGHT,
-    backgroundColor: "red",
+    backgroundColor: "#B0B0B0",
     borderRadius: 2,
   },
   progressBar: {
@@ -205,12 +244,29 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 2,
   },
-  touchArea: {
+  knob: {
     position: "absolute",
-    width: "100%",
-    height: 16,
-    top: -6,
-    justifyContent: "center",
+    width: KNOB_SIZE,
+    height: KNOB_SIZE,
+    borderRadius: KNOB_SIZE / 2,
+    backgroundColor: "white",
+    borderWidth: 2,
+    borderColor: "red",
+    top: (30 - KNOB_SIZE) / 2,
+    zIndex: 20,
+  },
+  tooltip: {
+    position: "absolute",
+    bottom: 25,
+    backgroundColor: "black",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    zIndex: 30,
+  },
+  tooltipText: {
+    color: "white",
+    fontSize: 12,
   },
 });
 

@@ -8,7 +8,6 @@ import {
   TextInput,
   Image,
   Alert,
-  StatusBar,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, ChevronDown } from "lucide-react-native";
@@ -254,8 +253,6 @@ export default function EditCommunity() {
   return (
     <ScrollView className="flex-1 h-full bg-black">
       <View className="flex-1">
-        <StatusBar barStyle="light-content" backgroundColor="black" />
-
         {/* Header */}
         <View
           className="flex-row items-center justify-between px-4 py-3"

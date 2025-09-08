@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  StatusBar,
   Image,
   ActivityIndicator,
   Alert,
@@ -309,7 +308,6 @@ const StrmlyStudio = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       {/* <ThemedView className="flex-1"> */}
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 mt-2">

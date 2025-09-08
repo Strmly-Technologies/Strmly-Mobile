@@ -1,19 +1,40 @@
 import { Colors } from "@/Constants/Colors";
-import { Stack } from "expo-router";
-import { Dimensions, useColorScheme } from "react-native";
+import { Stack, usePathname } from "expo-router";
+import { useColorScheme } from "react-native";
 import "../global.css";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-
-const { height } = Dimensions.get('window');
+import { useEffect } from "react";
+import { useOrientationStore } from "@/store/useOrientationStore";
+import * as ScreenOrientation from "expo-screen-orientation";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme() ?? "dark";
   const theme = Colors[colorScheme];
 
+  const { setOrientation, isLandscape } = useOrientationStore();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    console.log("pathname : ", pathname);
+    const lockOrientation = async () => {
+      if (
+        pathname !== "/(dashboard)/long/VideosFeed" ||
+        "/(dashboard)/long/GlobalVideoPlayer"
+      ) {
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.PORTRAIT_UP
+        );
+        setOrientation(false);
+      }
+    };
+
+    lockOrientation();
+  }, [pathname]);
+
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={isLandscape ? [] :['top']}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <Stack
             screenOptions={{
@@ -25,17 +46,6 @@ export default function RootLayout() {
             {/* Individual Screens */}
             <Stack.Screen name="index" options={{ title: "Signin" }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="(communities)"
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name="(dashboard)" options={{ headerShown: false }} />
-            <Stack.Screen name="(payments)" options={{ headerShown: false }} />
-            <Stack.Screen name="(search)" options={{ headerShown: false }} />
-            <Stack.Screen name="Profile" options={{ headerShown: false }} />
-            <Stack.Screen name="Setting" options={{ headerShown: false }} />
-            <Stack.Screen name="studio" options={{ headerShown: false }} />
           </Stack>
         </GestureHandlerRootView>
       </SafeAreaView>

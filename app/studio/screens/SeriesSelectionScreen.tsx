@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Series } from '../types';
 import { CONFIG } from '@/Constants/config';
@@ -125,7 +125,6 @@ const SeriesSelectionScreen: React.FC<SeriesSelectionScreenProps> = ({
   if (loading && series.length === 0) {
     return (
       <View className="flex-1 bg-black">
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 mt-12">
@@ -148,7 +147,6 @@ const SeriesSelectionScreen: React.FC<SeriesSelectionScreenProps> = ({
   
   return (
     <View className="flex-1 bg-black" style={{ backgroundColor: 'red' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
 
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 mt-12">

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StatusBar,
   TouchableOpacity,
   TextInput,
   KeyboardAvoidingView,
@@ -126,8 +125,6 @@ const SimpleSeriesCreationScreen: React.FC<SimpleSeriesCreationScreenProps> = ({
       className="flex-1"
     >
       <View className="flex-1 bg-black">
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
-
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 mt-12">
           <TouchableOpacity onPress={handleClose}>

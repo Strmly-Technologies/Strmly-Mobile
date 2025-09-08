@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StatusBar,
   Alert,
   Dimensions,
 } from "react-native";
@@ -88,7 +87,6 @@ const CommunityAccessDemo = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }} edges={[]}>
       <ThemedView style={{ flex: 1 }}>
-        <StatusBar barStyle="light-content" backgroundColor="#000" />
 
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 pt-10">

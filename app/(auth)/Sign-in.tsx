@@ -88,7 +88,7 @@ const SignIn = () => {
       setAlert("Login successful!");
       setShowAlert(() => true);
       setNeedButton(false);
-      if(data.user.is_onboarded){
+      if (data.user.is_onboarded) {
         setTimeout(
           () =>
             navigation.reset({
@@ -96,7 +96,7 @@ const SignIn = () => {
             }),
           1000
         );
-      } else{
+      } else {
         setTimeout(
           () =>
             navigation.reset({
@@ -215,18 +215,21 @@ const SignIn = () => {
         style={CreateProfileStyles.button}
         onPress={handleLogin}
       >
-        {isLoading && <ActivityIndicator className="size-5" />}
-        <Text className="text-lg font-semibold">Sign in</Text>
+        {isLoading ? (
+          <ActivityIndicator className="size-5" />
+        ) : (
+          <Text className="text-lg font-semibold">Sign in</Text>
+        )}
       </TouchableOpacity>
       <View className="">
         <Link href={"/(auth)/ForgotPassword"} className="text-white mt-8">
-          <ThemedText style={Signinstyles.Text16M}>
-            Forgot password?
-          </ThemedText>
+          <ThemedText style={Signinstyles.Text16M}>Forgot password?</ThemedText>
         </Link>
 
         <Link href={"/Profile/VerifyEmail"} className="text-white mt-8">
-          <ThemedText style={{...Signinstyles.Text16M, color: '#3b82f6'}}>Verify Email?</ThemedText>
+          <ThemedText style={{ ...Signinstyles.Text16M, color: "#3b82f6" }}>
+            Verify Email?
+          </ThemedText>
         </Link>
       </View>
     </>
@@ -244,7 +247,7 @@ const SignIn = () => {
   );
 
   return (
-    <ThemedView style={Signinstyles.Container} className="px-4">
+    <ThemedView style={Signinstyles.Container} className="px-4">      
       {useEmail && renderTopbar()}
       {renderLogo()}
       {renderTitle()}

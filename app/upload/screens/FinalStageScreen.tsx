@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Dropdown from '../components/Dropdown';
 import TimePicker from '../components/TimePicker';
@@ -80,7 +80,6 @@ const FinalStageScreen: React.FC<FinalStageProps> = ({
 
   return (
     <View className="flex-1 bg-black">
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
 
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 mt-12">

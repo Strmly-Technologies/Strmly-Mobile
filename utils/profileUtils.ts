@@ -19,7 +19,7 @@ export const getProfilePhotoUrl = (profilePhoto: string | null | undefined, type
   }
   
   // Return appropriate default based on type
-  return type === 'community' ? DEFAULT_PROFILE_PHOTOS.COMMUNITY : DEFAULT_PROFILE_PHOTOS.USER;
+  return type === 'community' ? DEFAULT_PROFILE_PHOTOS.COMMUNITY : CONFIG.DEFAULT_USER_PROFILE_PHOTO;
 };
 
 /**

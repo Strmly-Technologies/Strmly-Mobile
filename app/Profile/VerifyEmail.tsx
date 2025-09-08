@@ -70,7 +70,7 @@ const VerifyEmail = () => {
       console.log("Verification successful", data);
 
       // Update auth store to mark email_verified
-      useAuthStore.getState().updateUser({ isVerified: true });
+      useAuthStore.getState().updateUser({ is_verified: true });
 
       setAlert("Email verified successfully!");
       setShowAlert(true);

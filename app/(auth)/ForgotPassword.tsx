@@ -223,6 +223,7 @@ const ForgotPassword = () => {
   if (Step === 1) {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
+
         <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
           <TouchableOpacity onPress={() => router.back()} className="w-fit">
             <Image
@@ -267,6 +268,7 @@ const ForgotPassword = () => {
   if (Step === 2) {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
+
         <View className="items-center justify-between flex-row bg-gra w-full pt-20 px-4 mb-10">
           <TouchableOpacity onPress={() => HandleStep(false)}>
             <Image
@@ -322,6 +324,7 @@ const ForgotPassword = () => {
   if (Step === 3) {
     return (
       <ThemedView style={CreateProfileStyles.Container}>
+        
         <View className="items-center justify-between flex-row w-full pt-20 px-4 mb-10">
           <TouchableOpacity onPress={() => HandleStep(false)} className="w-fit">
             <Image

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StatusBar, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ProgressIndicator from '../components/ProgressIndicator';
 import { UploadProgressProps } from '../types';
@@ -62,7 +62,6 @@ const UploadProgressScreen: React.FC<UploadProgressProps> = ({
 
   return (
     <View className="flex-1 bg-black">
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
       
       {/* Header - Show cancel button during upload */}
       {!error && (
