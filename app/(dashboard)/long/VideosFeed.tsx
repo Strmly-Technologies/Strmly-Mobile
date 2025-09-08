@@ -248,7 +248,6 @@ const VideosFeed: React.FC = () => {
           backgroundColor: "#000",
         }}
       >
-        
         <VideoPlayer
           isGlobalPlayer={false}
           videoData={item}
