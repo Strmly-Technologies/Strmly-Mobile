@@ -6,9 +6,9 @@ export default {
     slug: "strmly",
     scheme: "strmly",
     owner: "strmly-technologies",
-    version: "1.0.1",
+    version: "1.0.2",
     orientation: "portrait",
-    icon: "./assets/images/logo2.png",
+    icon: "./assets/images/logo.png",
     userInterfaceStyle: "dark",
     newArchEnabled: true,
     ios: {
@@ -16,9 +16,9 @@ export default {
       supportsTablet: true
     },
     android: {
-      versionCode: 2,
+      versionCode: 3,
       adaptiveIcon: {
-        foregroundImage: "./assets/images/logo2.png",
+        foregroundImage: "./assets/images/logo3.png",
         backgroundColor: "#000"
       },
       package: "com.anonymous.strmly",
@@ -28,14 +28,14 @@ export default {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/logo2.png"
+      favicon: "./assets/images/logo3.png"
     },
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/logo2.png",
+          image: "./assets/images/logo3.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#000"
