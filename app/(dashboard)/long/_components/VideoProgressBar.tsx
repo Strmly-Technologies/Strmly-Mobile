@@ -56,7 +56,8 @@ const VideoProgressBar = ({
   const progressBarRef = useRef<View>(null);
   const [progressBarX, setProgressBarX] = useState(0);
 
-  const initialStartTime = access?.freeRange?.start_time ?? 0;
+  // const initialStartTime = access?.freeRange?.start_time ?? 0;
+  const initialStartTime = 0;
   const hasSeekedInitially = useRef(false);
 
   const { token } = useAuthStore();
@@ -113,8 +114,8 @@ const VideoProgressBar = ({
     const percentWatched = (currentTime / duration) * 100;
     if (!hasTriggered2Percent.current && percentWatched >= 2) {
       hasTriggered2Percent.current = true;
-      // saveVideoToHistory();
-      // incrementVideoViews();
+      saveVideoToHistory();
+      incrementVideoViews();
     }
   }, [currentTime, duration, isActive]);
 
