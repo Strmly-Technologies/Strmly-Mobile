@@ -67,8 +67,8 @@ const VideoControls = ({
   // const scaledOffset = PixelRatio.getPixelSizeForLayoutSize(12);
   const screenHeight = Dimensions.get("window").height;
   const bottomOffset =
-    screenHeight < 700 ? 50 : 28;
-    console.log('bottom insets:', insets.bottom)
+    screenHeight < 700 ? insets.bottom != 0 ? insets.bottom-16 : 45 : insets.bottom != 0 ? insets.bottom-16 : 28;
+    console.log('bottom insets:', insets.bottom, screenHeight)
 
   useEffect(() => {
     if (wantToBuyVideo) {
@@ -240,7 +240,7 @@ const VideoControls = ({
             isGlobalPlayer
               ? isLandscape
                 ? styles.detailsFullScreen
-                : { ...styles.detailsGlobal, bottom: insets.bottom + 20 }
+                : { ...styles.detailsGlobal, bottom: 25 }
               : isLandscape
                 ? styles.detailsFullScreen
                 : { ...styles.details, bottom: bottomOffset + 20 },
@@ -276,7 +276,7 @@ const VideoControls = ({
                 : { bottom: bottomOffset }
               : isLandscape
                 ? { bottom: "20%" }
-                : { bottom: 0 },
+                : { bottom: screenHeight > 700 ? -5 : 5 },
           ]}
         >
           <VideoProgressBar

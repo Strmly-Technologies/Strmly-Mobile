@@ -34,7 +34,7 @@ const { height: screenHeight } = Dimensions.get("window");
 const BOTTOM_NAV_HEIGHT = 50; // Height of your bottom navigation
 
 // Define the height for each video item (adjust as needed)
-const VIDEO_HEIGHT = screenHeight - 49;
+const VIDEO_HEIGHT = screenHeight;
 
 const VideosFeed: React.FC = () => {
   const [videos, setVideos] = useState<VideoItemType[]>([]);

@@ -535,7 +535,7 @@ const VideoPlayer = ({
   return (
     <View style={dynamicStyles.container}>
 
-      {!isReady ||
+      {/* {!isReady ||
         (accessChecked && showPaidMessage && (
           <View className="relative">
             <Image
@@ -552,7 +552,7 @@ You do not have permission to view this video.`}
               />
             )}
           </View>
-        ))}
+        ))} */}
 
       {player && canPlayVideo ? (
         <View className="relative items-center justify-center">

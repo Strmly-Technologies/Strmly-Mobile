@@ -184,37 +184,39 @@ const VideoDetails = ({
     }, [])
   );
 
-  useEffect(() => {
-    const checkIfFollowCommunity = async () => {
-      if (!token || !community?._id) {
-        return;
-      }
+  useFocusEffect(
+    useCallback(() => {
+      const checkIfFollowCommunity = async () => {
+        if (!token || !community?._id) {
+          return;
+        }
 
-      try {
-        const response = await fetch(
-          `${BACKEND_API_URL}/community/${community?._id}/following-status`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (!response.ok)
-          throw new Error("Failed while checking community follow status");
-        const data = await response.json();
-        // console.log("check follow community", data);
-        setIsFollowCommunity(data.status);
-      } catch (err) {
-        console.log("Error in community check status", err);
-      }
-    };
+        try {
+          const response = await fetch(
+            `${BACKEND_API_URL}/community/${community?._id}/following-status`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          if (!response.ok)
+            throw new Error("Failed while checking community follow status");
+          const data = await response.json();
+          // console.log("check follow community", data);
+          setIsFollowCommunity(data.status);
+        } catch (err) {
+          console.log("Error in community check status", err);
+        }
+      };
 
-    if (token && community?._id) {
-      checkIfFollowCommunity();
-    }
-  }, [token, community?._id]);
+      if (token && community?._id) {
+        checkIfFollowCommunity();
+      }
+    }, [token, community?._id])
+  );
 
   const followCreator = async () => {
     setIsFollowCreatorLoading(true);
@@ -440,7 +442,7 @@ const VideoDetails = ({
                 </Text>
               </View>
             </Pressable>
-            
+
             <Pressable onPress={() => followCommunity()}>
               {isFollowCommunityLoading ? (
                 <ActivityIndicator className="size-5" color="white" />
@@ -449,7 +451,7 @@ const VideoDetails = ({
               ) : (
                 <Image
                   source={require("../../../../assets/images/plus.png")}
-                  className="size-5" 
+                  className="size-5"
                 />
               )}
             </Pressable>
