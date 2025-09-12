@@ -535,25 +535,6 @@ const VideoPlayer = ({
   return (
     <View style={dynamicStyles.container}>
 
-      {/* {!isReady ||
-        (accessChecked && showPaidMessage && (
-          <View className="relative">
-            <Image
-              source={{ uri: videoData.thumbnailUrl }}
-              style={dynamicStyles.thumbnail}
-            />
-            {showPaidMessage && (
-              <ModalMessage
-                visible={true}
-                text={`Access Denied
-You do not have permission to view this video.`}
-                needCloseButton={true}
-                onClose={() => setShowPaidMessage(false)}
-              />
-            )}
-          </View>
-        ))} */}
-
       {player && canPlayVideo ? (
         <View className="relative items-center justify-center">
           <VideoView
