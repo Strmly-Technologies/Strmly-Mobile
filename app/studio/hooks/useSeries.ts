@@ -94,11 +94,20 @@ export const useSeries = () => {
 
       const { token } = useAuthStore.getState();
       
+      console.log('🔍 fetchSeries Debug Info:');
+      console.log('  - API Base URL:', CONFIG.API_BASE_URL);
+      console.log('  - Token exists:', !!token);
+      console.log('  - Token length:', token?.length || 0);
+      console.log('  - Token preview:', token ? token.substring(0, 20) + '...' : 'No token');
+      
       if (!token) {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${CONFIG.API_BASE_URL}/series/user?t=${Date.now()}`, {
+      const url = `${CONFIG.API_BASE_URL}/series/user?t=${Date.now()}`;
+      console.log('  - Full URL:', url);
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -107,11 +116,53 @@ export const useSeries = () => {
         },
       });
 
+      console.log('📊 Response Debug Info:');
+      console.log('  - Status:', response.status);
+      console.log('  - Status Text:', response.statusText);
+      console.log('  - Headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error(`Failed to fetch series: ${response.status}`);
+        // Handle the specific case where user has no series (backend returns 404 instead of 200)
+        if (response.status === 404) {
+          try {
+            const errorData = await response.json();
+            console.log('❌ Error response data:', errorData);
+            
+            // If the error message indicates no series found, treat it as success with empty array
+            if (errorData.error === "No series found for this user") {
+              console.log('✅ No series found - treating as empty result');
+              setSeries([]);
+              return; // Exit early, don't throw error
+            }
+          } catch (parseError) {
+            console.log('❌ Could not parse 404 error response as JSON');
+          }
+        }
+        
+        // For other errors, get detailed error information
+        let errorMessage = `Failed to fetch series: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          console.log('❌ Error response data:', errorData);
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch (parseError) {
+          console.log('❌ Could not parse error response as JSON');
+          const errorText = await response.text();
+          console.log('❌ Error response text:', errorText);
+        }
+        throw new Error(errorMessage);
       }
 
       const data: SeriesResponse = await response.json();
+      
+      console.log('✅ Raw API response:', data);
+      
+      // Handle case where data.data might be undefined or not an array
+      if (!data.data || !Array.isArray(data.data)) {
+        console.log('⚠️ Invalid data structure, treating as empty array');
+        setSeries([]);
+        return;
+      }
       
       // Transform series data for UI
       const transformedSeries: TransformedSeries[] = data.data.map((seriesItem) => ({
@@ -138,7 +189,15 @@ export const useSeries = () => {
       console.log('📊 Series IDs:', transformedSeries.map(s => s.id));
       setSeries(transformedSeries);
     } catch (err) {
-      console.error('Error fetching series:', err);
+      console.error('🚨 Error fetching series:', err);
+      console.error('🚨 Error type:', typeof err);
+      console.error('🚨 Error constructor:', err?.constructor?.name);
+      
+      if (err instanceof Error) {
+        console.error('🚨 Error message:', err.message);
+        console.error('🚨 Error stack:', err.stack);
+      }
+      
       setError(err instanceof Error ? err.message : 'Failed to fetch series');
     } finally {
       setLoading(false);

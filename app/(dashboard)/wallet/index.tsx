@@ -67,6 +67,7 @@ const WalletPage = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+      
       <ThemedView
         style={{
           backgroundColor: showSuccessModal ? "#B0B0B0BB" : "black",

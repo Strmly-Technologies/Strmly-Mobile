@@ -201,28 +201,28 @@ By submitting this request, you confirm that you understand and agree to our`,
 
         <View className="mt-14 items-start mx-5 gap-5 w-full">
           {/* Monetization Toggle */}
-          {/* <View className="flex-row items-center justify-between w-full">
-            <Text className="text-white text-lg">
+          <View className="flex-row items-center justify-between w-full">
+            {/* <Text className="text-white text-lg">
               Activate comment monetization
-            </Text>
-            {isMonetizationLoading ? (
+            </Text> */}
+            {/* {isMonetizationLoading ? (
               <ActivityIndicator className="size-6 mr-6" />
             ) : (
-              <Pressable
-                onPress={() => openModal(modalTypes.monetization)}
-                className="mr-6"
-              >
-                <Image
-                  source={
-                    monetizationStatus?.comment_monetization_status
-                      ? require("../../assets/images/switch-green.png")
-                      : require("../../assets/images/switch.png")
-                  }
-                  className="size-6"
-                />
-              </Pressable>
-            )}
-          </View> */}
+              // <Pressable
+              //   onPress={() => openModal(modalTypes.monetization)}
+              //   className="mr-6"
+              // >
+              //   <Image
+              //     source={
+              //       monetizationStatus?.comment_monetization_status
+              //         ? require("../../assets/images/switch-green.png")
+              //         : require("../../assets/images/switch.png")
+              //     }
+              //     className="size-6"
+              //   />
+              // </Pressable>
+            )} */}
+          </View>
 
           {/* Action Buttons */}
           <Pressable

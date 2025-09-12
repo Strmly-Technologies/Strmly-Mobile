@@ -68,7 +68,7 @@ export default function ProfileSections() {
     }, [refreshAllCounts, refreshCurrentSection])
   );
 
-  const filteredData = searchData(searchQuery);
+  const filteredData = searchData(searchQuery) || [];
 
   const renderUserItem = (user: User) => (
     <Pressable

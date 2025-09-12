@@ -50,9 +50,9 @@ const initialVideoDetails: VideoFormData = {
 const initialFinalStageData: FinalStageData = {
   genre: null,
   autoplayStartMinutes: 0,
-  autoplayStartSeconds: 22,
+  autoplayStartSeconds: 0,
   unlockFromMinutes: 0,
-  unlockFromSeconds: 22,
+  unlockFromSeconds: 0,
 };
 
 export const useUploadFlow = () => {
@@ -607,3 +607,5 @@ export const useUploadFlow = () => {
     saveToDraft,
   };
 };
+
+// In videofeed page there is issue when I upload video with start time and end time the video should play until that from start to end time and then popup message should show like u don't have content access if the content is not purshased and if purchased the it should load from start but currently the video gets stopped and doesn't proceed 

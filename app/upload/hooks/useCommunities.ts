@@ -53,7 +53,14 @@ export const useCommunities = (): UseCommunities => {
       setCommunities(communityOptions);
     } catch (err) {
       console.error('❌ Error fetching user communities:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch communities');
+      
+      // Special handling for Invalid ID format errors
+      if (err instanceof Error && err.message.includes('Invalid ID format')) {
+        console.error('🔍 Invalid ID format detected - JWT token may have invalid user ID');
+        setError('Authentication issue detected. Please try logging out and back in.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to fetch communities');
+      }
       
       // Fallback to basic options if API fails
       setCommunities([
