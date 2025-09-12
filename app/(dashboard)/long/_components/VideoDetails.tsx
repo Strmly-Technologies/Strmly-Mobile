@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   Image,
   Pressable,
-  FlatList,
   Alert,
   ActivityIndicator,
 } from "react-native";
@@ -13,7 +12,6 @@ import {
   ArrowUpRightFromSquare,
   ChevronDownIcon,
   Hash,
-  PlusSquare,
   SquareCheck,
 } from "lucide-react-native";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -30,7 +28,7 @@ type VideoDetailsProps = {
   videoId: string;
   name: string;
   type: string;
-  is_monetized: boolean;
+  is_monetized?: boolean;
   videoAmount: number;
 
   createdBy: {
@@ -442,7 +440,8 @@ const VideoDetails = ({
                 </Text>
               </View>
             </Pressable>
-            {/* <Pressable onPress={() => followCommunity()}>
+            
+            <Pressable onPress={() => followCommunity()}>
               {isFollowCommunityLoading ? (
                 <ActivityIndicator className="size-5" color="white" />
               ) : isFollowCommunity ? (
@@ -450,10 +449,10 @@ const VideoDetails = ({
               ) : (
                 <Image
                   source={require("../../../../assets/images/plus.png")}
-                  className="size-5"
+                  className="size-5" 
                 />
               )}
-            </Pressable> */}
+            </Pressable>
           </>
         )}
       </View>
@@ -544,7 +543,11 @@ const VideoDetails = ({
         <Pressable onPress={onToggleFullScreen}>
           <Image
             source={require("../../../../assets/images/fullscreen.png")}
-            className={`size-5 ${isFullScreen ? "scale-110" : "scale-100"} ease-in`}
+            style={{
+              width: 20,
+              height: 20,
+              transform: [{ scale: isFullScreen ? 1.1 : 1 }],
+            }}
           />
         </Pressable>
 

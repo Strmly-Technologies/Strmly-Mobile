@@ -114,8 +114,8 @@ const VideoProgressBar = ({
     const percentWatched = (currentTime / duration) * 100;
     if (!hasTriggered2Percent.current && percentWatched >= 2) {
       hasTriggered2Percent.current = true;
-      saveVideoToHistory();
-      incrementVideoViews();
+      // saveVideoToHistory();
+      // incrementVideoViews();
     }
   }, [currentTime, duration, isActive]);
 

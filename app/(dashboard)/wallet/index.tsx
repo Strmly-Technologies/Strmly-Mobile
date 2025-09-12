@@ -67,7 +67,6 @@ const WalletPage = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
-      
       <ThemedView
         style={{
           backgroundColor: showSuccessModal ? "#B0B0B0BB" : "black",
@@ -227,16 +226,15 @@ const WalletPage = () => {
                 walletBalance={walletData?.balance || 0}
               />
             </View>
-
-            {/* Bottom Navigation Bar */}
-            <View className="absolute bottom-0 left-0 right-0">
-              {!isOpenTBalance && !isOpenWBalance && !isOpenRevenue && (
-                <BottomNavBar />
-              )}
-            </View>
           </>
         )}
       </ThemedView>
+      {/* Bottom Navigation Bar */}
+      {/* <View className="absolute bottom-0 left-0 right-0">
+        {!isOpenTBalance && !isOpenWBalance && !isOpenRevenue && (
+          <BottomNavBar />
+        )}
+      </View> */}
     </SafeAreaView>
   );
 };

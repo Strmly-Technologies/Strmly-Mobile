@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Pressable, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+  Dimensions,
+} from "react-native";
 import { PlayIcon, PauseIcon } from "lucide-react-native";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import InteractOptions from "./interactOptions";
@@ -10,6 +16,7 @@ import { useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVideosStore } from "@/store/useVideosStore";
 import { useOrientationStore } from "@/store/useOrientationStore";
+import VideoProgressBar from "./VideoProgressBar";
 
 type Props = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,6 +24,7 @@ type Props = {
   haveAccessPass: boolean;
   showWallet: React.Dispatch<React.SetStateAction<boolean>>;
   player: VideoPlayer;
+  isActive: boolean;
   videoData: VideoItemType;
   isGlobalPlayer: boolean;
   setShowCommentsModal?: (visible: boolean) => void;
@@ -39,6 +47,7 @@ const VideoControls = ({
   haveAccessPass,
   showWallet,
   player,
+  isActive,
   videoData,
   isGlobalPlayer,
   setShowCommentsModal,
@@ -51,10 +60,15 @@ const VideoControls = ({
   const [buffering, setBuffering] = useState(false);
   const [wantToBuyVideo, setWantToBuyVideo] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const insets = useSafeAreaInsets();
   const { setVideosInZustand } = useVideosStore();
   const { isLandscape } = useOrientationStore();
   let hideTimer = React.useRef<NodeJS.Timeout | number | null>(null);
+  const insets = useSafeAreaInsets();
+  // const scaledOffset = PixelRatio.getPixelSizeForLayoutSize(12);
+  const screenHeight = Dimensions.get("window").height;
+  const bottomOffset =
+    screenHeight < 700 ? 50 : 28;
+    console.log('bottom insets:', insets.bottom)
 
   useEffect(() => {
     if (wantToBuyVideo) {
@@ -189,7 +203,6 @@ const VideoControls = ({
               : isLandscape
                 ? styles.interactFullScreen
                 : styles.interact,
-            { paddingBottom: insets.bottom },
           ]}
         >
           <InteractOptions
@@ -227,11 +240,10 @@ const VideoControls = ({
             isGlobalPlayer
               ? isLandscape
                 ? styles.detailsFullScreen
-                : styles.detailsGlobal
+                : { ...styles.detailsGlobal, bottom: insets.bottom + 20 }
               : isLandscape
                 ? styles.detailsFullScreen
-                : styles.details,
-            { paddingBottom: insets.bottom },
+                : { ...styles.details, bottom: bottomOffset + 20 },
           ]}
         >
           <VideoDetails
@@ -253,6 +265,29 @@ const VideoControls = ({
           />
         </View>
       )}
+
+      {showControls && (
+        <View
+          className={`absolute left-0 right-0 z-10`}
+          style={[
+            !isGlobalPlayer
+              ? isLandscape
+                ? { bottom: "20%" }
+                : { bottom: bottomOffset }
+              : isLandscape
+                ? { bottom: "20%" }
+                : { bottom: 0 },
+          ]}
+        >
+          <VideoProgressBar
+            player={player}
+            isActive={isActive}
+            videoId={videoData._id}
+            duration={videoData.duration || 0}
+            access={videoData.access}
+          />
+        </View>
+      )}
     </>
   );
 };
@@ -271,10 +306,9 @@ const styles = StyleSheet.create({
     right: 15,
     zIndex: 5,
   },
-  interactGlobal: { position: "absolute", bottom: "20%", right: 10, zIndex: 5 },
+  interactGlobal: { position: "absolute", bottom: "15%", right: 10, zIndex: 5 },
   details: {
     position: "absolute",
-    bottom: "7%",
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 10,
@@ -290,18 +324,18 @@ const styles = StyleSheet.create({
   },
   detailsGlobal: {
     position: "absolute",
-    bottom: "2%",
+    bottom: 0,
     width: "100%",
     paddingHorizontal: 16,
-    marginBottom: 40,
+    marginBottom: 10,
     zIndex: 5,
   },
   progressContainer: {
     position: "absolute",
-    bottom: 50,
+    bottom: 0,
     left: 0,
     right: 0,
-    height: 4,
+    height: 0,
     zIndex: 10,
   },
 });

@@ -1,6 +1,13 @@
 import { Link } from "expo-router";
 import React, { useState } from "react";
-import { Modal, View, Text, Pressable, StyleSheet } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Linking,
+} from "react-native";
 
 type ActionModalProps = {
   isVisible: boolean;
@@ -13,6 +20,7 @@ type ActionModalProps = {
   secondaryButtonText?: string;
   onSecondaryButtonPress?: () => void;
   info?: string;
+  type?: string;
   confirmRequest?: string;
 };
 
@@ -27,7 +35,8 @@ const ActionModal = ({
   secondaryButtonText = "",
   onSecondaryButtonPress,
   info,
-  confirmRequest
+  type,
+  confirmRequest,
 }: ActionModalProps) => {
   const [isPressed, setIsPressed] = useState(false);
   const [isConfirmationStage, setIsConfirmationStage] = useState(false);
@@ -84,6 +93,19 @@ const ActionModal = ({
             )}
           </Text>
 
+          {info && (
+            <View className=" items-center justify-center text-center">
+              <Text className="text-white text-center mt-5">{info}</Text>
+              {type === "support" && (
+                <Pressable
+                  onPress={() => Linking.openURL("mailto:support@strmly.com")}
+                >
+                  <Text className="text-blue-500">support@strmly.com</Text>
+                </Pressable>
+              )}
+            </View>
+          )}
+
           {useButtons && (
             <View className="flex-row items-center gap-1.5 mt-8 justify-between">
               <Pressable
@@ -94,7 +116,7 @@ const ActionModal = ({
                   {isConfirmationStage ? "Back" : secondaryButtonText}
                 </Text>
               </Pressable>
-              
+
               <Pressable
                 className="rounded-3xl flex-1 items-center px-6 py-2.5"
                 style={{

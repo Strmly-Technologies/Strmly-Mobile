@@ -585,6 +585,7 @@ You do not have permission to view this video.`}
         haveCreator={setCheckCreatorPass}
         showWallet={setShowWallet}
         player={player}
+        isActive={isActive}
         videoData={{
           ...videoData,
           likes: localStats.likes,
@@ -602,29 +603,6 @@ You do not have permission to view this video.`}
         onToggleFullScreen={onToggleFullScreen}
         onStatsUpdate={handleStatsUpdate}
       />
-
-      {showWallet && (
-        <View
-          className={`absolute left-0 right-0 z-10`}
-          style={
-            !isGlobalPlayer
-              ? isLandscape
-                ? { bottom: "20%" }
-                : { bottom: "4.8%" }
-              : isLandscape
-                ? { bottom: "20%" }
-                : { bottom: 10 }
-          }
-        >
-          <VideoProgressBar
-            player={player}
-            isActive={isActive}
-            videoId={videoData._id}
-            duration={videoData.duration || 0}
-            access={videoData.access}
-          />
-        </View>
-      )}
 
       {showWallet && (
         <View
