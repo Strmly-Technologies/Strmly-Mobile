@@ -55,7 +55,6 @@ export const CommunitiesStyles = StyleSheet.create({
         color: "#fff",
         fontSize: 15,
         fontFamily: 'Poppins-Medium',
-        paddingHorizontal: 5,
         paddingVertical: 2,
         marginBottom: 5,
     },

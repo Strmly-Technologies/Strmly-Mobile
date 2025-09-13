@@ -51,7 +51,7 @@ export const CreateCommunityStyle = StyleSheet.create({
     InfoFrame: {
         alignItems: 'center',
         marginTop: 20,
-        marginLeft: 20,
+        marginHorizontal: 10,
         display: 'flex',
         flexDirection: 'row',
         gap: 20
@@ -123,7 +123,9 @@ export const CreateCommunityStyle = StyleSheet.create({
     ExtraInfo: {
         fontFamily: 'Poppins-ExtraLight',
         fontSize: 12,
-        opacity: 0.6
+        opacity: 0.6,
+        width: '100%',
+        textAlign: 'center'
     },
     GenderInterestGroup: {
         width: '100%',

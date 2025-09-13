@@ -7,7 +7,7 @@ import {
   Pressable,
   View,
   StatusBar,
-  RefreshControl, // Add this import
+  RefreshControl,
 } from "react-native";
 import {
   SafeAreaProvider,
@@ -41,13 +41,13 @@ const VideosFeed: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [visibleIndex, setVisibleIndex] = useState(0);
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1); // Renamed for clarity
   const [limit, setLimit] = useState(6);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [isScreenFocused, setIsScreenFocused] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // Add refreshing state
+  const [refreshing, setRefreshing] = useState(false);
 
   const { token, isLoggedIn } = useAuthStore();
   const { setVideoType } = useVideosStore();
@@ -72,7 +72,7 @@ const VideosFeed: React.FC = () => {
 
         if (videos.length === 0 && !loading && !error) {
           setLoading(true);
-          setPage(1);
+          setCurrentPage(1);
           setHasMore(true);
           fetchTrendingVideos(1);
         }
@@ -98,16 +98,24 @@ const VideosFeed: React.FC = () => {
     };
   }, []);
 
-  const fetchTrendingVideos = async (nextPage?: number) => {
-    const targetPage = nextPage ?? page;
+  const fetchTrendingVideos = async (pageToFetch?: number) => {
+    // Use pageToFetch if provided, otherwise use currentPage + 1 for next page
+    const targetPage = pageToFetch !== undefined ? pageToFetch : currentPage + 1;
+    
+    console.log(`Fetching page: ${targetPage}, Current page: ${currentPage}`);
 
-    if (!hasMore || isFetchingMore) return;
+    if (!hasMore || isFetchingMore) {
+      console.log("Skipping fetch - hasMore:", hasMore, "isFetchingMore:", isFetchingMore);
+      return;
+    }
 
     setIsFetchingMore(true);
     try {
-      console.log("Fetching videos for page:", targetPage);
+      console.log("Fetching from:", `${BACKEND_API_URL}/videos/all-videos?page=${targetPage}`);
+      console.log("With token:", token ? "Present" : "Missing");
+      
       const res = await fetch(
-        `${BACKEND_API_URL}/recommendations/videos?page=${targetPage}`,
+        `${BACKEND_API_URL}/videos/all-videos?page=${targetPage}&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -116,38 +124,46 @@ const VideosFeed: React.FC = () => {
           },
         }
       );
-
-      if (!res.ok) throw new Error("Failed to fetch videos");
+      
+      console.log("Response status:", res.status);
+      console.log("Response ok:", res.ok);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Error response:", errorText);
+        throw new Error(`API Error: ${res.status} - ${errorText}`);
+      }
+      
       const json = await res.json();
-
+      console.log("Success response:", json);
+      
       if (!mountedRef.current) return;
 
       setVideos((prev) => {
         if (targetPage === 1) {
-          return json.recommendations || [];
+          console.log("Replacing videos with fresh data");
+          return json.data || [];
         } else {
           const existingIds = new Set(prev.map((v) => v._id));
-          const uniqueNew = (json.recommendations || []).filter(
+          const uniqueNew = (json.data || []).filter(
             (v: { _id: string }) => !existingIds.has(v._id)
           );
+          console.log(`Adding ${uniqueNew.length} new unique videos`);
           return [...prev, ...uniqueNew];
         }
       });
 
-      if ((json.recommendations || []).length < limit) {
+      // Update currentPage to the page we just fetched
+      setCurrentPage(targetPage);
+
+      // Check if we have more pages
+      if ((json.data || []).length < limit) {
+        console.log("No more pages available");
         setHasMore(false);
       }
 
-      console.log(
-        `Loaded ${json.recommendations?.length || 0} videos for page ${targetPage}`
-      );
+      console.log(`Loaded ${json.data?.length || 0} videos for page ${targetPage}`);
 
-      if (targetPage !== 1) {
-        setPage(targetPage + 1);
-      } else {
-        setPage(2);
-        setVisibleIndex(0);
-      }
     } catch (err: any) {
       console.error("Error fetching videos:", err);
       if (mountedRef.current) {
@@ -182,12 +198,20 @@ const VideosFeed: React.FC = () => {
           setVisibleIndex(currentIndex);
         }
 
-        if (currentIndex === videos.length - 2 && hasMore && !isFetchingMore) {
-          fetchTrendingVideos();
+        // Improved pagination trigger - fetch when we're near the end
+        const threshold = 2; // Fetch when 2 videos from the end
+        const shouldFetchMore = currentIndex >= videos.length - threshold && 
+                               hasMore && 
+                               !isFetchingMore &&
+                               videos.length > 0;
+        
+        if (shouldFetchMore) {
+          console.log(`Triggering pagination at index ${currentIndex} of ${videos.length} videos`);
+          fetchTrendingVideos(); // This will fetch currentPage + 1
         }
       }
     },
-    [visibleIndex, videos.length, hasMore, isFetchingMore, isScreenFocused]
+    [visibleIndex, videos.length, hasMore, isFetchingMore, isScreenFocused, currentPage]
   );
 
   const onScrollEndDrag = useCallback((event: any) => {
@@ -260,11 +284,10 @@ const VideosFeed: React.FC = () => {
     []
   );
 
-  // Updated refresh handler to use refreshing state
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     setError(null);
-    setPage(1);
+    setCurrentPage(1); // Reset to page 1
     setHasMore(true);
     setVisibleIndex(0);
     
@@ -364,23 +387,23 @@ const VideosFeed: React.FC = () => {
         contentContainerStyle={{ backgroundColor: '#000' }}
         overScrollMode="never"
         alwaysBounceVertical={false}
-        // Add RefreshControl here
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor="white" // iOS
-            colors={["white"]} // Android
-            progressBackgroundColor="#1a1a1a" // Android background
-            titleColor="white" // iOS
-            title="Pull to refresh" // iOS
-            progressViewOffset={0} // Android
+            tintColor="white"
+            colors={["white"]}
+            progressBackgroundColor="#1a1a1a"
+            titleColor="white"
+            title="Pull to refresh"
+            progressViewOffset={0}
           />
         }
         ListFooterComponent={
           isFetchingMore ? (
             <View style={{ height: VIDEO_HEIGHT, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
               <ActivityIndicator size="small" color="white" />
+              <Text className="text-white mt-2">Loading more videos...</Text>
             </View>
           ) : null
         }

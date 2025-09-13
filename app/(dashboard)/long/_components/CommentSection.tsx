@@ -803,15 +803,17 @@ const CommentsSection = ({
           position: "absolute",
           left: 0,
           right: 0,
-          ...(isInputFocused && keyboardHeight > 0 ? {
-            // When keyboard is open, position so the input sits above keyboard
-            bottom: keyboardHeight -260,
-            height: Math.min(SCREEN_HEIGHT * 0.5, SCREEN_HEIGHT - keyboardHeight - 50),
-          } : {
-            // When keyboard is closed, normal positioning
-            bottom: BOTTOM_NAV_HEIGHT,
-            height: SHEET_MAX_HEIGHT,
-          }),
+          ...(isInputFocused && keyboardHeight > 0
+            ? {
+                // When keyboard is open, position so the input sits above keyboard
+                bottom: keyboardHeight*0.3,
+                height: SHEET_MAX_HEIGHT
+              }
+            : {
+                // When keyboard is closed, normal positioning
+                bottom: 50,
+                height: SHEET_MAX_HEIGHT,
+              }),
           backgroundColor: "#0E0E0E",
           borderTopLeftRadius: 36,
           borderTopRightRadius: 36,

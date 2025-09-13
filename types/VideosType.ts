@@ -32,8 +32,9 @@ export type VideoItemType = {
 
   genre: string;
   type: string;
-  is_monetized: boolean;
-  language: string;
+  is_monetized?: boolean;
+  language?: string;
+  Videolanguage?: string;
   age_restriction: boolean;
   season_number: number;
   is_standalone: boolean;
