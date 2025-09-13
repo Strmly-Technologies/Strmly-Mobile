@@ -414,7 +414,7 @@ export class CommunityAPI {
     type: 'all' | 'created' | 'joined' = 'all'
   ): Promise<{ communities: Community[]; createdCount: number; joinedCount: number; totalCount: number }> {
     const response = await fetch(
-      `${CONFIG.API_BASE_URL}/community/user-communities?type=${type}`,
+      `${CONFIG.API_BASE_URL}/community/my-communities?type=${type}`,
      
       {
         method: 'GET',

@@ -109,7 +109,7 @@ export class ProfileAPI {
     type: 'all' | 'created' | 'joined' = 'all'
   ): Promise<CombinedCommunitiesResponse> {
     const response = await fetch(
-      `${CONFIG.API_BASE_URL}/user/communities?type=${type}`,
+      `${CONFIG.API_BASE_URL}/community/my-communities?type=${type}`,
       {
         method: 'GET',
         headers: ProfileAPI.getHeaders(token),
