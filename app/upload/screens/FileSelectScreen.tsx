@@ -5,6 +5,7 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  Platform
 } from "react-native";
 import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -244,6 +245,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
+    paddingTop: Platform.OS === 'ios' ? 10 : 0,
   },
   header: {
     flexDirection: "row",
@@ -251,7 +253,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginTop: 48,
+   
   },
   headerTitle: {
     color: "white",

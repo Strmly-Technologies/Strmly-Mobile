@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Dropdown from '../components/Dropdown';
 import TimePicker from '../components/TimePicker';
@@ -82,7 +82,9 @@ const FinalStageScreen: React.FC<FinalStageProps> = ({
     <View className="flex-1 bg-black">
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 mt-12">
+      <View className="flex-row items-center justify-between px-4 py-3 "
+      style={{ marginTop: Platform.OS === 'ios' ? 8 : 30 }}
+      >
         <TouchableOpacity onPress={onBack}>
           <Ionicons name="chevron-back" size={24} color="white" />
         </TouchableOpacity>

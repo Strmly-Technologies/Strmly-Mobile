@@ -451,7 +451,7 @@ const VideoDetails = ({
               ) : (
                 <Image
                   source={require("../../../../assets/images/plus.png")}
-                  className="size-5"
+                  className="size-5" 
                 />
               )}
             </Pressable>

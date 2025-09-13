@@ -9,6 +9,7 @@ import {
   Alert,
   RefreshControl,
   Dimensions,
+  Platform
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -545,86 +546,86 @@ const StrmlyStudio = () => {
                       </Text>
                     </View>
                   )}
-                  {series.map((seriesItem) => (
-                    <TouchableOpacity
-                      key={seriesItem.id}
-                      onPress={() => goToSeriesDetails(seriesItem.id)}
+                {series.map((seriesItem) => (
+                  <TouchableOpacity
+                    key={seriesItem.id}
+                    onPress={() => goToSeriesDetails(seriesItem.id)}
+                  >
+                    <LinearGradient
+                      colors={["#000000", "#0a0a0a", "#1a1a1a"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      className={`flex-row items-center rounded-lg ${Platform.OS === 'android' ? 'p-3' : 'p-1'} mb-3 ${
+                        selectedSeries === seriesItem.id
+                          ? "border-2 border-blue-500"
+                          : ""
+                      }`}
+                      style={{
+                        shadowColor: "#ffffff",
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 2,
+                        elevation: 3,
+                      }}
                     >
-                      <LinearGradient
-                        colors={["#000000", "#0a0a0a", "#1a1a1a"]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        className={`flex-row items-center rounded-lg p-3 mb-3 ${
-                          selectedSeries === seriesItem.id
-                            ? "border-2 border-blue-500"
-                            : ""
-                        }`}
-                        style={{
-                          shadowColor: "#ffffff",
-                          shadowOffset: { width: 0, height: 1 },
-                          shadowOpacity: 0.1,
-                          shadowRadius: 2,
-                          elevation: 3,
-                        }}
-                      >
-                        <View className="w-12 h-12 mr-3 items-center justify-center">
-                          {seriesItem.thumbnail ? (
-                            <Image
-                              source={{ uri: seriesItem.thumbnail }}
-                              className="w-full h-full rounded"
-                              resizeMode="cover"
-                            />
-                          ) : (
-                            <Image
-                              source={require("../../assets/episode.png")}
-                              style={{ width: 32, height: 32 }}
-                              resizeMode="contain"
-                            />
-                          )}
-                        </View>
+                      <View className={`${Platform.OS === 'android' ? 'w-10 h-10 mr-2' : 'w-12 h-12 mr-3'} items-center justify-center`}>
+                        {seriesItem.thumbnail ? (
+                          <Image
+                            source={{ uri: seriesItem.thumbnail }}
+                            className="w-full h-full rounded"
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <Image
+                            source={require("../../assets/episode.png")}
+                            style={Platform.OS === 'android' ? { width: 28, height: 28 } : { width: 32, height: 32 }}
+                            resizeMode="contain"
+                          />
+                        )}
+                      </View>
 
-                        <View className="flex-1">
-                          <Text
-                            className="text-white text-lg font-medium"
-                            numberOfLines={1}
-                          >
-                            {seriesItem.title}
-                          </Text>
-                          <Text className="text-gray-400 text-base">
-                            {seriesItem.date}
-                          </Text>
-                          <Text className="text-gray-500 text-sm">
-                            {seriesItem.genre} • {seriesItem.type}
-                          </Text>
-                        </View>
+                      <View className="flex-1">
+                        <Text
+                          className={`text-white ${Platform.OS === 'android' ? 'text-base' : 'text-lg'} font-medium`}
+                          numberOfLines={1}
+                        >
+                          {seriesItem.title}
+                        </Text>
+                        <Text className={`text-gray-400 ${Platform.OS === 'android' ? 'text-sm' : 'text-base'}`}>
+                          {seriesItem.date}
+                        </Text>
+                        <Text className={`text-gray-500 ${Platform.OS === 'android' ? 'text-xs' : 'text-sm'}`}>
+                          {seriesItem.genre} • {seriesItem.type}
+                        </Text>
+                      </View>
 
-                        <View className="items-end mr-3">
-                          <Text className="text-gray-400 text-sm">
-                            Total Episode
-                          </Text>
-                          <Text className="text-white text-base font-medium">
-                            {seriesItem.episodes.toString().padStart(2, "0")}
-                          </Text>
-                        </View>
+                      <View className={`items-end ${Platform.OS === 'android' ? 'mr-2' : 'mr-3'}`}>
+                        <Text className={`text-gray-400 ${Platform.OS === 'android' ? 'text-xs' : 'text-sm'}`}>
+                          Total Episode
+                        </Text>
+                        <Text className={`text-white ${Platform.OS === 'android' ? 'text-sm' : 'text-base'} font-medium`}>
+                          {seriesItem.episodes.toString().padStart(2, "0")}
+                        </Text>
+                      </View>
 
-                        <DropdownMenu
-                          options={[
-                            {
-                              id: "delete",
-                              label: "Delete",
-                              icon: "trash-outline",
-                              color: "#EF4444",
-                              onPress: () =>
-                                handleDeleteSeries(
-                                  seriesItem.id,
-                                  seriesItem.title
-                                ),
-                            },
-                          ]}
-                        />
-                      </LinearGradient>
-                    </TouchableOpacity>
-                  ))}
+                      <DropdownMenu
+                        options={[
+                          {
+                            id: "delete",
+                            label: "Delete",
+                            icon: "trash-outline",
+                            color: "#EF4444",
+                            onPress: () =>
+                              handleDeleteSeries(
+                                seriesItem.id,
+                                seriesItem.title
+                              ),
+                          },
+                        ]}
+                      />
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ))}
                 </View>
               )}
             </>

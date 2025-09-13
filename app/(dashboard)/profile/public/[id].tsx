@@ -83,7 +83,7 @@ export default function PublicProfilePageWithId() {
 
         if (pageToFetch === 1) {
           setVideos(data.videos); // replace
-          setVideosInZustand(data.videos);
+          // setVideosInZustand(data.videos);
         } else {
           setVideos((prev) => [...prev, ...data.videos]); // append
           appendVideos(data.videos);
@@ -356,6 +356,7 @@ export default function PublicProfilePageWithId() {
       className="relative aspect-[9/16] flex-1 rounded-sm overflow-hidden"
       onPress={() => {
         setVideosInZustand(videos);
+        console.log('index:', index)
         router.push({
           pathname: "/(dashboard)/long/GlobalVideoPlayer",
           params: { startIndex: index },

@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
+  Platform
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import FormField from "../components/FormField";
@@ -15,6 +16,7 @@ import { VideoDetailProps } from "../types";
 import { formatOptions, videoTypeOptions } from "../data/dropdownOptions";
 import { useCommunities } from "../hooks/useCommunities";
 import * as ImagePicker from "expo-image-picker";
+
 
 /**
  * Video Detail Screen
@@ -170,7 +172,9 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
     <View className="flex-1 bg-black">
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 mt-12">
+      <View className="flex-row items-center justify-between px-4 py-3 "
+      style={{ marginTop: Platform.OS === 'ios' ? 8 : 30 }}
+      >
         <TouchableOpacity onPress={onBack}>
           <Ionicons name="chevron-back" size={24} color="white" />
         </TouchableOpacity>

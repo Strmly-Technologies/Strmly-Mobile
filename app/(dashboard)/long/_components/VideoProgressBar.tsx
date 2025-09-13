@@ -52,7 +52,6 @@ const VideoProgressBar = ({
   access,
   onInitialSeekComplete,
   isVideoOwner = false,
-  hasAccess = false,
 }: Props) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -71,8 +70,13 @@ const VideoProgressBar = ({
   const hasShownAccessModal = useRef(false);
   const modalDismissed = useRef(false);
   const initialSeekTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Add this near the top with other refs
-const hasUserInteracted = useRef(false);
+  const hasUserInteracted = useRef(false);
+  
+  // Add persistent interval ref to prevent cleanup issues
+  const timeTrackingInterval = useRef<NodeJS.Timeout | number | null>(null);
+  
+  // Add component mounted ref to handle cleanup properly
+  const isMounted = useRef(true);
 
   const { token } = useAuthStore();
   const BACKEND_API_URL = Constants.expoConfig?.extra?.BACKEND_API_URL;
@@ -90,11 +94,10 @@ const hasUserInteracted = useRef(false);
       "| access.isPurchased:",
       access?.isPurchased,
       "| hasAccess prop:",
-      hasAccess,
       "| isVideoOwner:",
       isVideoOwner
     );
-  }, [initialStartTime, endTime, duration, access?.isPurchased, hasAccess, isVideoOwner, videoId]);
+  }, [initialStartTime, endTime, duration, access?.isPurchased, isVideoOwner, videoId]);
 
   // ✅ Wait for video to be ready and perform initial seek
   useEffect(() => {
@@ -183,6 +186,18 @@ const hasUserInteracted = useRef(false);
     };
   }, [videoId]);
 
+  // ✅ Component mount/unmount tracking
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+      if (timeTrackingInterval.current) {
+        clearInterval(timeTrackingInterval.current);
+        timeTrackingInterval.current = null;
+      }
+    };
+  }, []);
+
   // ✅ API calls (untouched)
   const saveVideoToHistory = useCallback(async () => {
     if (!token || !videoId) return;
@@ -248,32 +263,57 @@ const hasUserInteracted = useRef(false);
     if (!isActive) hasTriggered2Percent.current = false;
   }, [isActive]);
 
-  // ✅ Sync current time with interval and handle end time restriction
+  // ✅ FIXED: Improved time tracking that persists across UI hide/show
   useEffect(() => {
-    if (!isActive || !hasPerformedInitialSeek) return;
-    
-    const interval = setInterval(() => {
-      const currentPlayerTime = player.currentTime || 0;
-      setCurrentTime(currentPlayerTime);
-      
-      // Check if video has reached the end time and user doesn't have access
-      // Don't show modal if user is the video owner
-      // Only show modal for premium videos that user doesn't have access to
-      const isPremiumVideo = endTime < duration && endTime > 0;
-      const userHasAccess = hasAccess || isVideoOwner;
-      
-      if (isPremiumVideo && !userHasAccess && currentPlayerTime >= endTime) {
-        if (!hasShownAccessModal.current && !modalDismissed.current) {
-          console.log('Video reached end time, showing access modal. Current time:', currentPlayerTime, 'End time:', endTime);
-          hasShownAccessModal.current = true;
-          player.pause();
-          setShowAccessModal(true);
+    // Clear any existing interval
+    if (timeTrackingInterval.current) {
+      clearInterval(timeTrackingInterval.current);
+      timeTrackingInterval.current = null;
+    }
+
+    // Only start tracking if video is active and ready
+    if (!isActive || !player) {
+      return;
+    }
+
+    console.log('Starting time tracking for video:', videoId);
+
+    // Start continuous time tracking
+    timeTrackingInterval.current = setInterval(() => {
+      if (!isMounted.current || !player) {
+        return;
+      }
+
+      try {
+        const currentPlayerTime = player.currentTime || 0;
+        
+        // Always update current time, regardless of UI visibility
+        setCurrentTime(currentPlayerTime);
+        
+        // Check if video has reached the end time and user doesn't have access
+        const isPremiumVideo = endTime < duration && endTime > 0;
+        const userHasAccess = access.isPlayable || isVideoOwner;
+        
+        if (isPremiumVideo && !userHasAccess && currentPlayerTime >= endTime) {
+          if (!hasShownAccessModal.current && !modalDismissed.current) {
+            console.log('Video reached end time, showing access modal. Current time:', currentPlayerTime, 'End time:', endTime);
+            hasShownAccessModal.current = true;
+            player.pause();
+            setShowAccessModal(true);
+          }
         }
+      } catch (error) {
+        console.error('Error in time tracking:', error);
       }
     }, 250);
     
-    return () => clearInterval(interval);
-  }, [isActive, player, hasAccess, isVideoOwner, endTime, duration, hasPerformedInitialSeek]);
+    return () => {
+      if (timeTrackingInterval.current) {
+        clearInterval(timeTrackingInterval.current);
+        timeTrackingInterval.current = null;
+      }
+    };
+  }, [isActive, player, access.isPlayable, isVideoOwner, endTime, duration, videoId]);
 
   // Reset modal state when video changes or becomes inactive
   useEffect(() => {
@@ -290,7 +330,7 @@ const hasUserInteracted = useRef(false);
     modalDismissed.current = true; // Mark as dismissed for this video
     
     // If user has purchased access, restart from beginning
-    if (hasAccess || isVideoOwner) {
+    if (access.isPlayable || isVideoOwner) {
       player.currentTime = initialStartTime; // Start from the designated start time
       setCurrentTime(initialStartTime);
       player.play();
@@ -322,7 +362,7 @@ const hasUserInteracted = useRef(false);
     
     // Determine if this is a free video (no restrictions) or premium video
     const isFreeVideo = access?.accessType === 'free' || (initialStartTime === 0 && endTime >= duration);
-    const userHasAccess = hasAccess; // This includes video purchase or creator pass
+    const userHasAccess = access.isPlayable; // This includes video purchase or creator pass
     
     // For free videos: allow seeking anywhere
     if (isFreeVideo) {
@@ -360,12 +400,14 @@ const hasUserInteracted = useRef(false);
     return true;
   };
 
-  // ✅ Drag handling with PanResponder and access control
+  // ✅ FIXED: Improved drag handling that syncs better with current time
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {setIsDragging(true),
+      onPanResponderGrant: () => {
+        setIsDragging(true);
         hasUserInteracted.current = true;
+        console.log('Drag started, current time:', currentTime);
       },
       onPanResponderMove: (_, gestureState) => {
         const containerWidth = progressBarContainerWidth.current;
@@ -383,14 +425,20 @@ const hasUserInteracted = useRef(false);
         const finalTime = dragTimeRef.current;
         if (finalTime != null && validateSeekTime(finalTime)) {
           try {
+            console.log("Seeking from", currentTime, "to:", finalTime, "for video:", videoId);
+            
             player.pause();
             player.currentTime = finalTime;
+            
+            // Immediately update local state to prevent UI lag
             setCurrentTime(finalTime);
+            
             // Small delay before resuming playback for smooth transition
             setTimeout(() => {
-              player.play();
+              if (isMounted.current && player) {
+                player.play();
+              }
             }, 50);
-            console.log("Seeking to:", finalTime, "for video:", videoId);
           } catch (error) {
             console.error("Error seeking video:", error);
           }
@@ -402,13 +450,14 @@ const hasUserInteracted = useRef(false);
     })
   ).current;
 
+  // ✅ FIXED: Better progress calculation that handles edge cases
   const effectiveTime = isDragging && dragTime != null ? dragTime : currentTime;
-  const progress = duration > 0 ? Math.min(effectiveTime / duration, 1) : 0;
+  const progress = duration > 0 ? Math.max(0, Math.min(effectiveTime / duration, 1)) : 0;
 
   if (duration <= 0) return null;
 
   // Calculate restricted progress for visual indication
-  const restrictedProgress = !hasAccess && !isVideoOwner && endTime > 0 ? endTime / duration : 1;
+  const restrictedProgress = !access.isPlayable && !isVideoOwner && endTime > 0 ? endTime / duration : 1;
   const startProgress = initialStartTime > 0 ? initialStartTime / duration : 0;
 
   return (
@@ -433,7 +482,7 @@ const hasUserInteracted = useRef(false);
         )}
         
         {/* Show restricted area if user doesn't have access and it's not a free video */}
-        {!hasAccess && !isVideoOwner && endTime > 0 && endTime < duration && (
+        {!access.isPlayable && !isVideoOwner && endTime > 0 && endTime < duration && (
           <View 
             style={[
               styles.restrictedArea, 

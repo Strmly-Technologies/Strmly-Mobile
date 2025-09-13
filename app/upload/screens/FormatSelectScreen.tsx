@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'; // Import if you have this package
 
 interface FormatSelectScreenProps {
   onFormatSelected: (format: 'episode' | 'single') => void;
@@ -22,16 +23,28 @@ const FormatSelectScreen: React.FC<FormatSelectScreenProps> = ({
   onFormatSelected,
   onBack
 }) => {
+  // Get safe area insets if available (requires react-native-safe-area-context)
+  // const insets = useSafeAreaInsets(); // Uncomment if you have the package
+  
   // Handle format selection and navigate directly
   const handleFormatSelect = (format: 'episode' | 'single') => {
     onFormatSelected(format);
+  };
+
+  // Calculate header margin based on platform
+  const getHeaderMarginTop = () => {
+    if (Platform.OS === 'ios') {
+      // For iOS, use a smaller margin to account for the status bar
+      return 8; // Reduced from 48 to bring header closer to status bar
+    }
+    return 48; // Keep original Android margin
   };
 
   return (
     <View style={styles.container}>
       
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { marginTop: getHeaderMarginTop() }]}>
         <TouchableOpacity onPress={onBack}>
           <Ionicons name="chevron-back" size={24} color="white" />
         </TouchableOpacity>
@@ -99,7 +112,6 @@ const FormatSelectScreen: React.FC<FormatSelectScreenProps> = ({
         </Text>
       </View>
 
-
     </View>
   );
 };
@@ -108,6 +120,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+    // Add platform-specific padding top if needed
+    paddingTop: Platform.OS === 'ios' ? 10 : 0, // iOS status bar height
   },
   header: {
     flexDirection: 'row',
@@ -115,7 +129,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginTop: 48,
+    // marginTop is now handled dynamically in the component
   },
   headerTitle: {
     color: 'white',
@@ -151,7 +165,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
   },
-
   gradientCard: {
     padding: 24,
     alignItems: 'center',
@@ -185,7 +198,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     paddingHorizontal: 32,
   },
-
 });
 
 export default FormatSelectScreen;
