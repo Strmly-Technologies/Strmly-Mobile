@@ -73,6 +73,9 @@ type VideoDetailsProps = {
   onToggleFullScreen?: () => void;
   isFullScreen?: boolean;
   onEpisodeChange?: (episodeData: any) => void; // New callback for episode switching
+
+  setShowBuyOption: React.Dispatch<React.SetStateAction<boolean>>;
+  showBuyOption: boolean;
 };
 
 const VideoDetails = ({
@@ -92,6 +95,8 @@ const VideoDetails = ({
   onToggleFullScreen,
   isFullScreen,
   onEpisodeChange,
+  setShowBuyOption,
+  showBuyOption
 }: VideoDetailsProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedEpisodeIndex, setSelectedEpisodeIndex] = useState(0);
@@ -554,7 +559,7 @@ const VideoDetails = ({
         </Pressable>
 
         {/* Paid Dropdown */}
-        {showPriceDropdown && (
+        {showPriceDropdown || showBuyOption && (
           <View className="absolute bottom-14 -right-2 rounded-xl p-2 w-80">
             {(series != null &&
               series.type != "Free" &&
@@ -565,6 +570,7 @@ const VideoDetails = ({
                 className="mb-0.5"
                 onPress={() => {
                   setShowPriceDropdown(false);
+                  setShowBuyOption(false);
                   setShowDropdown(false);
                 }}
               >

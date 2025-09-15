@@ -172,8 +172,8 @@ const VideosFeed: React.FC = () => {
       }
     } finally {
       if (mountedRef.current) {
-        setLoading(false);
         setIsFetchingMore(false);
+        setLoading(false);
       }
     }
   };
@@ -305,7 +305,7 @@ const VideosFeed: React.FC = () => {
   );
 
   // Show loading while checking authentication or fetching videos
-  if (loading && !refreshing) {
+  if (loading && refreshing) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
         <ActivityIndicator size="large" color="white" />
@@ -344,7 +344,7 @@ const VideosFeed: React.FC = () => {
   if (videos.length === 0) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
-        <Text className="text-lg text-white">No Videos Available</Text>
+        <Text className="text-lg text-white">You watched all videos, no new videos Available.</Text>
         <Text className="text-lg text-white">
           Want to Upload your own{" "}
           <Link href={"/studio"} className="text-blue-500">

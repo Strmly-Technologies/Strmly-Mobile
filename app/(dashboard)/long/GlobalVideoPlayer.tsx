@@ -67,7 +67,6 @@ const GlobalVideoPlayer: React.FC = () => {
     }, 100);
   }, []);
 
-
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 95,
     minimumViewTime: 100,
@@ -76,7 +75,7 @@ const GlobalVideoPlayer: React.FC = () => {
 
   const renderItem = useCallback(
     ({ item, index }: { item: VideoItemType; index: number }) => {
-      if (index !== visibleIndex && index !== Number(startIndex)) {
+      if (index !== visibleIndex) {
         return <ThemedView style={{ height: VIDEO_HEIGHT }} />;
       }
 
@@ -173,39 +172,39 @@ const GlobalVideoPlayer: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1" edges={[]}>
-      <FlatList
-        ref={flatListRef}
-        data={videos}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        getItemLayout={getItemLayout}
-        initialScrollIndex={visibleIndex}
-        pagingEnabled
-        scrollEnabled={!showCommentsModal && !isLandscape}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        initialNumToRender={1}
-        maxToRenderPerBatch={1}
-        windowSize={1}
-        // updateCellsBatchingPeriod={100}
-        removeClippedSubviews={true}
-        showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
-        style={{ height: VIDEO_HEIGHT }}
-        maintainVisibleContentPosition={{
-          minIndexForVisible: 0,
-          autoscrollToTopThreshold: 10,
-        }}
-        snapToInterval={VIDEO_HEIGHT}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        bounces={false}
-        scrollEventThrottle={16}
-        disableIntervalMomentum={true}
-        contentContainerStyle={{ backgroundColor: "#000" }}
-        overScrollMode="never"
-        alwaysBounceVertical={false}
-      />
+        <FlatList
+          ref={flatListRef}
+          data={videos}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          getItemLayout={getItemLayout}
+          initialScrollIndex={visibleIndex}
+          pagingEnabled
+          scrollEnabled={!showCommentsModal && !isLandscape}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          initialNumToRender={1}
+          maxToRenderPerBatch={1}
+          windowSize={1}
+          // updateCellsBatchingPeriod={100}
+          removeClippedSubviews={true}
+          showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="automatic"
+          style={{ height: VIDEO_HEIGHT }}
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+            autoscrollToTopThreshold: 10,
+          }}
+          snapToInterval={VIDEO_HEIGHT}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          bounces={false}
+          scrollEventThrottle={16}
+          disableIntervalMomentum={true}
+          contentContainerStyle={{backgroundColor: "#000"}}
+          overScrollMode="never"
+          alwaysBounceVertical={false}
+        />
     </SafeAreaView>
   );
 };

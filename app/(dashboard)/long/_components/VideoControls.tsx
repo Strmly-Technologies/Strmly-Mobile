@@ -59,6 +59,7 @@ const VideoControls = ({
   const [playing, setPlaying] = useState(true);
   const [buffering, setBuffering] = useState(false);
   const [wantToBuyVideo, setWantToBuyVideo] = useState(false);
+  const [showBuyOption, setShowBuyOption] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const { setVideosInZustand } = useVideosStore();
   const { isLandscape } = useOrientationStore();
@@ -262,6 +263,8 @@ const VideoControls = ({
             community={videoData?.community}
             onToggleFullScreen={onToggleFullScreen}
             onEpisodeChange={onEpisodeChange}
+            showBuyOption={showBuyOption}
+            setShowBuyOption={setShowBuyOption}
           />
         </View>
       )}
@@ -285,6 +288,7 @@ const VideoControls = ({
             videoId={videoData._id}
             duration={videoData.duration || 0}
             access={videoData.access}
+            showBuyOption={setShowBuyOption}
           />
         </View>
       )}
