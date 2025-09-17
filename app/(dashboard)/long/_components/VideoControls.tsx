@@ -288,6 +288,7 @@ const VideoControls = ({
             videoId={videoData._id}
             duration={videoData.duration || 0}
             access={videoData.access}
+            hasCreatorPassOfVideoOwner={videoData.hasCreatorPassOfVideoOwner}
             showBuyOption={setShowBuyOption}
           />
         </View>

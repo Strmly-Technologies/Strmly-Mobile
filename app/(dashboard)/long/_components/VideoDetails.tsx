@@ -559,7 +559,7 @@ const VideoDetails = ({
         </Pressable>
 
         {/* Paid Dropdown */}
-        {showPriceDropdown || showBuyOption && (
+        {(showPriceDropdown || showBuyOption) && (
           <View className="absolute bottom-14 -right-2 rounded-xl p-2 w-80">
             {(series != null &&
               series.type != "Free" &&

@@ -30,6 +30,7 @@ type Props = {
   videoId: string;
   player: VideoPlayer;
   isActive: boolean;
+  hasCreatorPassOfVideoOwner: boolean;
   duration: number;
   access: AccessType;
   onInitialSeekComplete?: () => void; // Callback when initial seek is done
@@ -49,6 +50,7 @@ const VideoProgressBar = ({
   videoId,
   player,
   isActive,
+  hasCreatorPassOfVideoOwner,
   duration,
   access,
   onInitialSeekComplete,
@@ -281,6 +283,7 @@ const VideoProgressBar = ({
   const hasTriggered2Percent = useRef(false);
   useEffect(() => {
     if (!isActive || duration <= 0 || !hasPerformedInitialSeek) return;
+    console.log('stats:', { isActive, duration, currentTime, initialStartTime });
 
     // Calculate progress from the start time, not from 0
     const effectiveDuration = duration - initialStartTime;
@@ -292,6 +295,7 @@ const VideoProgressBar = ({
 
     if (!hasTriggered2Percent.current && percentWatched >= 2) {
       hasTriggered2Percent.current = true;
+      console.log('saving.....')
       saveVideoToHistory();
       incrementVideoViews();
     }
@@ -338,7 +342,7 @@ const VideoProgressBar = ({
         const isPremiumVideo = endTime < duration && endTime > 0;
         const userHasAccess = hasAccess || isVideoOwner;
 
-        if (isPremiumVideo && !userHasAccess && currentPlayerTime >= endTime) {
+        if (isPremiumVideo && !userHasAccess && !hasCreatorPassOfVideoOwner && currentPlayerTime >= endTime) {
           if (!hasShownAccessModal.current && !modalDismissed.current) {
             console.log(
               "Video reached end time, showing access modal. Current time:",
@@ -431,7 +435,7 @@ const VideoProgressBar = ({
     }
 
     // For premium videos without access: only allow seeking within free range (start_time to display_till_time)
-    if (!userHasAccess) {
+    if (!userHasAccess && !hasCreatorPassOfVideoOwner) {
       // Check if trying to seek before start time
       if (initialStartTime > 0 && newTimeSeconds < initialStartTime) {
         Alert.alert(
@@ -547,7 +551,7 @@ const VideoProgressBar = ({
         )}
 
         {/* Show restricted area if user doesn't have access and it's not a free video */}
-        {!hasAccess && !isVideoOwner && endTime > 0 && endTime < duration && (
+        {!hasAccess && !isVideoOwner && endTime > 0 && endTime < duration && !hasCreatorPassOfVideoOwner && (
           <View
             style={[
               styles.restrictedArea,
