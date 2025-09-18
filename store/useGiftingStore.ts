@@ -28,6 +28,7 @@ type GiftingState = {
   videoName: string | null;
   series: series;
   videoId: string | null;
+  purchaseSuccessCallback?: () => void; // Add this to the type definition
   initiateGifting: (creator: creator, videoId: string) => Promise<void>;
   initiateVideoAccess: (creator: creator, videoName: string, videoId: string) => Promise<void>;
   initiateCreatorPass: (creator: creator) => Promise<void>;
@@ -45,9 +46,11 @@ type GiftingState = {
   clearPassData: () => void;
   clearSeriesData: () => void;
   clearCommunityPassData: () => void;
+  setPurchaseSuccessCallback: (callback: () => void) => void; // Add this to type
+  triggerPurchaseSuccess: () => void; // Add this to type
 };
 
-export const useGiftingStore = create<GiftingState>((set) => ({
+export const useGiftingStore = create<GiftingState>((set, get) => ({
   isGifted: false,
   isVideoPurchased: false,
   isPurchasedPass: false,
@@ -59,9 +62,11 @@ export const useGiftingStore = create<GiftingState>((set) => ({
   videoName: null,
   series: null,
   videoId: null,
+  purchaseSuccessCallback: undefined,
 
-  initiateGifting: (creator, videoId) => {
-    useGiftingStore.getState().clearGiftingData();
+  initiateGifting: async (creator, videoId) => {
+    const state = get();
+    state.clearGiftingData();
 
     set({
       creator,
@@ -72,8 +77,9 @@ export const useGiftingStore = create<GiftingState>((set) => ({
     });
   },
 
-  initiateVideoAccess: (creator, videoName, videoId) => {
-    useGiftingStore.getState().clearVideoAccessData();
+  initiateVideoAccess: async (creator, videoName, videoId) => {
+    const state = get();
+    state.clearVideoAccessData();
 
     set({
       creator,
@@ -85,8 +91,9 @@ export const useGiftingStore = create<GiftingState>((set) => ({
     });
   },
 
-  initiateCreatorPass: (creator) => {
-    useGiftingStore.getState().clearPassData();
+  initiateCreatorPass: async (creator) => {
+    const state = get();
+    state.clearPassData();
 
     set({
       creator,
@@ -96,8 +103,9 @@ export const useGiftingStore = create<GiftingState>((set) => ({
     });
   },
 
-  initiateCommunityPass: (creator) => {
-    useGiftingStore.getState().clearCommunityPassData();
+  initiateCommunityPass: async (creator) => {
+    const state = get();
+    state.clearCommunityPassData();
 
     set({
       creator,
@@ -108,13 +116,25 @@ export const useGiftingStore = create<GiftingState>((set) => ({
   },
 
   initiateSeries: (series: series) => {
-    useGiftingStore.getState().clearSeriesData();
+    const state = get();
+    state.clearSeriesData();
 
     set({
       series,
       hasFetched: false,
       isPurchasedSeries: false,
     });
+  },
+
+  setPurchaseSuccessCallback: (callback) => {
+    set({ purchaseSuccessCallback: callback });
+  },
+
+  triggerPurchaseSuccess: () => {
+    const state = get();
+    if (state.purchaseSuccessCallback) {
+      state.purchaseSuccessCallback();
+    }
   },
 
   loadGiftingContext: async () => {
@@ -125,7 +145,7 @@ export const useGiftingStore = create<GiftingState>((set) => ({
     // TODO: Implement fetching gifting data if needed
   },
 
-  completeGifting: (amount) => {
+  completeGifting: async (amount) => {
     set({
       giftSuccessMessage: amount,
       isGifted: true,
@@ -133,28 +153,38 @@ export const useGiftingStore = create<GiftingState>((set) => ({
     });
   },
 
-  completeVideoAccess: (amount) => {
+  completeVideoAccess: async (amount) => {
     set({
       giftSuccessMessage: amount,
       isVideoPurchased: true,
       hasFetched: true,
     });
+    
+    // Trigger purchase success callback
+    const state = get();
+    state.triggerPurchaseSuccess();
   },
 
-  completePass: (amount) => {
+  completePass: async (amount) => {
     set({
       giftSuccessMessage: amount,
       isPurchasedPass: true,
       hasFetched: true,
     });
+    
+    const state = get();
+    state.triggerPurchaseSuccess();
   },
 
-  completeCommunityPass: (amount) => {
+  completeCommunityPass: async (amount) => {
     set({
       giftSuccessMessage: amount,
       isPurchasedCommunityPass: true,
       hasFetched: true,
     });
+    
+    const state = get();
+    state.triggerPurchaseSuccess();
   },
 
   completeSeriesPurchasing: () => {
@@ -162,6 +192,9 @@ export const useGiftingStore = create<GiftingState>((set) => ({
       isPurchasedSeries: true,
       hasFetched: true,
     });
+    
+    const state = get();
+    state.triggerPurchaseSuccess();
   },
 
   clearGiftingData: () => {
