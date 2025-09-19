@@ -20,6 +20,8 @@ import {
 import { useRoute } from "@react-navigation/native";
 import { getProfilePhotoUrl } from "@/utils/profileUtils";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { VideoItemType } from "@/types/VideosType";
+import { useVideosStore } from "@/store/useVideosStore";
 
 const { height } = Dimensions.get("screen");
 
@@ -33,6 +35,7 @@ export default function AccessPage() {
   const route = useRoute();
   const { routeTab } = route.params as { routeTab: string };
   const router = useRouter();
+  const { setVideosInZustand, setVideoType } = useVideosStore();
 
   const {
     data: purchasedData,
@@ -140,11 +143,66 @@ export default function AccessPage() {
     if (asset.content_type === "video") {
       // Navigate to video feed with the specific video
       try {
+        console.log("Navigating to video:", asset);
+        // Transform asset data to VideoItemType format
+        const videoData: VideoItemType = {
+          _id: asset.content_id,
+          video: asset.asset_data.videoUrl || "",
+          videoUrl: asset.asset_data.videoUrl || "",
+          name: asset.asset_data.title || asset.asset_data.name || "Untitled",
+          title: asset.asset_data.title || asset.asset_data.name || "Untitled",
+          description: asset.asset_data.description || "",
+          thumbnailUrl: asset.asset_data.thumbnailUrl || "",
+          duration: asset.asset_data.duration || 0,
+          start_time: asset.asset_data.start_time || 0,
+          display_till_time: asset.asset_data.display_till_time || 0,
+          visibility: asset.asset_data.visibility || "public",
+          hidden_at: null,
+          likes: asset.asset_data.likes || 0,
+          gifts: asset.asset_data.gifts || 0,
+          shares: asset.asset_data.shares || 0,
+          views: asset.asset_data.views || 0,
+          amount: asset.asset_data.amount || 0,
+          hasCreatorPassOfVideoOwner:
+            asset.asset_data.hasCreatorPassOfVideoOwner || false,
+          access: {
+            isPlayable: true,
+            freeRange: {
+              start_time: asset.asset_data.start_time || 0,
+              display_till_time: asset.asset_data.display_till_time || 0,
+            },
+            isPurchased: true,
+            accessType: "purchased",
+            price: asset.asset_data.price || 0,
+          },
+          genre: asset.asset_data.genre || "",
+          type: asset.asset_data.type || "video",
+          is_monetized: asset.asset_data.is_monetized || false,
+          language: asset.asset_data.language || "",
+          age_restriction: asset.asset_data.age_restriction || false,
+          season_number: 0,
+          is_standalone: true,
+          created_by: asset.asset_data.created_by || {
+            _id: "",
+            username: "Unknown",
+            profile_photo: "",
+          },
+          community: null,
+          is_following_creator: false,
+          creatorPassDetails: null,
+          series: null,
+          episode_number: null,
+        };
+
+        // Set the video in the store and navigate to GlobalVideoPlayer
+        setVideosInZustand([videoData]);
+        setVideoType("video");
+
         router.push({
-          pathname: "/(tabs)/home",
+          pathname: "/(dashboard)/long/GlobalVideoPlayer",
           params: {
-            videoId: asset.content_id,
-            startWithVideo: "true",
+            videoType: "video",
+            startIndex: "0",
           },
         });
       } catch (error) {
@@ -288,8 +346,10 @@ export default function AccessPage() {
         <View className="relative">
           <Image
             source={{
-              uri:
-                getProfilePhotoUrl(creatorPass.creator_id.profile_photo, "user"),
+              uri: getProfilePhotoUrl(
+                creatorPass.creator_id.profile_photo,
+                "user"
+              ),
             }}
             className="w-16 h-16 rounded-full"
             resizeMode="cover"
@@ -330,97 +390,96 @@ export default function AccessPage() {
   );
 
   return (
-    <SafeAreaView style={{ flex:1 , backgroundColor: "black" }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       <View className="flex-1">
+        {/* Header */}
+        <View className="flex-row items-center justify-between px-4 pt-4 pb-4">
+          <TouchableOpacity onPress={() => router.back()} className="p-2">
+            <ArrowLeft size={24} color="white" />
+          </TouchableOpacity>
+          <Text className="text-white text-lg font-semibold">
+            Purchased Access
+          </Text>
+          <View className="w-8" />
+        </View>
 
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 pt-4 pb-4">
-        <TouchableOpacity onPress={() => router.back()} className="p-2">
-          <ArrowLeft size={24} color="white" />
-        </TouchableOpacity>
-        <Text className="text-white text-lg font-semibold">
-          Purchased Access
-        </Text>
-        <View className="w-8" />
-      </View>
+        {/* Tabs */}
+        <View className="flex-row px-4 mb-6">
+          {renderTabButton("content", "Content")}
+          {renderTabButton("series", "Series")}
+          {renderTabButton("creator", "Creator")}
+        </View>
 
-      {/* Tabs */}
-      <View className="flex-row px-4 mb-6">
-        {renderTabButton("content", "Content")}
-        {renderTabButton("series", "Series")}
-        {renderTabButton("creator", "Creator")}
-      </View>
+        {/* Content */}
+        <ScrollView className="flex-1 px-4">
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setActiveDropdown(null)}
+            className="flex-1"
+          >
+            {isLoading ? (
+              <View className="flex-1 items-center justify-center mt-20">
+                <ActivityIndicator size="large" color="#F1C40F" />
+                <Text className="text-gray-400 mt-4">
+                  Loading your purchases...
+                </Text>
+              </View>
+            ) : error ? (
+              <View className="flex-1 items-center justify-center mt-20 px-4">
+                <Text className="text-red-400 text-center mb-4">
+                  Failed to load purchased access
+                </Text>
+                <Text className="text-gray-400 text-center text-sm mb-4">
+                  {error}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => window.location.reload()}
+                  className="bg-blue-600 px-4 py-2 rounded-lg"
+                >
+                  <Text className="text-white">Retry</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              (() => {
+                const filteredData = getFilteredData();
 
-      {/* Content */}
-      <ScrollView className="flex-1 px-4">
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => setActiveDropdown(null)}
-          className="flex-1"
-        >
-          {isLoading ? (
-            <View className="flex-1 items-center justify-center mt-20">
-              <ActivityIndicator size="large" color="#F1C40F" />
-              <Text className="text-gray-400 mt-4">
-                Loading your purchases...
-              </Text>
-            </View>
-          ) : error ? (
-            <View className="flex-1 items-center justify-center mt-20 px-4">
-              <Text className="text-red-400 text-center mb-4">
-                Failed to load purchased access
-              </Text>
-              <Text className="text-gray-400 text-center text-sm mb-4">
-                {error}
-              </Text>
-              <TouchableOpacity
-                onPress={() => window.location.reload()}
-                className="bg-blue-600 px-4 py-2 rounded-lg"
-              >
-                <Text className="text-white">Retry</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            (() => {
-              const filteredData = getFilteredData();
-
-              return filteredData.length > 0 ? (
-                filteredData.map((item: any) =>
-                  activeTab === "creator"
-                    ? renderCreatorPassItem(item)
-                    : renderAssetItem(item)
-                )
-              ) : (
-                <View className="flex-1 items-center justify-center mt-20 px-4">
-                  <View className="items-center">
-                    {activeTab === "content" && (
-                      <Play size={48} color="#6B7280" />
-                    )}
-                    {activeTab === "series" && (
-                      <Film size={48} color="#6B7280" />
-                    )}
-                    {activeTab === "creator" && (
-                      <User size={48} color="#6B7280" />
-                    )}
-                    <Text className="text-gray-400 text-center mt-4 text-lg">
-                      No purchased {activeTab} found
-                    </Text>
-                    <Text className="text-gray-500 text-center mt-2 text-sm">
-                      {activeTab === "content" &&
-                        "Purchase individual videos to see them here"}
-                      {activeTab === "series" &&
-                        "Purchase series to see them here"}
-                      {activeTab === "creator" &&
-                        "Purchase creator passes to see them here"}
-                    </Text>
+                return filteredData.length > 0 ? (
+                  filteredData.map((item: any) =>
+                    activeTab === "creator"
+                      ? renderCreatorPassItem(item)
+                      : renderAssetItem(item)
+                  )
+                ) : (
+                  <View className="flex-1 items-center justify-center mt-20 px-4">
+                    <View className="items-center">
+                      {activeTab === "content" && (
+                        <Play size={48} color="#6B7280" />
+                      )}
+                      {activeTab === "series" && (
+                        <Film size={48} color="#6B7280" />
+                      )}
+                      {activeTab === "creator" && (
+                        <User size={48} color="#6B7280" />
+                      )}
+                      <Text className="text-gray-400 text-center mt-4 text-lg">
+                        No purchased {activeTab} found
+                      </Text>
+                      <Text className="text-gray-500 text-center mt-2 text-sm">
+                        {activeTab === "content" &&
+                          "Purchase individual videos to see them here"}
+                        {activeTab === "series" &&
+                          "Purchase series to see them here"}
+                        {activeTab === "creator" &&
+                          "Purchase creator passes to see them here"}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              );
-            })()
-          )}
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+                );
+              })()
+            )}
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

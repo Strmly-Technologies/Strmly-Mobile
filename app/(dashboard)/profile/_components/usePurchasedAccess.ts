@@ -30,6 +30,13 @@ interface Asset {
   _id: string;
   user_id: string;
   content_id: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  created_by: {
+    _id: string;
+    username: string;
+    profile_photo: string;
+  };
   content_type: 'video' | 'series';
   access_type: string;
   payment_method: string;

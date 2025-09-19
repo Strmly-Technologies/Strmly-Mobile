@@ -30,6 +30,7 @@ type Props = {
   videoId: string;
   player: VideoPlayer;
   isActive: boolean;
+  hasCreatorPassOfVideoOwner: boolean;
   duration: number;
   access: AccessType;
   onInitialSeekComplete?: () => void;
@@ -51,6 +52,7 @@ const VideoProgressBar = ({
   videoId,
   player,
   isActive,
+  hasCreatorPassOfVideoOwner,
   duration,
   access,
   showBuyOption,
@@ -465,17 +467,17 @@ const VideoProgressBar = ({
     }
   };
 
-  const handleShowPaidButton = () => {
-    showBuyOption(true);
-    handleAccessModalClose();
-  };
-
   // ✅ Layout width
   const handleProgressBarLayout = (event: LayoutChangeEvent) => {
     progressBarContainerWidth.current = event.nativeEvent.layout.width;
     progressBarRef.current?.measure((_x, _y, _width, _height, pageX) => {
       setProgressBarX(pageX);
     });
+  };
+
+  const handleShowPaidButton = () => {
+    showBuyOption(true);
+    handleAccessModalClose();
   };
 
   // ✅ Validate seek position based on access permissions
@@ -502,7 +504,7 @@ const VideoProgressBar = ({
     }
 
     // For premium videos without access: only allow seeking within free range (start_time to display_till_time)
-    if (!userHasAccess) {
+    if (!userHasAccess && !hasCreatorPassOfVideoOwner) {
       // Check if trying to seek before start time
       if (initialStartTime > 0 && newTimeSeconds < initialStartTime) {
         Alert.alert(

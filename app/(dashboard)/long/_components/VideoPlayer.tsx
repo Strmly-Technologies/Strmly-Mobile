@@ -85,11 +85,9 @@ const VideoPlayer = ({
   const [haveAccess, setHaveAccess] = useState(false);
   const [accessVersion, setAccessVersion] = useState(0);
 
-  const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
 
   const [showWallet, setShowWallet] = useState(true);
-
   const [showBuyOption, setShowBuyOption] = useState(false);
 
   // Player store
@@ -104,6 +102,16 @@ const VideoPlayer = ({
   const [isInitialSeekComplete, setIsInitialSeekComplete] = useState(false);
   // ✅ NEW: Track if this is the first time becoming active for this video
   const [hasBeenActiveBefore, setHasBeenActiveBefore] = useState(false);
+
+  const insets = useSafeAreaInsets();
+  const bottomOffset =
+    screenHeight < 700
+      ? insets.bottom != 0
+        ? insets.bottom - 16
+        : 45
+      : insets.bottom != 0
+        ? insets.bottom - 16
+        : 28;
 
   // Local stats
   const [localStats, setLocalStats] = useState({
@@ -127,14 +135,6 @@ const VideoPlayer = ({
   const isFocused = useIsFocused();
 
 
-  const bottomOffset =
-    screenHeight < 700
-      ? insets.bottom != 0
-        ? insets.bottom - 16
-        : 45
-      : insets.bottom != 0
-        ? insets.bottom - 16
-        : 28;
 
   // FIX: Update local stats when videoData changes (e.g., when switching videos)
   useEffect(() => {
@@ -674,26 +674,6 @@ const VideoPlayer = ({
 
   return (
     <View style={dynamicStyles.container}>
-
-            {/* {!isReady ||
-        (accessChecked && showPaidMessage && (
-          <View className="relative">
-            <Image
-              source={{ uri: videoData.thumbnailUrl }}
-              style={dynamicStyles.thumbnail}
-            />
-            {showPaidMessage && (
-              <ModalMessage
-                visible={true}
-                text={`Access Denied
-You do not have permission to view this video.`}
-                needCloseButton={true}
-                onClose={() => setShowPaidMessage(false)}
-              />
-            )}
-          </View>
-        ))} */}
-        
       {player && canPlayVideo ? (
         <View className="relative items-center justify-center">
           <VideoView
@@ -723,10 +703,8 @@ You do not have permission to view this video.`}
         haveCreatorPass={haveCreator}
         haveAccessPass={haveAccess}
         haveCreator={setCheckCreatorPass}
-        accessVersion={accessVersion}
         showBuyOption={showBuyOption}
         setShowBuyOption={setShowBuyOption}
-        handleInitialSeekComplete={handleInitialSeekComplete}
         showWallet={setShowWallet}
         player={player}
         videoData={{
@@ -768,6 +746,7 @@ You do not have permission to view this video.`}
             duration={videoData.duration || 0}
             access={videoData.access}
             showBuyOption={setShowBuyOption}
+            hasCreatorPassOfVideoOwner={videoData.hasCreatorPassOfVideoOwner}
             onInitialSeekComplete={handleInitialSeekComplete}
             isVideoOwner={videoData.created_by._id === user?.id}
             hasAccess={haveAccess || haveCreator || videoData.access.isPurchased}

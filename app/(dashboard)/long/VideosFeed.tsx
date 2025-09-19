@@ -18,6 +18,7 @@ import VideoPlayer from "./_components/VideoPlayer";
 import { clearActivePlayer } from "@/store/usePlayerStore";
 import { useVideosStore } from "@/store/useVideosStore";
 import { useOrientationStore } from "@/store/useOrientationStore";
+import { RefreshControl } from "react-native-gesture-handler";
 
 export type GiftType = {
   creator: {
@@ -40,7 +41,7 @@ const VideosFeed: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [visibleIndex, setVisibleIndex] = useState(0);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(4);
+  const [limit, setLimit] = useState(6);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -164,8 +165,8 @@ const VideosFeed: React.FC = () => {
       }
     } finally {
       if (mountedRef.current) {
-        setLoading(false);
         setIsFetchingMore(false);
+        setLoading(false);
       }
     }
   };
@@ -349,7 +350,7 @@ const VideosFeed: React.FC = () => {
   if (videos.length === 0) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
-        <Text className="text-lg text-white">No Videos Available</Text>
+        <Text className="text-lg text-white">You watched all videos, no new videos Available.</Text>
         <Text className="text-lg text-white">
           Want to Upload your own{" "}
           <Link href={"/studio"} className="text-blue-500">
