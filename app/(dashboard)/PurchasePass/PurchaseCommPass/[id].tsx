@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  Dimensions,
-} from "react-native";
+import { View, Text, TouchableOpacity, Alert, Dimensions } from "react-native";
 import {
   X,
   Unlock,
@@ -85,9 +79,8 @@ const CommunityAccessDemo = () => {
   }, [id, token]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       <ThemedView style={{ flex: 1 }}>
-
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 pt-10">
           <TouchableOpacity onPress={() => router.back()}>
@@ -177,11 +170,12 @@ const CommunityAccessDemo = () => {
             className="rounded-full"
           >
             <TouchableOpacity
+              disabled={isLoading}
               onPress={() => {
                 initiateCommunityPass(userData?.founder);
                 router.replace(`/(payments)/CommunityPassBuy/${id}`);
               }}
-              className="px-8 py-4 rounded-full"
+              className={`px-8 py-4 rounded-full`}
             >
               <Text className="text-white text-lg font-medium">
                 Join at ₹{userData?.community_fee_amount}/month

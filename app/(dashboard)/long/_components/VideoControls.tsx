@@ -7,7 +7,6 @@ import {
   Dimensions,
 } from "react-native";
 import { PlayIcon, PauseIcon } from "lucide-react-native";
-import { usePlayerStore } from "@/store/usePlayerStore";
 import InteractOptions from "./interactOptions";
 import VideoDetails from "./VideoDetails";
 import { VideoItemType } from "@/types/VideosType";
@@ -16,7 +15,6 @@ import { useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVideosStore } from "@/store/useVideosStore";
 import { useOrientationStore } from "@/store/useOrientationStore";
-import VideoProgressBar from "./VideoProgressBar";
 
 type Props = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
@@ -72,8 +70,8 @@ const VideoControls = ({
   const { isLandscape } = useOrientationStore();
   let hideTimer = React.useRef<NodeJS.Timeout | number | null>(null);
   const insets = useSafeAreaInsets();
-  // const scaledOffset = PixelRatio.getPixelSizeForLayoutSize(12);
   const screenHeight = Dimensions.get("window").height;
+
   const bottomOffset =
     screenHeight < 700
       ? insets.bottom != 0
@@ -180,8 +178,16 @@ const VideoControls = ({
       setShowPlayPauseIcon(true);
 
       // every tap resets hide timer in landscape
+      // if (isLandscape) {
+      //   resetHideTimer();
+      // }
+
       if (isLandscape) {
         resetHideTimer();
+      } else {
+        clearHideTimer();
+        setShowControls(true); // portrait → always visible
+        showWallet(true);
       }
     } catch (e) {
       console.error("play/pause error:", e);
@@ -190,12 +196,12 @@ const VideoControls = ({
 
   return (
     <>
-      {(
+      {
         <Pressable
           style={styles.fullScreenPressable}
           onPress={handleTogglePlayPause}
         />
-      )}
+      }
       <View style={styles.iconContainer} pointerEvents="none">
         {showPlayPauseIcon &&
           (!playing ? (

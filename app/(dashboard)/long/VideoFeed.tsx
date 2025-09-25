@@ -244,7 +244,6 @@ const VideoFeed: React.FC = () => {
           key={item._id}
           videoData={item}
           isActive={index === visibleIndex}
-          isGlobalPlayer={false}
           containerHeight={adjustedHeight}
           showCommentsModal={showCommentsModal}
           setShowCommentsModal={setShowCommentsModal}

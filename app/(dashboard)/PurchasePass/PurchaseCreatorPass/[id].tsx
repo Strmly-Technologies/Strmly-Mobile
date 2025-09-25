@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   Alert,
-  Dimensions,
 } from "react-native";
 import {
   X,
@@ -16,14 +15,11 @@ import {
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import ThemedView from "@/components/ThemedView";
 import { useRoute } from "@react-navigation/native";
 import Constants from "expo-constants";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useGiftingStore } from "@/store/useGiftingStore";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const { height } = Dimensions.get("screen");
 
 const CreatorPassDemo = () => {
   const [userData, setUserData] = useState<any>(null);
@@ -182,13 +178,12 @@ const CreatorPassDemo = () => {
             className="rounded-full"
           >
             <TouchableOpacity
+              disabled={isLoading}
               onPress={() => router.replace(`/(payments)/CreatorPassBuy/${id}`)}
-              className="px-8 py-4 rounded-full"
+              className={`px-8 py-4 rounded-full`}
             >
               <Text className="text-white text-lg font-medium">
-                Join at ₹
-                {userData?.userDetails?.creator_profile?.creator_pass_price}
-                /month
+                Join at ₹{userData?.userDetails?.creator_profile?.creator_pass_price}/month
               </Text>
             </TouchableOpacity>
           </LinearGradient>

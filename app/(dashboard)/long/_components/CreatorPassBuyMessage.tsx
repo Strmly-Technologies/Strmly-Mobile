@@ -63,7 +63,7 @@ const CreatorPassBuyMessage = ({
 
           <Pressable style={styles.modalContainer}>
             <Text className="text-white text-lg text-center">
-              Successfully bought the Community Pass of {creator?.username}
+              Successfully bought the Creator Pass of {creator?.username}
             </Text>
           </Pressable>
 

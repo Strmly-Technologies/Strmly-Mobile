@@ -513,9 +513,9 @@ const VideoDetails = ({
                 setShowDropdown(false);
                 setShowBuyOption(false);
               }}
-              className="border border-white rounded-md px-2"
+              className="border border-black rounded-md px-2 pb-0.5 bg-black items-center justify-center"
             >
-              <Text className="font-semibold text-sm text-white">Paid</Text>
+              <Text className="font-semibold text-sm text-orange-500">Access</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -649,7 +649,7 @@ const VideoDetails = ({
                       <Text className="text-white text-[16px]">
                         ₹
                         {series && series?.type !== "Free"
-                          ? series?.price
+                          ? series?.price ?? videoAmount
                           : videoAmount}
                       </Text>
                     )}
@@ -740,7 +740,7 @@ const VideoDetails = ({
                                 />
                               </Text>
                             ) : (
-                              `₹${series?.price}`
+                              `₹${series?.price ?? videoAmount}`
                             )
                           ) : hasAccessPass || hasCreatorPass ? (
                             <Text className="text-[16px] text-green-600">

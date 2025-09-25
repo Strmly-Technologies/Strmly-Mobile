@@ -350,7 +350,7 @@ const VideosFeed: React.FC = () => {
   if (videos.length === 0) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
-        <Text className="text-lg text-white">You watched all videos, no new videos Available.</Text>
+        <Text className="text-lg text-white">You all caught up!</Text>
         <Text className="text-lg text-white">
           Want to Upload your own{" "}
           <Link href={"/studio"} className="text-blue-500">

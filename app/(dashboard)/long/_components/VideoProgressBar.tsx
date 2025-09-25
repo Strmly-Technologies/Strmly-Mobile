@@ -312,7 +312,6 @@ const VideoProgressBar = ({
       console.log(`Triggering 2% milestone for video ${videoId}`);
       saveVideoToHistory();
       incrementVideoViews();
-
     }
   }, [
     currentTime,
