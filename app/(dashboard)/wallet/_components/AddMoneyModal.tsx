@@ -20,10 +20,11 @@ interface AddMoneyModalProps {
   onClose: () => void;
   onSuccess: (amount: number) => void;
   onCreateOrder: (amount: number) => Promise<any>;
+  // change onVerifyPayment to accept platform-agnostic payload
   onVerifyPayment: (
-    orderIdOrTransactionId: string,
+    orderIdOrTransactionId: string, // either purchaseToken/transactionId depending on platform
     productId: string,
-    receiptOrToken: string,
+    receiptOrToken: string, // purchaseToken (android) or transactionReceipt (ios)
     amount: number
   ) => Promise<any>;
   onError?: (error: Error) => void;
@@ -80,6 +81,8 @@ const AddMoneyModal: React.FC<AddMoneyModalProps> = ({
           throw new Error("Incomplete iOS purchase response");
       }
 
+      // 4. call backend verification API with the right fields
+      // use purchaseToken for Android, transactionReceipt for iOS
       await onVerifyPayment(
         billingResult.orderIdAndroid ?? billingResult.transactionId ?? "",
         billingResult.productId,
