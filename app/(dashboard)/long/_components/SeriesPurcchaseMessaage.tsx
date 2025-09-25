@@ -66,7 +66,7 @@ const SeriesPurchaseMessage = ({
 
           <Pressable style={styles.modalContainer}>
             <Text className="text-white text-lg text-center">
-              Successfully bought the ₹{series?.title} series of {series?.created_by?.username}
+              Successfully bought the {series?.title} series of {series?.created_by?.username}
             </Text>
           </Pressable>
 

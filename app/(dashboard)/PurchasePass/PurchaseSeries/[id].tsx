@@ -173,16 +173,17 @@ const SeriesAccess = () => {
             className="rounded-full"
           >
             <TouchableOpacity
+              disabled={isLoading}
               onPress={() => {
                 initiateSeries(seriesData);
                 router.replace(
                   `/(payments)/SeriesPassBuy/${seriesData?.created_by?._id}`
                 );
               }}
-              className="px-8 py-4 rounded-full"
+              className={`px-8 py-4 rounded-full`}
             >
               <Text className="text-white text-lg font-medium">
-                Join at ₹{seriesData?.price}/series
+                Purchase at ₹{seriesData?.price}/series
               </Text>
             </TouchableOpacity>
           </LinearGradient>

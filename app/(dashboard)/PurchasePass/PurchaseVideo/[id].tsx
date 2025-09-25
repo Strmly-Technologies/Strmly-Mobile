@@ -60,10 +60,7 @@ const VideoAccess = () => {
   }, [id, token]);
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "black" }}
-      edges={[]}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       <View className="flex-1">
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 mt-12">
@@ -155,6 +152,7 @@ const VideoAccess = () => {
             className="rounded-full"
           >
             <TouchableOpacity
+              disabled={isLoading}
               onPress={() => {
                 initiateVideoAccess(videoData?.created_by, videoData.name, id);
                 router.replace({
@@ -162,7 +160,7 @@ const VideoAccess = () => {
                   params: { id: id },
                 });
               }}
-              className="px-8 py-4 rounded-full"
+              className={`px-8 py-4 rounded-full`}
             >
               <Text className="text-white text-lg font-medium">
                 Buy for ₹{videoData?.access.price}

@@ -102,16 +102,19 @@ const VideoPlayer = ({
   const [isInitialSeekComplete, setIsInitialSeekComplete] = useState(false);
   // ✅ NEW: Track if this is the first time becoming active for this video
   const [hasBeenActiveBefore, setHasBeenActiveBefore] = useState(false);
+  
+  // Full screen:
+  const { setOrientation, isLandscape } = useOrientationStore();
 
   const insets = useSafeAreaInsets();
   const bottomOffset =
     screenHeight < 700
       ? insets.bottom != 0
-        ? insets.bottom - 16
-        : 45
+        ? isGlobalPlayer ? insets.bottom/10 - 16 : insets.bottom - 16
+        : isGlobalPlayer ? 15 : 45
       : insets.bottom != 0
-        ? insets.bottom - 16
-        : 28;
+        ? isGlobalPlayer ? insets.bottom/10 - 16 : insets.bottom - 16
+        : isGlobalPlayer ? 5 : 28;
 
   // Local stats
   const [localStats, setLocalStats] = useState({
@@ -192,8 +195,6 @@ const VideoPlayer = ({
     isPurchasedSeries
   ]);
 
-  // Full screen:
-  const { setOrientation, isLandscape } = useOrientationStore();
 
   // Access check states
   const [fetchVideoDataAccess, setFetchVideoDataAccess] = useState(false);
@@ -735,7 +736,7 @@ const VideoPlayer = ({
                 : { bottom: bottomOffset }
               : isLandscape
                 ? { bottom: "20%" }
-                : { bottom: screenHeight > 700 ? -5 : 5 }
+                : { bottom: bottomOffset }
           }
         >
           {/* ✅ UPDATED: Pass onInitialSeekComplete callback */}

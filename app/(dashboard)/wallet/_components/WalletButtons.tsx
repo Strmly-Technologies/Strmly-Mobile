@@ -7,9 +7,9 @@ interface WalletButtonsProps {
   onWithdraw: () => void;
   onCreateOrder: (amount: number) => Promise<any>;
   onVerifyPayment: (
-    orderId: string,
-    paymentId: string,
-    purchaseToken: string,
+    orderIdOrTransactionId: string,
+    productId: string,
+    receiptOrToken: string,
     amount: number
   ) => Promise<any>;
   onRefreshWallet: () => void;

@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Image,
   Alert,
-  Dimensions,
 } from "react-native";
 import { ArrowLeft, MoreVertical, Play, Film, User } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -22,8 +21,6 @@ import { getProfilePhotoUrl } from "@/utils/profileUtils";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { VideoItemType } from "@/types/VideosType";
 import { useVideosStore } from "@/store/useVideosStore";
-
-const { height } = Dimensions.get("screen");
 
 export default function AccessPage() {
   const [activeTab, setActiveTab] = useState<"content" | "series" | "creator">(

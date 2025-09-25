@@ -102,6 +102,8 @@ const SeriesDetailsScreen: React.FC<SeriesDetailsScreenProps> = ({
   const params = useLocalSearchParams();
   const seriesId = propSeriesId || (params.seriesId as string);
 
+  const {user} = useAuthStore();
+
   // Helper function for back navigation
   const handleBack = () => {
     if (onBack) {
@@ -133,7 +135,7 @@ const SeriesDetailsScreen: React.FC<SeriesDetailsScreenProps> = ({
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const {setVideoType, setVideosInZustand} = useVideosStore();
+  const { setVideoType, setVideosInZustand } = useVideosStore();
 
   const fetchSeriesDetails = async (showLoadingIndicator = true) => {
     try {
@@ -163,7 +165,7 @@ const SeriesDetailsScreen: React.FC<SeriesDetailsScreenProps> = ({
       const result = await response.json();
 
       console.log("seres by id..");
-      
+
       if (response.ok && result.data) {
         setSeriesData(result.data);
         setVideosInZustand(result.data.episodes);
@@ -216,12 +218,12 @@ const SeriesDetailsScreen: React.FC<SeriesDetailsScreenProps> = ({
       episode.creatorPassDetails
     );
 
-    setVideoType('series');
+    setVideoType("series");
     const currentIndex = allEpisodes.findIndex((ep) => ep._id === episode._id);
     router.push({
-      pathname: '/(dashboard)/long/GlobalVideoPlayer',
-      params: {videoType: 'series', startIndex: currentIndex}
-    })
+      pathname: "/(dashboard)/long/GlobalVideoPlayer",
+      params: { videoType: "series", startIndex: currentIndex },
+    });
   };
 
   if (loading) {
@@ -275,10 +277,8 @@ const SeriesDetailsScreen: React.FC<SeriesDetailsScreenProps> = ({
 
   return (
     <View className="flex-1 bg-black">
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
-
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 mt-12">
+      <View className="flex-row items-center justify-between px-4 py-3">
         <TouchableOpacity onPress={handleBack}>
           <Ionicons name="chevron-back" size={24} color="white" />
         </TouchableOpacity>
@@ -301,35 +301,37 @@ const SeriesDetailsScreen: React.FC<SeriesDetailsScreenProps> = ({
         }
       >
         {/* Series Info */}
-        <View className="px-4 py-6">
-          <View className="flex-row items-center justify-between mb-4">
-            <View>
-              <Text className="text-white text-lg font-medium">
-                Total episode:{" "}
-                {(seriesData.total_episodes || 0).toString().padStart(2, "0")}
-              </Text>
-              <Text className="text-gray-400 text-sm">
-                Launch on {formatDate(seriesData.release_date)}
-              </Text>
+        {seriesData.created_by._id === user?.id && (
+          <View className="px-4 py-6">
+            <View className="flex-row items-center justify-between mb-4">
+              <View>
+                <Text className="text-white text-lg font-medium">
+                  Total episode:{" "}
+                  {(seriesData.total_episodes || 0).toString().padStart(2, "0")}
+                </Text>
+                <Text className="text-gray-400 text-sm">
+                  Launch on {formatDate(seriesData.release_date)}
+                </Text>
+              </View>
             </View>
-          </View>
 
-          {/* Analytics */}
-          <View className="flex-row justify-between mb-8">
-            <View className="items-center">
-              <Text className="text-white text-2xl font-bold">
-                {formatNumber(seriesData.analytics?.total_views || 0)}
-              </Text>
-              <Text className="text-gray-400 text-sm">Total view</Text>
-            </View>
-            <View className="items-center">
-              <Text className="text-white text-2xl font-bold">
-                ₹{formatNumber(seriesData.total_earned || 0)}
-              </Text>
-              <Text className="text-gray-400 text-sm">Total earning</Text>
+            {/* Analytics */}
+            <View className="flex-row justify-between mb-8">
+              <View className="items-center">
+                <Text className="text-white text-2xl font-bold">
+                  {formatNumber(seriesData.analytics?.total_views || 0)}
+                </Text>
+                <Text className="text-gray-400 text-sm">Total view</Text>
+              </View>
+              <View className="items-center">
+                <Text className="text-white text-2xl font-bold">
+                  ₹{formatNumber(seriesData.total_earned || 0)}
+                </Text>
+                <Text className="text-gray-400 text-sm">Total earning</Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
 
         {/* Episodes List */}
         <View className="px-4">
