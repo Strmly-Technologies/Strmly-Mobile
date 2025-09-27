@@ -499,7 +499,7 @@ const VideoProgressBar = ({
     }
 
     // For premium videos with access (purchased or creator pass): allow seeking anywhere
-    if (userHasAccess) {
+    if (userHasAccess || hasCreatorPassOfVideoOwner || hasAccess) {
       return true;
     }
 
