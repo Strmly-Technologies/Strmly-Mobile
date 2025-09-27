@@ -115,7 +115,7 @@ const VideoDetails = ({
   const [isFollowCommunityLoading, setIsFollowCommunityLoading] =
     useState<boolean>(false);
 
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { initiateGifting } = useGiftingStore();
 
   const { setVideosInZustand, videoType, setVideoType } = useVideosStore();
@@ -515,7 +515,7 @@ const VideoDetails = ({
               }}
               className="border border-black rounded-md px-2 pb-0.5 bg-black items-center justify-center"
             >
-              <Text className="font-semibold text-sm text-orange-500">Access</Text>
+              <Text className={`font-semibold text-sm ${createdBy._id === user?.id || hasAccessPass || hasCreatorPass ? "text-green-500" : "text-orange-500"}`}>{createdBy._id === user?.id || hasAccessPass || hasCreatorPass ? "Active" : "No Access"}</Text>
             </TouchableOpacity>
           </View>
         )}

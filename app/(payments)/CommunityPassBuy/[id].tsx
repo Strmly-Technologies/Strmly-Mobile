@@ -155,8 +155,11 @@ const CommunityPassBuy = () => {
         }
       );
 
-      if (!response.ok) throw new Error("Failed to provide community pass");
       const data = await response.json();
+      if (!response.ok) {
+        // Show backend error message
+        throw new Error(data.error || "Failed to provide community pass");
+      }
       console.log("purchase community pass data---------------", data);
       completePass(userData?.community_fee_amount);
       router.back();
@@ -208,7 +211,10 @@ const CommunityPassBuy = () => {
         {/* Top section */}
         <View className="mt-5">
           <CreatorInfo
-            profile={userData?.founder?.profile_photo || CONFIG.DEFAULT_COMMUNITY_PROFILE_PHOTO}
+            profile={
+              userData?.founder?.profile_photo ||
+              CONFIG.DEFAULT_COMMUNITY_PROFILE_PHOTO
+            }
             name={userData?.founder?.name}
             username={userData?.founder?.username}
           />
