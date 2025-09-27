@@ -23,6 +23,8 @@ import { useVideosStore } from "@/store/useVideosStore";
 
 type VideoDetailsProps = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
+  haveAccess: React.Dispatch<React.SetStateAction<boolean>>;
+  checkAccess: React.Dispatch<React.SetStateAction<boolean>>;
   setWantToBuyVideo: React.Dispatch<React.SetStateAction<boolean>>;
 
   videoId: string;
@@ -80,6 +82,8 @@ type VideoDetailsProps = {
 
 const VideoDetails = ({
   haveCreator,
+  haveAccess,
+  checkAccess,
   setWantToBuyVideo,
   videoId,
   type,
@@ -96,7 +100,7 @@ const VideoDetails = ({
   isFullScreen,
   onEpisodeChange,
   setShowBuyOption,
-  showBuyOption
+  showBuyOption,
 }: VideoDetailsProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedEpisodeIndex, setSelectedEpisodeIndex] = useState(0);
@@ -162,9 +166,8 @@ const VideoDetails = ({
             "has access pass",
             data.data?.accessData && data.data?.accessData.content_type
           );
-          setHasAccessPass(
-            data.data?.accessData ? data.data.accessData.content_type : null
-          );
+          setHasAccessPass(data.data?.accessData ? data.data.accessData.content_type : null);
+          haveAccess(data.data?.accessData?.content_type != undefined);
           // if(data.data?.accessData && data.data.accessData.content_type != null){
           // }
           console.log(
@@ -179,6 +182,8 @@ const VideoDetails = ({
           //     ? error.message
           //     : "An unknown error occurred while checking video access."
           // );
+        } finally{
+          checkAccess(true);
         }
       };
 
@@ -456,7 +461,7 @@ const VideoDetails = ({
               ) : (
                 <Image
                   source={require("../../../../assets/images/plus.png")}
-                  className="size-5" 
+                  className="size-5"
                 />
               )}
             </Pressable>
@@ -515,7 +520,13 @@ const VideoDetails = ({
               }}
               className="border border-black rounded-md px-2 pb-0.5 bg-black items-center justify-center"
             >
-              <Text className={`font-semibold text-sm ${createdBy._id === user?.id || hasAccessPass || hasCreatorPass ? "text-green-500" : "text-orange-500"}`}>{createdBy._id === user?.id || hasAccessPass || hasCreatorPass ? "Active" : "No Access"}</Text>
+              <Text
+                className={`font-semibold text-sm ${createdBy._id === user?.id || hasAccessPass || hasCreatorPass ? "text-green-500" : "text-orange-500"}`}
+              >
+                {createdBy._id === user?.id || hasAccessPass || hasCreatorPass
+                  ? "Active"
+                  : "No Access"}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -649,7 +660,7 @@ const VideoDetails = ({
                       <Text className="text-white text-[16px]">
                         ₹
                         {series && series?.type !== "Free"
-                          ? series?.price ?? videoAmount
+                          ? (series?.price ?? videoAmount)
                           : videoAmount}
                       </Text>
                     )}

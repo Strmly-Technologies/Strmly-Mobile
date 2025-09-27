@@ -199,6 +199,7 @@ const VideoPlayer = ({
   // Access check states
   const [fetchVideoDataAccess, setFetchVideoDataAccess] = useState(false);
   const [accessChecked, setAccessChecked] = useState(false);
+  const [accessCheckedAPI, setAccessCheckedAPI] = useState(false);
   const [canPlayVideo, setCanPlayVideo] = useState(false);
 
   // Create player with proper cleanup
@@ -702,8 +703,9 @@ const VideoPlayer = ({
 
       <VideoControls
         haveCreatorPass={haveCreator}
-        haveAccessPass={haveAccess}
+        haveAccess={setHaveAccess}
         haveCreator={setCheckCreatorPass}
+        checkAccess={setAccessCheckedAPI}
         showBuyOption={showBuyOption}
         setShowBuyOption={setShowBuyOption}
         showWallet={setShowWallet}
@@ -726,7 +728,7 @@ const VideoPlayer = ({
         onStatsUpdate={handleStatsUpdate}
       />
 
-      {showWallet && (
+      {showWallet && accessCheckedAPI && (
         <View
           className={`absolute left-0 right-0 z-10`}
           style={

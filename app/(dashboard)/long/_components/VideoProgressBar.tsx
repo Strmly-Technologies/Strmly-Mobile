@@ -35,7 +35,7 @@ type Props = {
   access: AccessType;
   onInitialSeekComplete?: () => void;
   isVideoOwner?: boolean;
-  hasAccess?: boolean;
+  hasAccess: boolean;
   showBuyOption: React.Dispatch<React.SetStateAction<boolean>>;
   isGlobalPlayer?: boolean;
   accessVersion?: number;
@@ -57,8 +57,8 @@ const VideoProgressBar = ({
   access,
   showBuyOption,
   onInitialSeekComplete,
-  isVideoOwner = false,
-  hasAccess = false,
+  isVideoOwner,
+  hasAccess,
   isGlobalPlayer = false,
   accessVersion,
 }: Props) => {
@@ -483,6 +483,7 @@ const VideoProgressBar = ({
   // ✅ Validate seek position based on access permissions
   const validateSeekTime = (newTimeSeconds: number): boolean => {
     // If user is the video owner, allow seeking anywhere
+    console.log("Validating seek to:", hasAccess);
     if (isVideoOwner) {
       return true;
     }
@@ -492,6 +493,7 @@ const VideoProgressBar = ({
       access?.accessType === "free" ||
       (initialStartTime === 0 && endTime >= duration);
     const userHasAccess = hasAccess || access?.isPurchased; // This includes video purchase or creator pass
+    console.log('hasAccess:', hasAccess, 'isPurchased:', access?.isPurchased, 'userHasAccess:', userHasAccess);
 
     // For free videos: allow seeking anywhere
     if (isFreeVideo) {
@@ -499,7 +501,7 @@ const VideoProgressBar = ({
     }
 
     // For premium videos with access (purchased or creator pass): allow seeking anywhere
-    if (userHasAccess || hasCreatorPassOfVideoOwner || hasAccess) {
+    if (userHasAccess || hasCreatorPassOfVideoOwner) {
       return true;
     }
 

@@ -18,6 +18,8 @@ import { useOrientationStore } from "@/store/useOrientationStore";
 
 type Props = {
   haveCreator: React.Dispatch<React.SetStateAction<boolean>>;
+  haveAccess: React.Dispatch<React.SetStateAction<boolean>>;
+  checkAccess: React.Dispatch<React.SetStateAction<boolean>>;
   haveCreatorPass: boolean;
   haveAccessPass: boolean;
   accessVersion: number;
@@ -45,6 +47,8 @@ type Props = {
 
 const VideoControls = ({
   haveCreator,
+  haveAccess,
+  checkAccess,
   haveCreatorPass,
   haveAccessPass,
   accessVersion,
@@ -268,6 +272,8 @@ const VideoControls = ({
         >
           <VideoDetails
             haveCreator={haveCreator}
+            haveAccess={haveAccess}
+            checkAccess={checkAccess}
             setWantToBuyVideo={setWantToBuyVideo}
             videoId={videoData._id}
             type={videoData.type}
