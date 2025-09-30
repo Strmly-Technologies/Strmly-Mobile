@@ -97,12 +97,13 @@ export const createWalletLoadOrder = async (token: string, amount: number) => {
 
 export const verifyWalletLoad = async (
   token: string, 
-  orderIdOrTransactionId: string, 
+  // orderIdOrTransactionId: string, 
   productId: string,
   receiptOrToken: string,
   amount: number,
+  platform: string
 ) => {
-  console.log('Verifying wallet load with:', { orderIdOrTransactionId, productId, receiptOrToken, amount });
+  console.log('Verifying wallet load with:', { productId, receiptOrToken, amount, platform });
   const res = await fetch(`${API_BASE_URL}/wallet/load/verify`, {
     method: "POST",
     headers: {
@@ -112,8 +113,9 @@ export const verifyWalletLoad = async (
     body: JSON.stringify({ 
       google_purchase_token: receiptOrToken,
       google_product_id: productId,
-      google_order_id: orderIdOrTransactionId,
+      // google_order_id: orderIdOrTransactionId,
       amount,
+      platform
     })
   });
 

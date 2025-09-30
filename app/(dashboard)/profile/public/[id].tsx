@@ -283,9 +283,9 @@ export default function PublicProfilePageWithId() {
       //     ? "You unFollowed this creator"
       //     : "You are now Following this creator"
       // );
-    } catch (error) {
+    } catch (error: { message: string } | any) {
       console.log(error);
-      Alert.alert("An unknown error occurred.");
+      Alert.alert(error.message || "An unknown error occurred.");
       // Alert.alert(
       //   "Error",
       //   error instanceof Error

@@ -78,11 +78,8 @@ const SeriesAccess = () => {
   }, [token, id]);
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "black" }} edges={[]}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
       <View className="flex-1">
-
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3">
           <TouchableOpacity onPress={() => router.back()}>
@@ -166,27 +163,31 @@ const SeriesAccess = () => {
           </View>
 
           {/* Join Button */}
-          <LinearGradient
-            colors={["#000000", "#0a0a0a", "#1a1a1a"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="rounded-full"
-          >
-            <TouchableOpacity
-              disabled={isLoading}
-              onPress={() => {
-                initiateSeries(seriesData);
-                router.replace(
-                  `/(payments)/SeriesPassBuy/${seriesData?.created_by?._id}`
-                );
-              }}
-              className={`px-8 py-4 rounded-full`}
-            >
-              <Text className="text-white text-lg font-medium">
-                Purchase at ₹{seriesData?.price}/series
-              </Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          {!isLoading && (
+            <View className="animate-bounce">
+              <LinearGradient
+                colors={["#000000", "#0a0a0a", "#1a1a1a"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="rounded-full"
+              >
+                <TouchableOpacity
+                  disabled={isLoading}
+                  onPress={() => {
+                    initiateSeries(seriesData);
+                    router.replace(
+                      `/(payments)/SeriesPassBuy/${seriesData?.created_by?._id}`
+                    );
+                  }}
+                  className={`px-8 py-4 rounded-full`}
+                >
+                  <Text className="text-white text-lg font-medium">
+                    Purchase at ₹{seriesData?.price}/series
+                  </Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>
