@@ -145,28 +145,36 @@ const VideoAccess = () => {
           </View>
 
           {/* Join Button */}
-          <LinearGradient
-            colors={["#000000", "#0a0a0a", "#1a1a1a"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="rounded-full"
-          >
-            <TouchableOpacity
-              disabled={isLoading}
-              onPress={() => {
-                initiateVideoAccess(videoData?.created_by, videoData.name, id);
-                router.replace({
-                  pathname: `/(payments)/VideoBuy/[id]`,
-                  params: { id: id },
-                });
-              }}
-              className={`px-8 py-4 rounded-full`}
-            >
-              <Text className="text-white text-lg font-medium">
-                Buy for ₹{videoData?.access.price}
-              </Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          {!isLoading && (
+            <View className="animate-bounce">
+              <LinearGradient
+                colors={["#000000", "#0a0a0a", "#1a1a1a"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="rounded-full"
+              >
+                <TouchableOpacity
+                  disabled={isLoading}
+                  onPress={() => {
+                    initiateVideoAccess(
+                      videoData?.created_by,
+                      videoData.name,
+                      id
+                    );
+                    router.replace({
+                      pathname: `/(payments)/VideoBuy/[id]`,
+                      params: { id: id },
+                    });
+                  }}
+                  className={`px-8 py-4 rounded-full`}
+                >
+                  <Text className="text-white text-lg font-medium">
+                    Buy for ₹{videoData?.access.price}
+                  </Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>

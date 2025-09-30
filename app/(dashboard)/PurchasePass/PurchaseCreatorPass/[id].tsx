@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import {
   X,
   Unlock,
@@ -84,10 +79,8 @@ const CreatorPassDemo = () => {
   }, [token, id]);
 
   return (
-    <SafeAreaView style={{ flex:1, backgroundColor: "black" }} edges={[]}>
-      <View
-        style={{ flex: 1 }}
-      >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+      <View style={{ flex: 1 }}>
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 pt-10 py-3">
           <TouchableOpacity onPress={() => router.back()}>
@@ -171,22 +164,30 @@ const CreatorPassDemo = () => {
           </View>
 
           {/* Join Button */}
-          <LinearGradient
-            colors={["#000000", "#0a0a0a", "#1a1a1a"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="rounded-full"
-          >
-            <TouchableOpacity
-              disabled={isLoading}
-              onPress={() => router.replace(`/(payments)/CreatorPassBuy/${id}`)}
-              className={`px-8 py-4 rounded-full`}
-            >
-              <Text className="text-white text-lg font-medium">
-                Join at ₹{userData?.userDetails?.creator_profile?.creator_pass_price}/month
-              </Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          {!isLoading && (
+            <View className="animate-bounce">
+              <LinearGradient
+                colors={["#000000", "#0a0a0a", "#1a1a1a"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="rounded-full"
+              >
+                <TouchableOpacity
+                  disabled={isLoading}
+                  onPress={() =>
+                    router.replace(`/(payments)/CreatorPassBuy/${id}`)
+                  }
+                  className={`px-8 py-4 rounded-full`}
+                >
+                  <Text className="text-white text-lg font-medium">
+                    Join at ₹
+                    {userData?.userDetails?.creator_profile?.creator_pass_price}
+                    /month
+                  </Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>

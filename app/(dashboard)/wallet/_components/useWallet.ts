@@ -71,11 +71,11 @@ export const useWallet = (token: string) => {
   };
 
   // Verify Google Play Billing payment
-  const verifyPayment = async (orderIdOrTransactionId: string, productId: string, receiptOrToken: string, amount: number) => {
+  const verifyPayment = async (productId: string, receiptOrToken: string, amount: number, platform: string) => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await verifyWalletLoad(token, orderIdOrTransactionId, productId, receiptOrToken, amount);
+      const response = await verifyWalletLoad(token, productId, receiptOrToken, amount, platform);
       await fetchWalletDetails(); // Refresh wallet data
       return response.transaction;
     } catch (err: any) {

@@ -51,10 +51,9 @@ export const initiateGooglePlayBilling = async (
     result.purchaseToken = purchase.purchaseToken;
     // optional/android-specific fields
     result.signatureAndroid = (purchase as any).signatureAndroid ?? (purchase as any).signature ?? undefined;
-    result.orderIdAndroid = (purchase as any).orderId ?? undefined;
   } else {
     // iOS
-    if (!purchase.transactionReceipt && !purchase.purchaseToken) {
+    if (!purchase.transactionReceipt) {
       // iOS uses transactionReceipt or transactionId for server verification
       throw new Error("iOS purchase missing transactionReceipt");
     }

@@ -12,7 +12,10 @@ import VideoDetails from "./VideoDetails";
 import { VideoItemType } from "@/types/VideosType";
 import { VideoPlayer } from "expo-video";
 import { useFocusEffect } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useVideosStore } from "@/store/useVideosStore";
 import { useOrientationStore } from "@/store/useOrientationStore";
 
@@ -79,10 +82,10 @@ const VideoControls = ({
   const bottomOffset =
     screenHeight < 700
       ? insets.bottom != 0
-        ? insets.bottom - 16
+        ? insets.bottom
         : 45
       : insets.bottom != 0
-        ? insets.bottom - 16
+        ? insets.bottom
         : 28;
   console.log("bottom insets:", insets.bottom, screenHeight);
 
@@ -199,102 +202,103 @@ const VideoControls = ({
   };
 
   return (
-    <>
-      {
-        <Pressable
-          style={styles.fullScreenPressable}
-          onPress={handleTogglePlayPause}
-        />
-      }
-      <View style={styles.iconContainer} pointerEvents="none">
-        {showPlayPauseIcon &&
-          (!playing ? (
-            <PlayIcon size={40} color="white" />
-          ) : (
-            <PauseIcon size={40} color="white" />
-          ))}
-        {buffering && !showPlayPauseIcon && (
-          <ActivityIndicator size="large" color="white" />
-        )}
-      </View>
-      {showControls && (
-        <View
-          style={[
-            isGlobalPlayer
-              ? isLandscape
-                ? styles.interactFullScreen
-                : styles.interactGlobal
-              : isLandscape
-                ? styles.interactFullScreen
-                : styles.interact,
-          ]}
-        >
-          <InteractOptions
-            videoId={videoData._id}
-            name={videoData.name}
-            creator={videoData.created_by}
-            likes={videoData.likes}
-            gifts={videoData.gifts}
-            shares={videoData.shares}
-            comments={videoData.comments?.length}
-            onCommentPress={
-              setShowCommentsModal
-                ? () => {
-                    setShowCommentsModal(true);
-                    onCommentsModalOpen?.(); // Trigger refresh when modal opens
-                  }
-                : undefined
-            }
-            onCommentUpdate={(newCount) => {
-              if (onStatsUpdate) {
-                onStatsUpdate({ comments: newCount });
+    <SafeAreaView edges={screenHeight > 850 ? ['bottom'] : []}>
+      <View className="h-full w-full">
+        {
+          <Pressable
+            style={styles.fullScreenPressable}
+            onPress={handleTogglePlayPause}
+          />
+        }
+        <View style={styles.iconContainer} pointerEvents="none">
+          {showPlayPauseIcon &&
+            (!playing ? (
+              <PlayIcon size={40} color="white" />
+            ) : (
+              <PauseIcon size={40} color="white" />
+            ))}
+          {buffering && !showPlayPauseIcon && (
+            <ActivityIndicator size="large" color="white" />
+          )}
+        </View>
+        {showControls && (
+          <View
+            style={[
+              isGlobalPlayer
+                ? isLandscape
+                  ? styles.interactFullScreen
+                  : styles.interactGlobal
+                : isLandscape
+                  ? styles.interactFullScreen
+                  : styles.interact
+            ]}
+          >
+            <InteractOptions
+              videoId={videoData._id}
+              name={videoData.name}
+              creator={videoData.created_by}
+              likes={videoData.likes}
+              gifts={videoData.gifts}
+              shares={videoData.shares}
+              comments={videoData.comments?.length}
+              onCommentPress={
+                setShowCommentsModal
+                  ? () => {
+                      setShowCommentsModal(true);
+                      onCommentsModalOpen?.(); // Trigger refresh when modal opens
+                    }
+                  : undefined
               }
-            }}
-            // onShareUpdate={(newShares, isShared) =>
-            //   onStatsUpdate?.({ shares: newShares })
-            // }
-            // onGiftUpdate={(newGifts) => onStatsUpdate?.({ gifts: newGifts })}
-          />
-        </View>
-      )}
+              onCommentUpdate={(newCount) => {
+                if (onStatsUpdate) {
+                  onStatsUpdate({ comments: newCount });
+                }
+              }}
+              // onShareUpdate={(newShares, isShared) =>
+              //   onStatsUpdate?.({ shares: newShares })
+              // }
+              // onGiftUpdate={(newGifts) => onStatsUpdate?.({ gifts: newGifts })}
+            />
+          </View>
+        )}
 
-      {showControls && (
-        <View
-          style={[
-            isGlobalPlayer
-              ? isLandscape
-                ? styles.detailsFullScreen
-                : { ...styles.detailsGlobal, bottom: bottomOffset - 10 }
-              : isLandscape
-                ? styles.detailsFullScreen
-                : { ...styles.details, bottom: bottomOffset + 20 },
-          ]}
-        >
-          <VideoDetails
-            haveCreator={haveCreator}
-            haveAccess={haveAccess}
-            checkAccess={checkAccess}
-            setWantToBuyVideo={setWantToBuyVideo}
-            videoId={videoData._id}
-            type={videoData.type}
-            videoAmount={videoData.amount}
-            is_monetized={videoData.is_monetized}
-            name={videoData.name}
-            series={videoData?.series}
-            is_following_creator={videoData.is_following_creator}
-            creatorPass={videoData?.creatorPassDetails}
-            episode_number={videoData?.episode_number}
-            createdBy={videoData?.created_by}
-            community={videoData?.community}
-            onToggleFullScreen={onToggleFullScreen}
-            onEpisodeChange={onEpisodeChange}
-            showBuyOption={showBuyOption}
-            setShowBuyOption={setShowBuyOption}
-          />
-        </View>
-      )}
+        {showControls && (
+          <View
+            style={[
+              isGlobalPlayer
+                ? isLandscape
+                  ? styles.detailsFullScreen
+                  : { ...styles.detailsGlobal, bottom: screenHeight > 850 ? bottomOffset < 35 ? bottomOffset*2 : bottomOffset : 15 }
+                : isLandscape
+                  ? styles.detailsFullScreen
+                  : { ...styles.details, bottom: screenHeight > 850 ? bottomOffset < 35 ? bottomOffset*3+20 : bottomOffset*2 : 50 },
+            ]}
+          >
+            <VideoDetails
+              haveCreator={haveCreator}
+              haveAccess={haveAccess}
+              checkAccess={checkAccess}
+              setWantToBuyVideo={setWantToBuyVideo}
+              videoId={videoData._id}
+              type={videoData.type}
+              videoAmount={videoData.amount}
+              is_monetized={videoData.is_monetized}
+              name={videoData.name}
+              series={videoData?.series}
+              is_following_creator={videoData.is_following_creator}
+              creatorPass={videoData?.creatorPassDetails}
+              episode_number={videoData?.episode_number}
+              createdBy={videoData?.created_by}
+              community={videoData?.community}
+              onToggleFullScreen={onToggleFullScreen}
+              onEpisodeChange={onEpisodeChange}
+              showBuyOption={showBuyOption}
+              setShowBuyOption={setShowBuyOption}
+            />
+          </View>
+        )}
 
-      {/* {showControls && (
+        {/* {showControls && (
         <View
           className={`absolute left-0 right-0 z-10`}
           style={[
@@ -322,7 +326,8 @@ const VideoControls = ({
           />
         </View>
       )} */}
-    </>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -333,14 +338,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  interact: { position: "absolute", bottom: "20%", right: 10, zIndex: 5 },
+  interact: { position: "absolute", bottom: '15%', right: 10, zIndex: 5 },
   interactFullScreen: {
     position: "absolute",
     bottom: "18%",
     right: 15,
     zIndex: 5,
   },
-  interactGlobal: { position: "absolute", bottom: "15%", right: 10, zIndex: 5 },
+  interactGlobal: { position: "absolute", bottom: '15%', right: 10, zIndex: 5 },
   details: {
     position: "absolute",
     width: "100%",
@@ -350,15 +355,14 @@ const styles = StyleSheet.create({
   },
   detailsFullScreen: {
     position: "absolute",
-    bottom: "0%",
     width: "100%",
+    bottom: 0,
     paddingHorizontal: 20,
     marginBottom: 20,
     zIndex: 5,
   },
   detailsGlobal: {
     position: "absolute",
-    bottom: 0,
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 10,

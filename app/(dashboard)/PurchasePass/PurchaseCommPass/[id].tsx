@@ -163,25 +163,29 @@ const CommunityAccessDemo = () => {
           </View>
 
           {/* Join Button */}
-          <LinearGradient
-            colors={["#000000", "#0a0a0a", "#1a1a1a"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="rounded-full"
-          >
-            <TouchableOpacity
-              disabled={isLoading}
-              onPress={() => {
-                initiateCommunityPass(userData?.founder);
-                router.replace(`/(payments)/CommunityPassBuy/${id}`);
-              }}
-              className={`px-8 py-4 rounded-full`}
-            >
-              <Text className="text-white text-lg font-medium">
-                Join at ₹{userData?.community_fee_amount}/month
-              </Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          {!isLoading && (
+            <View className="animate-bounce">
+              <LinearGradient
+                colors={["#000000", "#0a0a0a", "#1a1a1a"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="rounded-full"
+              >
+                <TouchableOpacity
+                  disabled={isLoading}
+                  onPress={() => {
+                    initiateCommunityPass(userData?.founder);
+                    router.replace(`/(payments)/CommunityPassBuy/${id}`);
+                  }}
+                  className={`px-8 py-4 rounded-full`}
+                >
+                  <Text className="text-white text-lg font-medium">
+                    Join at ₹{userData?.community_fee_amount}/month
+                  </Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+          )}
         </View>
       </ThemedView>
     </SafeAreaView>
