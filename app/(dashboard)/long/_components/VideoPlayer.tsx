@@ -156,6 +156,11 @@ const VideoPlayer = ({
   const VIDEO_HEIGHT = containerHeight || screenHeight;
   const isFocused = useIsFocused();
 
+  // Access check states
+  const [fetchVideoDataAccess, setFetchVideoDataAccess] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const [accessCheckedAPI, setAccessCheckedAPI] = useState(false);
+  const [canPlayVideo, setCanPlayVideo] = useState(false);
   // FIX: Update local stats when videoData changes (e.g., when switching videos)
   useEffect(() => {
     setLocalStats({
@@ -217,7 +222,6 @@ const VideoPlayer = ({
   const [accessChecked, setAccessChecked] = useState(false);
   const [accessCheckedAPI, setAccessCheckedAPI] = useState(false);
   const [canPlayVideo, setCanPlayVideo] = useState(false);
-
   // Create player with proper cleanup
   const player = useVideoPlayer(videoData?.videoUrl || "", (p) => {
     p.loop = true;
@@ -750,6 +754,8 @@ const VideoPlayer = ({
           haveAccess={setHaveAccess}
           haveCreator={setCheckCreatorPass}
           checkAccess={setAccessCheckedAPI}
+          isPurchasedVideo={isVideoPurchased}
+          isPurchasedSeries={isPurchasedSeries}
           showBuyOption={showBuyOption}
           setShowBuyOption={setShowBuyOption}
           showWallet={setShowWallet}
@@ -779,27 +785,46 @@ const VideoPlayer = ({
               !isGlobalPlayer
                 ? isLandscape
                   ? { bottom: "20%" }
-                  : { bottom: screenHeight > 850 ? bottomOffset < 35 ? insets.bottom !=0 ? bottomOffset*3+25 : 60 : bottomOffset*2+25 : insets.bottom > 0 ? bottomOffset-12 : screenHeight > 650 ? 28 : 45 }
+                  : {
+                      bottom:
+                        screenHeight > 850
+                          ? bottomOffset < 35
+                            ? insets.bottom != 0
+                              ? bottomOffset * 3 + 25
+                              : 60
+                            : bottomOffset * 2 + 25
+                          : insets.bottom > 0
+                            ? bottomOffset - 12
+                            : screenHeight > 650
+                              ? 28
+                              : 45,
+                    }
                 : isLandscape
                   ? { bottom: "20%" }
-                  : { bottom: screenHeight > 850 ? bottomOffset + 30 : screenHeight < 650 ? 5 : -5 }
+                  : {
+                      bottom:
+                        screenHeight > 850
+                          ? bottomOffset + 30
+                          : screenHeight < 650
+                            ? 5
+                            : -5,
+                    }
             }
           >
-          <VideoProgressBar
-            player={player}
-            isActive={isActive}
-            videoId={videoData._id}
-            duration={videoData.duration || 0}
-            access={videoData.access}
-            showBuyOption={setShowBuyOption}
-            hasCreatorPassOfVideoOwner={videoData.hasCreatorPassOfVideoOwner}
-            onInitialSeekComplete={handleInitialSeekComplete}
-            isVideoOwner={videoData.created_by._id === user?.id}
-            hasAccess={
-              haveAccess || haveCreator || videoData.access.isPurchased
-            }
-            accessVersion={accessVersion}
-          />
+            <VideoProgressBar
+              player={player}
+              isActive={isActive}
+              videoId={videoData._id}
+              duration={videoData.duration || 0}
+              access={videoData.access}
+              showBuyOption={setShowBuyOption}
+              hasCreatorPassOfVideoOwner={videoData.hasCreatorPassOfVideoOwner}
+              onInitialSeekComplete={handleInitialSeekComplete}
+              isVideoOwner={videoData.created_by._id === user?.id}
+              haveAccess={haveAccess}
+              haveCreator={haveCreator}
+              accessVersion={accessVersion}
+            />
           </View>
         )}
       </View>

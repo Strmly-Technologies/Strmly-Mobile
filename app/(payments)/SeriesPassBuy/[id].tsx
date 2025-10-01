@@ -131,7 +131,7 @@ const SeriesPassBuy = () => {
       return;
     }
     
-    if (walletInfo && walletInfo.balance === series?.price) {
+    if (series && walletInfo && walletInfo.balance < series?.price) {
       Alert.alert("You don't have sufficient balance");
       return;
     }
