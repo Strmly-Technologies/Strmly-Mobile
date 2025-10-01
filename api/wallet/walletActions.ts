@@ -111,8 +111,8 @@ export const verifyWalletLoad = async (
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ 
-      google_purchase_token: receiptOrToken,
-      google_product_id: productId,
+      receiptOrToken: receiptOrToken,
+      product_id: productId,
       // google_order_id: orderIdOrTransactionId,
       amount,
       platform
@@ -122,7 +122,8 @@ export const verifyWalletLoad = async (
   console.log('Verify wallet load response status:', res);
   if (!res.ok) {
     const error = await res.json();
-    throw new Error(error.message || "Google Play Billing verification failed");
+    console.log('error', error)
+    throw new Error(error.error || "Google Play Billing verification failed");
   }
 
   return await res.json();

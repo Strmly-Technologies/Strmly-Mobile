@@ -26,6 +26,8 @@ type Props = {
   haveCreatorPass: boolean;
   haveAccessPass: boolean;
   accessVersion: number;
+  isPurchasedVideo: boolean;
+  isPurchasedSeries: boolean;
   handleInitialSeekComplete: () => void;
   showWallet: React.Dispatch<React.SetStateAction<boolean>>;
   showBuyOption: boolean;
@@ -55,6 +57,8 @@ const VideoControls = ({
   haveCreatorPass,
   haveAccessPass,
   accessVersion,
+  isPurchasedVideo,
+  isPurchasedSeries,
   handleInitialSeekComplete,
   showBuyOption,
   setShowBuyOption,
@@ -278,6 +282,8 @@ const VideoControls = ({
               haveCreator={haveCreator}
               haveAccess={haveAccess}
               checkAccess={checkAccess}
+              isPurchasedVideo={isPurchasedVideo}
+              isPurchasedSeries={isPurchasedSeries}
               setWantToBuyVideo={setWantToBuyVideo}
               videoId={videoData._id}
               type={videoData.type}

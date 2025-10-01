@@ -27,6 +27,9 @@ type VideoDetailsProps = {
   checkAccess: React.Dispatch<React.SetStateAction<boolean>>;
   setWantToBuyVideo: React.Dispatch<React.SetStateAction<boolean>>;
 
+  isPurchasedVideo: boolean;
+  isPurchasedSeries: boolean;
+  
   videoId: string;
   name: string;
   type: string;
@@ -84,6 +87,8 @@ const VideoDetails = ({
   haveCreator,
   haveAccess,
   checkAccess,
+  isPurchasedVideo,
+  isPurchasedSeries,
   setWantToBuyVideo,
   videoId,
   type,
@@ -167,12 +172,12 @@ const VideoDetails = ({
             data.data?.accessData && data.data?.accessData.content_type
           );
           setHasAccessPass(data.data?.accessData ? data.data.accessData.content_type : null);
-          haveAccess(data.data?.accessData?.content_type != undefined);
+          haveAccess(data.data?.hasUserAccess);
           // if(data.data?.accessData && data.data.accessData.content_type != null){
           // }
           console.log(
-            "have Access",
-            data.data?.accessData?.content_type != undefined
+            "have Access------",
+            data.data.hasUserAccess
           );
         } catch (error) {
           console.log(error);
@@ -191,7 +196,7 @@ const VideoDetails = ({
         console.log(series);
         hasAccessPass();
       }
-    }, [])
+    }, [isPurchasedVideo, isPurchasedSeries])
   );
 
   useFocusEffect(
