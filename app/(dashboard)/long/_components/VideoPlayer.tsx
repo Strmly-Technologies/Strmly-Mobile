@@ -161,7 +161,6 @@ const VideoPlayer = ({
   const [accessChecked, setAccessChecked] = useState(false);
   const [accessCheckedAPI, setAccessCheckedAPI] = useState(false);
   const [canPlayVideo, setCanPlayVideo] = useState(false);
-
   // FIX: Update local stats when videoData changes (e.g., when switching videos)
   useEffect(() => {
     setLocalStats({
@@ -218,6 +217,11 @@ const VideoPlayer = ({
     isPurchasedSeries,
   ]);
 
+  // Access check states
+  const [fetchVideoDataAccess, setFetchVideoDataAccess] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const [accessCheckedAPI, setAccessCheckedAPI] = useState(false);
+  const [canPlayVideo, setCanPlayVideo] = useState(false);
   // Create player with proper cleanup
   const player = useVideoPlayer(videoData?.videoUrl || "", (p) => {
     p.loop = true;
