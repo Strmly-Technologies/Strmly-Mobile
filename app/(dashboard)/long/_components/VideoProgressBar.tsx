@@ -78,12 +78,7 @@ const VideoProgressBar = ({
 
   const initialStartTime = access?.freeRange?.start_time ?? 0;
   const endTime = access?.freeRange?.display_till_time ?? duration;
-  console.log(
-    "VideoProgressBar - initialStartTime:",
-    initialStartTime,
-    "endTime:",
-    endTime
-  );
+
   const hasShownAccessModal = useRef(false);
   const modalDismissed = useRef(false);
   const initialSeekTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -103,6 +98,12 @@ const VideoProgressBar = ({
   useEffect(() => {
     hasAccessRef.current = haveAccess;
     console.log("VideoProgressBar - haveAccess changed: ", haveAccess);
+    console.log(
+      "VideoProgressBar - initialStartTime:",
+      initialStartTime,
+      "endTime:",
+      endTime
+    );
   }, [haveAccess]);
 
   useEffect(() => {
@@ -328,8 +329,8 @@ const VideoProgressBar = ({
     if (!hasTriggered2Percent.current && percentWatched >= 2) {
       hasTriggered2Percent.current = true;
       console.log(`Triggering 2% milestone for video ${videoId}`);
-      // saveVideoToHistory();
-      // incrementVideoViews();
+      saveVideoToHistory();
+      incrementVideoViews();
     }
   }, [
     currentTime,
@@ -639,7 +640,7 @@ const VideoProgressBar = ({
 
   // Calculate restricted progress for visual indication
   const restrictedProgress =
-    !hasAccessRef.current && !isVideoOwner && haveCreator && endTime > 0
+    !hasAccessRef.current && !isVideoOwner && !haveCreator && endTime > 0
       ? endTime / duration
       : 1;
   const startProgress = initialStartTime > 0 ? initialStartTime / duration : 0;
@@ -680,7 +681,7 @@ const VideoProgressBar = ({
                 {
                   position: "absolute",
                   left: `${startProgress * 100}%`,
-                  width: `${(startProgress) * 100}%`,
+                  width: `${(restrictedProgress - startProgress) * 100}%`,
                 },
               ]}
             />
@@ -810,7 +811,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    // backgroundColor: "rgba(0, 0, 0, 0.8)",
     zIndex: 1000,
   },
   accessModalContent: {
