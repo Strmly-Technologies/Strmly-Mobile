@@ -20,6 +20,7 @@ interface AddMoneyModalProps {
   onClose: () => void;
   onSuccess: (amount: number) => void;
   onCreateOrder: (amount: number) => Promise<any>;
+
   onVerifyPayment: (
     // orderIdOrTransactionId: string, // either purchaseToken/transactionId depending on platform
     productId: string,
