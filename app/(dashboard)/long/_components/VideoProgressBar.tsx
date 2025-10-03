@@ -78,7 +78,7 @@ const VideoProgressBar = ({
 
   const initialStartTime = access?.freeRange?.start_time ?? 0;
   const endTime = access?.freeRange?.display_till_time ?? duration;
-
+  
   const hasShownAccessModal = useRef(false);
   const modalDismissed = useRef(false);
   const initialSeekTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -98,6 +98,7 @@ const VideoProgressBar = ({
   useEffect(() => {
     hasAccessRef.current = haveAccess;
     console.log("VideoProgressBar - haveAccess changed: ", haveAccess);
+
     console.log(
       "VideoProgressBar - initialStartTime:",
       initialStartTime,
