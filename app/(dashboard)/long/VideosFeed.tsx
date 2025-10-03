@@ -143,7 +143,7 @@ const VideosFeed: React.FC = () => {
         }
       });
 
-      if ((json.data || []).length < limit) {
+      if ((json.data || []).length < (limit || 0)) {
         setHasMore(false);
       }
 
@@ -212,9 +212,9 @@ const VideosFeed: React.FC = () => {
         }
 
         // Prefetch when approaching end
-        if (currentIndex === videos.length - 2 && hasMore && !isFetchingMore) {
-          fetchTrendingVideos();
-        }
+        // if (currentIndex === videos.length - 2 && hasMore && !isFetchingMore) {
+        //   fetchTrendingVideos();
+        // }
       }
     },
     [visibleIndex, videos.length, hasMore, isFetchingMore, isScreenFocused]
@@ -311,7 +311,7 @@ const VideosFeed: React.FC = () => {
   );
 
   // Show loading while checking authentication or fetching videos
-  if (loading && isFetchingMore) {
+  if (loading && videos.length === 0) {
     return (
       <ThemedView style={{ flex: 1 }} className="justify-center items-center">
         <ActivityIndicator size="large" color="white" />

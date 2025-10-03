@@ -238,10 +238,8 @@ export default function AccessPage() {
             <Image
               source={{
                 uri:
-                  asset.asset_data.thumbnailUrl ||
-                  asset.asset_data.posterUrl ||
-                  asset.asset_data.bannerUrl ||
-                  (asset.asset_data.episodes &&
+                  asset.asset_data?.thumbnailUrl ||
+                  (asset.asset_data?.episodes &&
                     asset.asset_data.episodes[0]?.thumbnailUrl) ||
                   "https://images.unsplash.com/photo-1489599735734-79b4169c2a78?w=100&h=100&fit=crop",
               }}
@@ -259,27 +257,27 @@ export default function AccessPage() {
           </View>
           <View className="flex-1 ml-3">
             <Text className="text-white font-medium text-base">
-              {asset.asset_data.title || asset.asset_data.name || "Untitled"}
+              {asset.asset_data?.title || asset.asset_data?.name || "Untitled"}
             </Text>
             <Text className="text-gray-400 text-sm mt-1">
               <Text className="text-blue-400 font-medium">
                 {asset.content_type === "video" ? "Video" : "Series"}
               </Text>
               {asset.content_type === "series" &&
-                (asset.asset_data.total_episodes
+                (asset.asset_data?.total_episodes
                   ? ` • ${asset.asset_data.total_episodes} episodes`
-                  : asset.asset_data.episodes
+                  : asset.asset_data?.episodes
                     ? ` • ${asset.asset_data.episodes.length} episodes`
                     : "")}
               {"\n"}Purchase on {formatDate(asset.granted_at)}
-              {asset.asset_data.created_by && (
+              {asset.asset_data?.created_by && (
                 <Text className="text-gray-500 text-xs">
                   {"\n"}by @{asset.asset_data.created_by.username}
                 </Text>
               )}
             </Text>
           </View>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             className="p-2"
             onPress={(e) => {
               e.stopPropagation(); // Prevent triggering the asset click
@@ -289,12 +287,12 @@ export default function AccessPage() {
             }}
           >
             <MoreVertical size={20} color="#9CA3AF" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </LinearGradient>
       </TouchableOpacity>
 
       {/* Dropdown Menu */}
-      {activeDropdown === asset._id && (
+      {/* {activeDropdown === asset._id && (
         <View
           className="absolute right-4 top-16 rounded-lg border border-gray-700 z-10 min-w-32"
           style={{ backgroundColor: "#6B7280" }}
@@ -309,7 +307,7 @@ export default function AccessPage() {
             </Text>
           </TouchableOpacity>
         </View>
-      )}
+      )} */}
     </View>
   );
 

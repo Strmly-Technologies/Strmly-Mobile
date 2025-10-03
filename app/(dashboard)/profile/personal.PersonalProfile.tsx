@@ -34,6 +34,7 @@ export default function PersonalProfilePage() {
   const [isError, setIsError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [isLoadingVideos, setIsLoadingVideos] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
   const [showVideoMenu, setShowVideoMenu] = useState(false);
@@ -79,7 +80,9 @@ export default function PersonalProfilePage() {
 
   const fetchUserVideos = useCallback(
     async (pageToFetch: number) => {
-      if (!token || isLoadingVideos || !hasMore) return;
+      if (isRefreshing) {
+        console.log("refreshing videos");
+      } else if (!token || isLoadingVideos || !hasMore) return;
 
       if (pageToFetch === 1) setIsLoadingVideos(true);
 
@@ -104,6 +107,7 @@ export default function PersonalProfilePage() {
           setVideos(data.videos); // first page → replace
         } else {
           setVideos((prev) => [...prev, ...data.videos]); // next pages → append
+          appendVideos(data.videos); // also append to global store
         }
 
         if (data.videos.length === 0) {
@@ -230,6 +234,7 @@ export default function PersonalProfilePage() {
   };
 
   const handleDeleteUserVideo = async (videoId: string) => {
+    console.log("delete video id", videoId, hasMore, isRefreshing);
     try {
       const response = await fetch(
         `${BACKEND_API_URL}/caution/video/long/${videoId}`,
@@ -250,9 +255,9 @@ export default function PersonalProfilePage() {
       if (!response.ok) {
         throw new Error(data.message || "Failed to delete user video");
       }
-      console.log("delete response videos", data);
-      fetchUserVideos(1); // Refresh videos after deletion
       Alert.alert("Success", "Video deleted successfully");
+      console.log("delete response videos", data);
+      fetchUserVideos(1).finally(() => setIsRefreshing(false)); // Refresh videos after deletion
     } catch (error) {
       console.log(error);
     }
@@ -298,7 +303,7 @@ export default function PersonalProfilePage() {
       {selectedVideoMenu === item._id && showVideoMenu && (
         <View className="absolute top-8 right-2 bg-white rounded-md shadow-md px-2 py-1">
           <Pressable
-            onPress={() => handleDeleteUserVideo(item._id)}
+            onPress={() => {setIsRefreshing(true); handleDeleteUserVideo(item._id)}}
             className="px-3"
           >
             <Text className="text-red-500 text-sm">Delete</Text>
