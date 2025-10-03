@@ -5,7 +5,10 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  Platform
+  Platform,
+  Linking,
+  Modal,
+  Pressable,
 } from "react-native";
 import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -37,6 +40,26 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
       player.volume = 1;
     }
   });
+
+  const [showModal, setShowModal] = useState(false);
+
+  const showContentOwnershipPopup = () => {
+    setShowModal(true);
+  };
+
+  const handleViewPolicy = () => {
+    Linking.openURL("https://www.strmly.com/legal/privacy");
+    // Do NOT close modal here
+  };
+
+  const handleAccept = () => {
+    setShowModal(false);
+    handleFileSelect();
+  };
+
+  const handleCancel = () => {
+    setShowModal(false);
+  };
 
   // Handle file selection
   const handleFileSelect = async () => {
@@ -117,6 +140,7 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
     setSelectedFile(null);
     setIsPlaying(false);
     handleFileSelect();
+    showContentOwnershipPopup();
   };
 
   return (
@@ -129,6 +153,38 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
         <Text style={styles.headerTitle}>Upload</Text>
         <View style={styles.headerSpacer} />
       </View>
+
+      {/* Show content ownership confirmation before file selection */}
+      <Modal visible={showModal} transparent animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+              ⚠️ Important:
+              {"\n\n"}1. You are only allowed to upload your own original
+              content.
+              {"\n"}2. Uploading third-party or copyrighted content without
+              permission is strictly prohibited.
+              {"\n"}3. Uploading or sharing any content involving child
+              exploitation, abuse, or sexual material (CSAM) is illegal and
+              strictly forbidden.
+              {"\n\n"}By continuing, you agree to follow these rules.
+            </Text>
+
+            <Pressable onPress={handleViewPolicy}>
+              <Text style={styles.link}>📜 View Privacy Policy</Text>
+            </Pressable>
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity onPress={handleCancel}>
+                <Text style={styles.button}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleAccept}>
+                <Text style={styles.button}>I Understand</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Main Content */}
       <View style={styles.content}>
@@ -196,7 +252,7 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
             </Text>
             <TouchableOpacity
               style={styles.uploadButton}
-              onPress={handleFileSelect}
+              onPress={showContentOwnershipPopup}
             >
               <Text style={styles.uploadButtonText}>Upload file</Text>
             </TouchableOpacity>
@@ -208,7 +264,6 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
           </View>
         )}
       </View>
-
       {/* Action Buttons */}
       <View style={styles.actionButtonsContainer}>
         {/* Save to Draft Button - Always show */}
@@ -242,10 +297,48 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    width: "100%",
+    maxWidth: 400,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  link: {
+    fontSize: 16,
+    color: "#007AFF",
+    textDecorationLine: "underline",
+    marginBottom: 20,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  button: {
+    fontSize: 16,
+    color: "#007AFF",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#000",
-    paddingTop: Platform.OS === 'ios' ? 10 : 0,
+    paddingTop: Platform.OS === "ios" ? 10 : 0,
   },
   header: {
     flexDirection: "row",
@@ -253,7 +346,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
-   
   },
   headerTitle: {
     color: "white",
