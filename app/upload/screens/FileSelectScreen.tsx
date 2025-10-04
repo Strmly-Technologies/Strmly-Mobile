@@ -139,8 +139,7 @@ const FileSelectScreen: React.FC<FileSelectScreenProps> = ({
   const handleSelectDifferentVideo = () => {
     setSelectedFile(null);
     setIsPlaying(false);
-    handleFileSelect();
-    showContentOwnershipPopup();
+    handleAccept();
   };
 
   return (

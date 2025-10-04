@@ -19,6 +19,8 @@ export default {
       versionCode: 6,
       adaptiveIcon: {
         foregroundImage: "./assets/images/logo3.png",
+        resizeMode: "contain",
+        imageWidth: 200,
         backgroundColor: "#000"
       },
       package: "com.anonymous.strmly",
@@ -44,8 +46,8 @@ export default {
       [
         "expo-video",
         {
-          supportsBackgroundPlayback: true,
-          supportsPictureInPicture: true
+          supportsBackgroundPlayback: false,
+          supportsPictureInPicture: false
         }
       ],
       [

@@ -37,13 +37,6 @@ export default function PersonalCommunityPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingVideos, setIsLoadingVideos] = useState(false);
 
-  // Video player state
-  const [isVideoPlayerActive, setIsVideoPlayerActive] = useState(false);
-  const [currentVideoData, setCurrentVideoData] = useState<any>(null);
-  const [currentVideoList, setCurrentVideoList] = useState<any[]>([]);
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [showCommentsModal, setShowCommentsModal] = useState(false);
-
   // Section data states
   const [followers, setFollowers] = useState<any[]>([]);
   const [creators, setCreators] = useState<any[]>([]);
