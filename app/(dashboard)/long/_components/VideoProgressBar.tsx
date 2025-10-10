@@ -330,8 +330,8 @@ const VideoProgressBar = ({
     if (!hasTriggered2Percent.current && percentWatched >= 2) {
       hasTriggered2Percent.current = true;
       console.log(`Triggering 2% milestone for video ${videoId}`);
-      // saveVideoToHistory();
-      // incrementVideoViews();
+      saveVideoToHistory();
+      incrementVideoViews();
     }
   }, [
     currentTime,
@@ -747,9 +747,10 @@ const VideoProgressBar = ({
 const styles = StyleSheet.create({
   progressBarContainer: {
     width: "100%",
-    height: 30,
+    bottom: 0,
+    height: 10,
     justifyContent: "center",
-    position: "relative",
+    position: "absolute",
   },
   progressBarContainerGlobal: {
     marginBottom: 100, // Add bottom margin only for global player

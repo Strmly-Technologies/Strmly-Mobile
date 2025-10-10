@@ -225,7 +225,7 @@ const VideoControls = ({
             <ActivityIndicator size="large" color="white" />
           )}
         </View>
-        {showControls && (
+        {showControls && !isLandscape && (
           <View
             style={[
               isGlobalPlayer
@@ -272,10 +272,12 @@ const VideoControls = ({
               isGlobalPlayer
                 ? isLandscape
                   ? styles.detailsFullScreen
-                  : { ...styles.detailsGlobal, bottom: screenHeight > 850 ? bottomOffset < 35 ? bottomOffset*2 : bottomOffset : 15 }
+                  : styles.detailsGlobal
+                  // : { ...styles.detailsGlobal, bottom: screenHeight > 850 ? bottomOffset < 35 ? bottomOffset*2 : bottomOffset : 15 }
                 : isLandscape
                   ? styles.detailsFullScreen
-                  : { ...styles.details, bottom: screenHeight > 850 ? bottomOffset < 35 ? bottomOffset*3+20 : bottomOffset*2 : 50 },
+                  : styles.details
+                  // : { ...styles.details, bottom: screenHeight > 850 ? bottomOffset < 35 ? bottomOffset*3+20 : bottomOffset*2 : 50 },
             ]}
           >
             <VideoDetails
@@ -347,13 +349,14 @@ const styles = StyleSheet.create({
   interact: { position: "absolute", bottom: '15%', right: 10, zIndex: 5 },
   interactFullScreen: {
     position: "absolute",
-    bottom: "18%",
+    bottom: "10%",
     right: 15,
     zIndex: 5,
   },
   interactGlobal: { position: "absolute", bottom: '15%', right: 10, zIndex: 5 },
   details: {
     position: "absolute",
+    bottom: '1%',
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 10,
@@ -369,6 +372,7 @@ const styles = StyleSheet.create({
   },
   detailsGlobal: {
     position: "absolute",
+    bottom: '1%',
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 10,

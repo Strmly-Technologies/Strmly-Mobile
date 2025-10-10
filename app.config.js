@@ -6,9 +6,9 @@ export default {
     slug: "strmly",
     scheme: "strmly",
     owner: "strmly-technologies",
-    version: "1.0.5",
+    version: "1.0.6",
     orientation: "portrait",
-    icon: "./assets/images/logo2.png",
+    icon: "./assets/images/logo3.png",
     userInterfaceStyle: "dark",
     newArchEnabled: true,
     ios: {
@@ -16,13 +16,12 @@ export default {
       supportsTablet: true
     },
     android: {
-      versionCode: 6,
+      versionCode: 7,
       adaptiveIcon: {
         foregroundImage: "./assets/images/logo3.png",
-        resizeMode: "contain",
-        imageWidth: 200,
-        backgroundColor: "#000"
+        backgroundColor: "#000000"
       },
+
       package: "com.anonymous.strmly",
       softwareKeyboardLayoutMode: "pan",
       edgeToEdgeEnabled: true
