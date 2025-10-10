@@ -8,7 +8,6 @@ import Svg, { Path } from "react-native-svg";
 import { useAuthStore } from "@/store/useAuthStore";
 import { CONFIG } from "@/Constants/config";
 import { getProfilePhotoUrl } from "@/utils/profileUtils";
-import * as ScreenOrientation from "expo-screen-orientation";
 import { useOrientationStore } from "@/store/useOrientationStore";
 
 export default function TabLayout() {

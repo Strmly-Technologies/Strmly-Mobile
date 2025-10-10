@@ -14,6 +14,7 @@ import { Link, useFocusEffect, useLocalSearchParams } from "expo-router";
 import VideoPlayer from "./_components/VideoPlayer";
 import { useVideosStore } from "@/store/useVideosStore";
 import { useOrientationStore } from "@/store/useOrientationStore";
+import BottomNavBar from "@/components/BottomNavBar";
 
 const { height: screenHeight } = Dimensions.get("window");
 const VIDEO_HEIGHT = screenHeight;
@@ -172,39 +173,40 @@ const GlobalVideoPlayer: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1" edges={[]}>
-        <FlatList
-          ref={flatListRef}
-          data={videos}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          getItemLayout={getItemLayout}
-          initialScrollIndex={visibleIndex}
-          pagingEnabled
-          scrollEnabled={!showCommentsModal && !isLandscape}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          initialNumToRender={1}
-          maxToRenderPerBatch={1}
-          windowSize={1}
-          // updateCellsBatchingPeriod={100}
-          removeClippedSubviews={true}
-          showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="automatic"
-          style={{ height: VIDEO_HEIGHT }}
-          maintainVisibleContentPosition={{
-            minIndexForVisible: 0,
-            autoscrollToTopThreshold: 10,
-          }}
-          snapToInterval={VIDEO_HEIGHT}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          bounces={false}
-          scrollEventThrottle={16}
-          disableIntervalMomentum={true}
-          contentContainerStyle={{backgroundColor: "#000"}}
-          overScrollMode="never"
-          alwaysBounceVertical={false}
-        />
+      <FlatList
+        ref={flatListRef}
+        data={videos}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        getItemLayout={getItemLayout}
+        initialScrollIndex={visibleIndex}
+        pagingEnabled
+        scrollEnabled={!showCommentsModal && !isLandscape}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+        windowSize={1}
+        // updateCellsBatchingPeriod={100}
+        removeClippedSubviews={true}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        style={{ height: VIDEO_HEIGHT }}
+        maintainVisibleContentPosition={{
+          minIndexForVisible: 0,
+          autoscrollToTopThreshold: 10,
+        }}
+        snapToInterval={VIDEO_HEIGHT}
+        snapToAlignment="start"
+        decelerationRate="fast"
+        bounces={false}
+        scrollEventThrottle={16}
+        disableIntervalMomentum={true}
+        contentContainerStyle={{ backgroundColor: "#000" }}
+        overScrollMode="never"
+        alwaysBounceVertical={false}
+      />
+      {/* {!isLandscape && <BottomNavBar />} */}
     </SafeAreaView>
   );
 };

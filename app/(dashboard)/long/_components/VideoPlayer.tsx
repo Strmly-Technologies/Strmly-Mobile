@@ -744,6 +744,40 @@ const VideoPlayer = ({
       )}
 
       <View className="h-full absolute w-full">
+        {showWallet && accessCheckedAPI && (
+          <View
+            className={`absolute left-0 right-0 z-10`}
+            style={
+              !isGlobalPlayer
+                ? isLandscape
+                  ? { bottom: "25%" }
+                  : {
+                      bottom: 0,
+                    }
+                : isLandscape
+                  ? { bottom: "25%" }
+                  : {
+                      bottom: 0,
+                    }
+            }
+          >
+            <VideoProgressBar
+              player={player}
+              isActive={isActive}
+              videoId={videoData._id}
+              duration={videoData.duration || 0}
+              access={videoData.access}
+              showBuyOption={setShowBuyOption}
+              hasCreatorPassOfVideoOwner={videoData.hasCreatorPassOfVideoOwner}
+              onInitialSeekComplete={handleInitialSeekComplete}
+              isVideoOwner={videoData.created_by._id === user?.id}
+              haveAccess={haveAccess}
+              haveCreator={haveCreator}
+              accessVersion={accessVersion}
+            />
+          </View>
+        )}
+
         <VideoControls
           haveCreatorPass={haveCreator}
           haveAccess={setHaveAccess}
@@ -772,59 +806,9 @@ const VideoPlayer = ({
           onToggleFullScreen={onToggleFullScreen}
           onStatsUpdate={handleStatsUpdate}
         />
-
-        {showWallet && accessCheckedAPI && (
-          <View
-            className={`absolute left-0 right-0 z-10`}
-            style={
-              !isGlobalPlayer
-                ? isLandscape
-                  ? { bottom: "20%" }
-                  : {
-                      bottom:
-                        screenHeight > 850
-                          ? bottomOffset < 35
-                            ? insets.bottom != 0
-                              ? bottomOffset * 3 + 25
-                              : 60
-                            : bottomOffset * 2 + 25
-                          : insets.bottom > 0
-                            ? bottomOffset - 12
-                            : screenHeight > 650
-                              ? 28
-                              : 45,
-                    }
-                : isLandscape
-                  ? { bottom: "20%" }
-                  : {
-                      bottom:
-                        screenHeight > 850
-                          ? bottomOffset + 30
-                          : screenHeight < 650
-                            ? 5
-                            : -5,
-                    }
-            }
-          >
-            <VideoProgressBar
-              player={player}
-              isActive={isActive}
-              videoId={videoData._id}
-              duration={videoData.duration || 0}
-              access={videoData.access}
-              showBuyOption={setShowBuyOption}
-              hasCreatorPassOfVideoOwner={videoData.hasCreatorPassOfVideoOwner}
-              onInitialSeekComplete={handleInitialSeekComplete}
-              isVideoOwner={videoData.created_by._id === user?.id}
-              haveAccess={haveAccess}
-              haveCreator={haveCreator}
-              accessVersion={accessVersion}
-            />
-          </View>
-        )}
       </View>
 
-      {showWallet && (
+      {showWallet && !isLandscape && (
         <View
           className={`z-10 absolute left-5 ${showWallet ? "top-10" : "top-14"}`}
         >
@@ -909,6 +893,7 @@ const VideoPlayer = ({
           }}
         />
       )}
+      <View className="h-5"></View>
     </View>
   );
 };

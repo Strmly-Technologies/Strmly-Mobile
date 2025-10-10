@@ -19,6 +19,7 @@ import { clearActivePlayer } from "@/store/usePlayerStore";
 import { useVideosStore } from "@/store/useVideosStore";
 import { useOrientationStore } from "@/store/useOrientationStore";
 import { RefreshControl } from "react-native-gesture-handler";
+import BottomNavBar from "@/components/BottomNavBar";
 
 export type GiftType = {
   creator: {
@@ -33,7 +34,7 @@ const { height: screenHeight } = Dimensions.get("window");
 const BOTTOM_NAV_HEIGHT = -50; // Height of your bottom navigation
 
 // Define the height for each video item (adjust as needed)
-const VIDEO_HEIGHT = screenHeight;
+const VIDEO_HEIGHT = screenHeight - 40;
 
 const VideosFeed: React.FC = () => {
   const [videos, setVideos] = useState<VideoItemType[]>([]);
@@ -369,7 +370,7 @@ const VideosFeed: React.FC = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
-      <ThemedView style={{ flex: 1 }} {...panResponder.panHandlers}>
+      <ThemedView style={{ height: VIDEO_HEIGHT, width: "100%"}} {...panResponder.panHandlers}>
         <FlatList
           ref={flatListRef}
           data={videos}
@@ -420,6 +421,7 @@ const VideosFeed: React.FC = () => {
           overScrollMode="never" // Android: prevent over-scrolling
           alwaysBounceVertical={false} // iOS: prevent bouncing
         />
+
       </ThemedView>
     </SafeAreaView>
   );
