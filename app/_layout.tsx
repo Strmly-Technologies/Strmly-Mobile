@@ -1,12 +1,13 @@
 import { Colors } from "@/Constants/Colors";
 import { Stack, usePathname } from "expo-router";
-import { useColorScheme } from "react-native";
+import { KeyboardAvoidingView, Platform, useColorScheme, View } from "react-native";
 import "../global.css";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useEffect } from "react";
 import { useOrientationStore } from "@/store/useOrientationStore";
 import * as ScreenOrientation from "expo-screen-orientation";
+import BottomNavBar from "@/components/BottomNavBar";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme() ?? "dark";
@@ -34,19 +35,40 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={isLandscape ? ['right', 'left'] :['bottom', 'top']}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "black" }}
+        edges={isLandscape ? ["right", "left"] : ['bottom']}
+      >
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <Stack
-            screenOptions={{
-              headerStyle: { backgroundColor: theme.navBackground },
-              headerTintColor: theme.title,
-              headerShown: false,
-            }}
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
-            {/* Individual Screens */}
-            <Stack.Screen name="index" options={{ title: "Signin" }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          </Stack>
+          <View style={{ flex: 1 }}>
+            {/* Routed Screens */}
+            <Stack
+              // style={{ flex: 1 }}
+              screenOptions={{
+                headerStyle: { backgroundColor: theme.navBackground },
+                headerTintColor: theme.title,
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="index" options={{ title: "Signin" }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+          </View>
+          </KeyboardAvoidingView>
+
+          {/* Bottom Navigation */}
+          {!isLandscape && (
+            <SafeAreaView
+              edges={[]}
+              style={{ backgroundColor: "black" }}
+            >
+              <BottomNavBar />
+            </SafeAreaView>
+          )}
         </GestureHandlerRootView>
       </SafeAreaView>
     </SafeAreaProvider>

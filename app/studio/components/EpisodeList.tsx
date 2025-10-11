@@ -12,8 +12,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import DropdownMenu from "./DropdownMenu";
 import { useDeleteActions } from "../hooks/useDeleteActions";
-import VideoPlayer from "@/app/(dashboard)/long/_components/VideoPlayer";
-import Constants from "expo-constants";
 
 interface Episode {
   _id: string;

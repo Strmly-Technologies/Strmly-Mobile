@@ -55,8 +55,9 @@ export default function Index() {
   }
   if (token && isLoggedIn) {
     console.log("✅ User is authenticated, redirecting to home");
-    return <Redirect href="/(tabs)/home" />;
-    // return <Redirect href="/(dashboard)/long/VideosFeed" />;
+    // return <Redirect href="/(tabs)/home" />;
+    return <Redirect href="/(dashboard)/long/VideosFeed" />;
+    // return <Redirect href="/(InterestsSection)/Interests" />;
   } else {
     console.log("❌ User not authenticated, redirecting to sign-in");
     return <Redirect href="/(auth)/Sign-up" />;

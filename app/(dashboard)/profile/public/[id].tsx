@@ -378,7 +378,7 @@ export default function PublicProfilePageWithId() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={['top']}>
       <ThemedView style={{ flex: 1 }}>
         <FlatList
           data={videos}

@@ -135,7 +135,7 @@ export default function ProfileSections() {
         // console.log(community.founder, user?.id);
         router.push({
           pathname:
-            community?.founder._id === user?.id
+            community?.founder?._id === user?.id
               ? "/(dashboard)/communities/personal/[id]"
               : "/(dashboard)/communities/public/[id]",
           params: { id: community._id },
@@ -218,7 +218,7 @@ export default function ProfileSections() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "black" }} edges={[]}
+      style={{ flex: 1, backgroundColor: "black" }} edges={['top']}
     >
       <ThemedView className="flex-1">
         <StatusBar barStyle="light-content" backgroundColor="black" />

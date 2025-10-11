@@ -92,7 +92,7 @@ const SignIn = () => {
         setTimeout(
           () =>
             navigation.reset({
-              routes: [{ name: "(tabs)" }],
+              routes: [{ name: "(dashboard)/long/VideosFeed" }],
             }),
           1000
         );

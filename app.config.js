@@ -8,7 +8,7 @@ export default {
     owner: "strmly-technologies",
     version: "1.0.6",
     orientation: "portrait",
-    icon: "./assets/images/logo3.png",
+    icon: "./assets/images/logo4.png",
     userInterfaceStyle: "dark",
     newArchEnabled: true,
     ios: {
@@ -18,7 +18,7 @@ export default {
     android: {
       versionCode: 7,
       adaptiveIcon: {
-        foregroundImage: "./assets/images/logo3.png",
+        foregroundImage: "./assets/images/logo4.png",
         backgroundColor: "#000000"
       },
 
@@ -29,14 +29,14 @@ export default {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/logo3.png"
+      favicon: "./assets/images/logo4.png"
     },
     plugins: [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/logo3.png",
+          image: "./assets/images/logo4.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#000"

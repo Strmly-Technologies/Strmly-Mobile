@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Text,
   Pressable,
+  View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ThemedView from "@/components/ThemedView";
@@ -172,42 +173,46 @@ const GlobalVideoPlayer: React.FC = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1" edges={[]}>
-      <FlatList
-        ref={flatListRef}
-        data={videos}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        getItemLayout={getItemLayout}
-        initialScrollIndex={visibleIndex}
-        pagingEnabled
-        scrollEnabled={!showCommentsModal && !isLandscape}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        initialNumToRender={1}
-        maxToRenderPerBatch={1}
-        windowSize={1}
-        // updateCellsBatchingPeriod={100}
-        removeClippedSubviews={true}
-        showsVerticalScrollIndicator={false}
-        contentInsetAdjustmentBehavior="automatic"
-        style={{ height: VIDEO_HEIGHT }}
-        maintainVisibleContentPosition={{
-          minIndexForVisible: 0,
-          autoscrollToTopThreshold: 10,
-        }}
-        snapToInterval={VIDEO_HEIGHT}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        bounces={false}
-        scrollEventThrottle={16}
-        disableIntervalMomentum={true}
-        contentContainerStyle={{ backgroundColor: "#000" }}
-        overScrollMode="never"
-        alwaysBounceVertical={false}
-      />
-      {/* {!isLandscape && <BottomNavBar />} */}
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+        <View style={{ flex: 1, width: "100%", backgroundColor: "black" }}>
+          <FlatList
+            ref={flatListRef}
+            data={videos}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            getItemLayout={getItemLayout}
+            initialScrollIndex={visibleIndex}
+            pagingEnabled
+            scrollEnabled={!showCommentsModal && !isLandscape}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+            initialNumToRender={1}
+            maxToRenderPerBatch={1}
+            windowSize={1}
+            // updateCellsBatchingPeriod={100}
+            removeClippedSubviews={true}
+            showsVerticalScrollIndicator={false}
+            contentInsetAdjustmentBehavior="automatic"
+            style={{ height: VIDEO_HEIGHT }}
+            maintainVisibleContentPosition={{
+              minIndexForVisible: 0,
+              autoscrollToTopThreshold: 10,
+            }}
+            snapToInterval={VIDEO_HEIGHT}
+            snapToAlignment="start"
+            decelerationRate="fast"
+            bounces={false}
+            scrollEventThrottle={16}
+            disableIntervalMomentum={true}
+            contentContainerStyle={{ backgroundColor: "#000" }}
+            overScrollMode="never"
+            alwaysBounceVertical={false}
+          />
+          {/* {!isLandscape && <BottomNavBar />} */}
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 

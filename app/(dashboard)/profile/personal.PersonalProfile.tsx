@@ -314,7 +314,7 @@ export default function PersonalProfilePage() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={['top']}>
       {/* <ThemedView className="flex-1"> */}
 
       {/* Video Grid */}

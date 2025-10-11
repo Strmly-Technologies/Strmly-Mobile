@@ -72,13 +72,14 @@ const VideoContentGifting = ({
   const currentVideoId = isCommentGiftMode ? routeVideoId : videoId;
 
   // For comment gifting, construct creator object from route parameters
-  const currentCreator = isCommentGiftMode ? {
-    _id: creatorId as string,
-    username: creatorUsername as string,
-    name: creatorName as string,
-    profile_photo: creatorPhoto as string,
-  } : creator;
-
+  const currentCreator = isCommentGiftMode
+    ? {
+        _id: creatorId as string,
+        username: creatorUsername as string,
+        name: creatorName as string,
+        profile_photo: creatorPhoto as string,
+      }
+    : creator;
 
   const [amount, setAmount] = useState("");
   const [userUPI, setUserUPI] = useState("");
@@ -99,7 +100,12 @@ const VideoContentGifting = ({
   // const animatedBottom = useRef(new Animated.Value(insets.bottom)).current;
 
   const { token, user } = useAuthStore();
-  const { walletData, error: walletError, isLoading: walletLoading, fetchWalletDetails } = useWallet(token || "");
+  const {
+    walletData,
+    error: walletError,
+    isLoading: walletLoading,
+    fetchWalletDetails,
+  } = useWallet(token || "");
 
   const handleCloseModalMessage = () => {
     setIsWithdrawalComplete(false);
@@ -127,8 +133,6 @@ const VideoContentGifting = ({
   // ------------ Transaction -------------------
 
   const giftVideo = async () => {
-
-
     if (!token || !videoId) {
       const missingFields = [];
       if (!token) missingFields.push("token");
@@ -177,23 +181,19 @@ const VideoContentGifting = ({
 
       const data = await response.json();
 
-
       // Setting data when gifting done
       completeGifting(data.gift.amount);
-      
+
       // Refresh wallet data
       fetchWalletDetails();
 
       router.back();
     } catch (err) {
-
       setError(err instanceof Error ? err.message : "Failed to send gift");
     }
   };
 
   const giftCommentHandler = async () => {
-
-
     if (!token || !commentId || !currentVideoId || !amount) {
       const missingFields = [];
       if (!token) missingFields.push("token");
@@ -238,7 +238,7 @@ const VideoContentGifting = ({
         headers: {
           Authorization: `Bearer ${token?.substring(0, 20)}...`,
           "Content-Type": "application/json",
-        }
+        },
       });
 
       // Use direct API call with correct URL format
@@ -259,9 +259,13 @@ const VideoContentGifting = ({
         console.error("❌ API Error Response:", {
           status: response.status,
           statusText: response.statusText,
-          errorData
+          errorData,
         });
-        throw new Error(errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(
+          errorData.error ||
+            errorData.message ||
+            `HTTP ${response.status}: ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -272,15 +276,15 @@ const VideoContentGifting = ({
       setSuccessMessage(
         `Successfully gifted ₹${giftAmount} to ${creatorName || "the creator"}!`
       );
-      
+
       // Refresh wallet data
       fetchWalletDetails();
-      
+
       // Call success callback to refresh comments
       if (onGiftSuccess) {
         onGiftSuccess();
       }
-      
+
       // Auto-navigate back after 2 seconds
       setTimeout(() => {
         router.back();
@@ -297,7 +301,10 @@ const VideoContentGifting = ({
         // const { logout } = useAuthStore.getState();
         // logout();
         // router.replace('/(auth)/Sign-in');
-      } else if (err.message === "Comment author has disabled comment monetization" || err.message === "Comment not monetized") {
+      } else if (
+        err.message === "Comment author has disabled comment monetization" ||
+        err.message === "Comment not monetized"
+      ) {
         setError(
           "This comment cannot receive gifts. The creator may not have enabled comment monetization for this content."
         );
@@ -518,7 +525,9 @@ const VideoContentGifting = ({
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 60 : isWithdrawMode ? 0 : 40}
+          keyboardVerticalOffset={
+            Platform.OS === "ios" ? 60 : isWithdrawMode ? 0 : 40
+          }
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View className="flex-1 justify-between px-5">
@@ -662,6 +671,7 @@ const VideoContentGifting = ({
                     0
                   ),
                   // paddingBottom: 10,
+                  paddingHorizontal: 10,
                 }}
                 className="gap-2 justify-end"
               >
@@ -700,17 +710,21 @@ const VideoContentGifting = ({
                 </Pressable>
 
                 <View className="items-center justify-center mt-1">
-                  <Text className="text-white text-sm">
-                    {isWithdrawMode ? "Current balance" : "Total balance"} ₹
-                    {walletLoading ? "Loading..." : walletData?.balance?.toFixed(2) || "0.00"}
-                  </Text>
+                  <Pressable onPress={()=> router.push('/(dashboard)/wallet')}>
+                    <Text className="text-white text-sm">
+                      {isWithdrawMode ? "Current balance" : "Total balance"} ₹
+                      {walletLoading
+                        ? "Loading..."
+                        : walletData?.balance?.toFixed(2) || "0.00"}
+                    </Text>
+                  </Pressable>
                   {walletError && (
                     <View className="items-center mt-1">
                       <Text className="text-red-400 text-xs">
                         Failed to load wallet balance
                       </Text>
                       <Pressable
-                        onPress={()=> fetchWalletDetails()}
+                        onPress={() => fetchWalletDetails()}
                         className="mt-1 px-2 py-1 bg-blue-600 rounded"
                       >
                         <Text className="text-white text-xs">Retry</Text>

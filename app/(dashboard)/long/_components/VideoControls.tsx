@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   },
   detailsGlobal: {
     position: "absolute",
-    bottom: '1%',
+    bottom: 0,
     width: "100%",
     paddingHorizontal: 16,
     marginBottom: 10,

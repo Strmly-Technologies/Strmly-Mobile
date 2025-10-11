@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const CreateProfileStyles = StyleSheet.create({
   TopBar: {
     width: "100%",
-    height: 60,
+    height: 'auto',
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -65,6 +65,7 @@ export const CreateProfileStyles = StyleSheet.create({
   Centered: {
     flex: 1,
     display: "flex",
+    paddingBottom: 20,
     gap: 10,
     alignContent: "center",
     alignItems: "center",
@@ -73,7 +74,9 @@ export const CreateProfileStyles = StyleSheet.create({
   CardGrid: {
     display: "flex",
     flexDirection: "row",
-    gap: 42,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 22,
   },
   button: {
     marginTop: 16,
@@ -94,15 +97,14 @@ export const CreateProfileStyles = StyleSheet.create({
     height: 150,
     borderRadius: 12,
     gap: "0.75em",
-    backgroundColor: "linear-gradient(to right, #000000, #ffffff)",
+    // backgroundColor: "linear-gradient(to right, #000000, #ffffff)",
+    borderColor: 'gray',
+    boxShadow: '0 245 012',
     display: "flex",
     justifyContent: "center",
     textAlign: "center",
     alignItems: "center",
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingLeft: 2,
-    paddingRight: 2,
+    paddingHorizontal: 5,
     borderWidth: 1,
   },
   InterestCardText: {

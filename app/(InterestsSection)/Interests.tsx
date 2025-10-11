@@ -21,6 +21,7 @@ import { BlurView } from "expo-blur";
 import { set } from "lodash";
 import ModalMessage from "@/components/AuthModalMessage";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Interests = () => {
   const [Step, setStep] = useState(1);
@@ -82,7 +83,7 @@ const Interests = () => {
       setTimeout(
         () =>
           navigation.reset({
-            routes: [{ name: "(tabs)" }],
+            routes: [{ name: "(dashboard)/long/VideosFeed" }],
           }),
         1000
       );
@@ -134,107 +135,18 @@ const Interests = () => {
               return <View key={j} className="w-1/2 px-2" />;
             }
 
-            const shadowColor = isSelected ? "#FF0000" : "#000000";
+            const shadowColor = isSelected ? "#1a1a1a" : "#000000";
 
             return (
               <View key={j} className="w-1/2 px-2">
                 <View style={{ position: "relative" }}>
-                  {/* Shadow Layer 3 - Furthest/Lightest */}
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: 6,
-                      left: -1,
-                      right: -1,
-                      bottom: -6,
-                      backgroundColor: `${shadowColor}08`,
-                      borderRadius: 12,
-                      zIndex: 1,
-                    }}
-                  />
-
-                  {/* Shadow Layer 2 - Middle */}
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: 4,
-                      left: 0,
-                      right: 0,
-                      bottom: -4,
-                      backgroundColor: `${shadowColor}15`,
-                      borderRadius: 12,
-                      zIndex: 2,
-                    }}
-                  />
-
-                  {/* Shadow Layer 1 - Closest/Darkest */}
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: 2,
-                      left: 1,
-                      right: -1,
-                      bottom: -2,
-                      backgroundColor: `${shadowColor}25`,
-                      borderRadius: 12,
-                      zIndex: 3,
-                    }}
-                  />
-
-                  {/* 🔮 Bottom Blur */}
-                  <BlurView
-                    intensity={60}
-                    tint="dark"
-                    style={{
-                      position: "absolute",
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: 3.5,
-                      borderBottomLeftRadius: 12,
-                      borderBottomRightRadius: 12,
-                      zIndex: 5,
-                    }}
-                  />
-
-                  {/* 🔮 Left Blur */}
-                  <BlurView
-                    intensity={60}
-                    tint="dark"
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      bottom: 0,
-                      left: -6,
-                      width: 12,
-                      borderTopLeftRadius: 12,
-                      borderBottomLeftRadius: 12,
-                      zIndex: 5,
-                    }}
-                  />
-
-                  {/* 🔮 Right Blur */}
-                  <BlurView
-                    intensity={60}
-                    tint="dark"
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      bottom: 0,
-                      right: -6,
-                      width: 12,
-                      borderTopRightRadius: 12,
-                      borderBottomRightRadius: 12,
-                      zIndex: 5,
-                    }}
-                  />
 
                   {/* Main Button */}
                   <TouchableOpacity
                     onPress={() => handleInterestToggle(item)}
                     activeOpacity={0.3}
                     style={{
-                      backgroundColor: isSelected ? "#1a1a1a" : "#000000",
+                      backgroundColor: "#000000",
                       borderRadius: 12,
                       height: 64,
                       alignItems: "center",
@@ -243,7 +155,7 @@ const Interests = () => {
                       borderBottomWidth: 2,
                       borderLeftWidth: 1,
                       borderRightWidth: 1,
-                      borderColor: isSelected ? "#FF0000" : "#FFFFFF40",
+                      borderColor: !isSelected ? "rgba(26, 26, 26, 1)" : "#FFFFFF40",
                       position: "relative",
                       zIndex: 4,
                     }}
@@ -274,69 +186,70 @@ const Interests = () => {
 
   if (Step === 1) {
     return (
-      <ThemedView style={CreateProfileStyles.Container}>
-        <StatusBar backgroundColor={"black"} />
-        <ThemedView style={CreateProfileStyles.TopBar}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="items-start w-full absolute top-20 z-10 left-5"
-          >
-            <Image
-              source={require("../../assets/images/back.png")}
-              className="h-7 w-4"
-            />
-          </TouchableOpacity>
-        </ThemedView>
-        <ThemedView style={CreateProfileStyles.Centered}>
-          <ThemedText style={CreateProfileStyles.Heading}>
-            Pick your kind of content
-          </ThemedText>
-          <ThemedView style={CreateProfileStyles.CardGrid}>
+      <SafeAreaView className="flex-1 bg-black" edges={["top", "bottom"]}>
+        <ThemedView style={CreateProfileStyles.Container}>
+          <ThemedView style={CreateProfileStyles.TopBar}>
             <TouchableOpacity
-              onPress={() => {
-                setType("Netflix");
-                setStep((prev) => prev + 1);
-              }}
-              style={CreateProfileStyles.InterestCard}
+              onPress={() => router.back()}
+              className="items-start w-full z-10 left-5"
             >
-              <LinearGradient
-                colors={["#000000", "#ffffff"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 6, y: 1 }}
+              <Image
+                source={require("../../assets/images/back.png")}
+                className="h-7 w-4"
+              />
+            </TouchableOpacity>
+          </ThemedView>
+          <ThemedView style={CreateProfileStyles.Centered}>
+            <ThemedText style={CreateProfileStyles.Heading}>
+              Pick your kind of content
+            </ThemedText>
+            <ThemedView style={CreateProfileStyles.CardGrid}>
+              <TouchableOpacity
+                onPress={() => {
+                  setType("Netflix");
+                  setStep((prev) => prev + 1);
+                }}
                 style={CreateProfileStyles.InterestCard}
               >
+                {/* <LinearGradient
+                  colors={["#000000", "#ffffff"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 6, y: 1 }}
+                  style={CreateProfileStyles.InterestCard}
+                > */}
                 <ThemedText style={CreateProfileStyles.InterestCardText}>
                   Netflix
                 </ThemedText>
                 <ThemedText style={CreateProfileStyles.CardContent}>
                   Short films, web series, dramas & movies.
                 </ThemedText>
-              </LinearGradient>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setType("Youtube");
-                setStep((prev) => prev + 1);
-              }}
-              style={CreateProfileStyles.InterestCard}
-            >
-              <LinearGradient
-                colors={["#000000", "#ffffff"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 6, y: 1 }}
+                {/* </LinearGradient> */}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setType("Youtube");
+                  setStep((prev) => prev + 1);
+                }}
                 style={CreateProfileStyles.InterestCard}
               >
+                {/* <LinearGradient
+                  colors={["#000000", "#ffffff"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 6, y: 1 }}
+                  style={CreateProfileStyles.InterestCard}
+                > */}
                 <ThemedText style={CreateProfileStyles.InterestCardText}>
                   Youtube
                 </ThemedText>
                 <ThemedText style={CreateProfileStyles.CardContent}>
                   Vlogs, comedy, food, beauty & Tech.
                 </ThemedText>
-              </LinearGradient>
-            </TouchableOpacity>
+                {/* </LinearGradient> */}
+              </TouchableOpacity>
+            </ThemedView>
           </ThemedView>
         </ThemedView>
-      </ThemedView>
+      </SafeAreaView>
     );
   }
 
@@ -434,63 +347,66 @@ const Interests = () => {
             "Short Films & Anthologies",
           ];
     return (
-      <ThemedView style={CreateProfileStyles.Container}>
-        <StatusBar backgroundColor={"black"} />
-        <View style={CreateProfileStyles.TopBar}>
-          <TouchableOpacity
-            onPress={() => {
-              HandleStep(false);
-              Step === 2 ? setInterests([]) : setInterests2([]);
-            }}
-            className="items-start w-full absolute top-10 z-10 left-5"
-          >
-            <Image
-              source={require("../../assets/images/back.png")}
-              className="h-7 w-4"
-            />
-          </TouchableOpacity>
-        </View>
-        <ScrollView contentContainerStyle={{ padding: 16, marginTop: 20 }}>
-          <ThemedText style={CreateProfileStyles.Heading}>
-            Your Interests
-          </ThemedText>
-          <Text style={CreateProfileStyles.OptionsCardText}>
-            Select only 3 of your interest from
-            {isCinema ? " “Cinema content”" : " “Non-cinema content”"}
-          </Text>
-
-          <View style={{ marginBottom: 30, marginTop: 10 }}>
-            {renderGrid(items)}
+      <SafeAreaView className="flex-1 bg-black" edges={['top', 'bottom']}>
+        <ThemedView style={CreateProfileStyles.Container}>
+          <View style={CreateProfileStyles.TopBar}>
+            <TouchableOpacity
+              onPress={() => {
+                HandleStep(false);
+                Step === 2 ? setInterests([]) : setInterests2([]);
+              }}
+              className="items-start w-full z-10 left-5"
+            >
+              <Image
+                source={require("../../assets/images/back.png")}
+                className="h-7 w-4"
+              />
+            </TouchableOpacity>
           </View>
-        </ScrollView>
-        <View className="px-4 w-full pb-10">
-          <TouchableOpacity
-            disabled={
-              (Step === 2 ? Interests.length !== 3 : Interests2.length !== 3) ||
-              (Step === 3 &&
-                (Interests.length !== 3 || Interests2.length !== 3)) ||
-              isSubmitting
-            }
-            onPress={() => HandleStep(true)}
-            className="rounded-3xl z-10 bg-white items-center justify-center h-[55px]"
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color="black" />
-            ) : (
-              <Text className="text-black text-xl">
-                {Step === 3 ? "Submit" : "Continue"}
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
+          <ScrollView contentContainerStyle={{ padding: 16, marginTop: 20 }}>
+            <ThemedText style={CreateProfileStyles.Heading}>
+              Your Interests
+            </ThemedText>
+            <Text style={CreateProfileStyles.OptionsCardText}>
+              Select only 3 of your interest from
+              {isCinema ? " “Cinema content”" : " “Non-cinema content”"}
+            </Text>
 
-        <ModalMessage
-          visible={showAlert}
-          text={alert}
-          needCloseButton={needButton}
-          onClose={() => setShowAlert(false)}
-        />
-      </ThemedView>
+            <View style={{ marginBottom: 30, marginTop: 10 }}>
+              {renderGrid(items)}
+            </View>
+          </ScrollView>
+          <View className="px-4 w-full pb-10">
+            <TouchableOpacity
+              disabled={
+                (Step === 2
+                  ? Interests.length !== 3
+                  : Interests2.length !== 3) ||
+                (Step === 3 &&
+                  (Interests.length !== 3 || Interests2.length !== 3)) ||
+                isSubmitting
+              }
+              onPress={() => HandleStep(true)}
+              className="rounded-3xl z-10 bg-white items-center justify-center h-[55px]"
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="black" />
+              ) : (
+                <Text className="text-black text-xl">
+                  {Step === 3 ? "Submit" : "Continue"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <ModalMessage
+            visible={showAlert}
+            text={alert}
+            needCloseButton={needButton}
+            onClose={() => setShowAlert(false)}
+          />
+        </ThemedView>
+      </SafeAreaView>
     );
   }
 
