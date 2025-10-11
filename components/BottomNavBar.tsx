@@ -69,31 +69,35 @@ export default function BottomNavBar({ activeTab }: BottomNavBarProps) {
     }
   }, [user?.profile_photo]);
 
-  const navigateToTab = (tab: string) => {
-    switch (tab) {
-      case "home":
-        router.push("/(dashboard)/long/VideosFeed");
-        break;
-      case "studio":
-        router.push("/(tabs)/studio");
-        break;
-      case "search":
-        router.push("/(tabs)/search");
-        break;
-      case "profile":
-        router.push("/(tabs)/profile");
-        break;
+  const routes = {
+    home: "/(dashboard)/long/VideosFeed",
+    home2: "/long/VideosFeed",
+    home3: "/home",
+    studio: "/studio",
+    search: "/search",
+    profile: "/profile",
+  } as const;
+
+  type TabKey = keyof typeof routes;
+
+  const navigateToTab = (tab: TabKey) => {
+    const targetPath = routes[tab];
+    if (pathname !== targetPath) {
+      router.push(targetPath);
     }
   };
 
-  return (
+  const tabRoutes = Object.values(routes);
+  const isTabRoute = tabRoutes.some((route) => pathname.startsWith(route));
+
+  return ( isTabRoute &&
     <View
       style={{
         position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: "#000000",
+        backgroundColor: "#000",
         height: 40,
         flexDirection: "row",
         justifyContent: "space-around",
@@ -109,7 +113,8 @@ export default function BottomNavBar({ activeTab }: BottomNavBarProps) {
     >
       {/* Home Tab */}
       <TouchableOpacity
-        className={`w-6 h-6 items-center justify-center ${navLoading ? "opacity-100" : "opacity-60"}`}
+      onPress={() => navigateToTab("home2")}
+        className={`w-6 h-6 items-center justify-center ${pathname.startsWith("/long/VideosFeed") ? "opacity-100" : "opacity-60"}`}
       >
         <PaperclipIcon size={22} color="white" />
       </TouchableOpacity>
@@ -117,7 +122,9 @@ export default function BottomNavBar({ activeTab }: BottomNavBarProps) {
       {/* Studio Tab */}
       <TouchableOpacity
         onPress={() => navigateToTab("studio")}
-        className={`w-8 h-8 items-center justify-center ${activeTab === "studio" ? "opacity-100" : "opacity-60"}`}
+        className={`w-8 h-8 items-center justify-center ${
+          pathname.endsWith("/studio") ? "opacity-100" : "opacity-60"
+        }`}
       >
         <Svg width="24" height="24" viewBox="0 0 29 28" fill="none">
           <Path
@@ -130,7 +137,9 @@ export default function BottomNavBar({ activeTab }: BottomNavBarProps) {
       {/* Search Tab */}
       <TouchableOpacity
         onPress={() => navigateToTab("search")}
-        className={`w-8 h-8 items-center justify-center ${activeTab === "search" ? "opacity-100" : "opacity-60"}`}
+        className={`w-8 h-8 items-center justify-center ${
+          pathname.startsWith("/search") ? "opacity-100" : "opacity-60"
+        }`}
       >
         <Search size={24} color="white" />
       </TouchableOpacity>
@@ -138,7 +147,9 @@ export default function BottomNavBar({ activeTab }: BottomNavBarProps) {
       {/* Profile Tab */}
       <TouchableOpacity
         onPress={() => navigateToTab("profile")}
-        className={`w-8 h-8 items-center justify-center ${activeTab === "profile" ? "opacity-100" : "opacity-60"}`}
+        className={`w-8 h-8 items-center justify-center ${
+          pathname.startsWith("/profile") ? "opacity-100" : "opacity-60"
+        }`}
       >
         <View className="w-7 h-7 bg-gray-600 rounded-full overflow-hidden items-center justify-center">
           <Image

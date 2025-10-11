@@ -31,10 +31,9 @@ export type GiftType = {
 };
 
 const { height: screenHeight } = Dimensions.get("window");
-const BOTTOM_NAV_HEIGHT = -50; // Height of your bottom navigation
 
 // Define the height for each video item (adjust as needed)
-const VIDEO_HEIGHT = screenHeight - 40;
+const VIDEO_HEIGHT = screenHeight;
 
 const VideosFeed: React.FC = () => {
   const [videos, setVideos] = useState<VideoItemType[]>([]);
@@ -369,61 +368,69 @@ const VideosFeed: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
-      <ThemedView style={{ height: VIDEO_HEIGHT, width: "100%"}} {...panResponder.panHandlers}>
-        <FlatList
-          ref={flatListRef}
-          data={videos}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          getItemLayout={getItemLayout}
-          pagingEnabled
-          scrollEnabled={!showCommentsModal && !isLandscape}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          initialNumToRender={1}
-          maxToRenderPerBatch={1}
-          windowSize={1}
-          removeClippedSubviews={true}
-          showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="automatic"
-          onEndReachedThreshold={0.8}
-          onEndReached={() => {
-            if (hasMore && !isFetchingMore && isScreenFocused) {
-              fetchTrendingVideos();
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+        <ThemedView
+          style={{
+            height: VIDEO_HEIGHT,
+            width: "100%",
+            backgroundColor: "black",
+          }}
+          {...panResponder.panHandlers}
+        >
+          <FlatList
+            ref={flatListRef}
+            data={videos}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            getItemLayout={getItemLayout}
+            pagingEnabled
+            scrollEnabled={!showCommentsModal && !isLandscape}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+            initialNumToRender={1}
+            maxToRenderPerBatch={1}
+            windowSize={1}
+            removeClippedSubviews={true}
+            showsVerticalScrollIndicator={false}
+            contentInsetAdjustmentBehavior="automatic"
+            onEndReachedThreshold={0.8}
+            onEndReached={() => {
+              if (hasMore && !isFetchingMore && isScreenFocused) {
+                fetchTrendingVideos();
+              }
+            }}
+            style={{ height: VIDEO_HEIGHT }}
+            maintainVisibleContentPosition={{
+              minIndexForVisible: 0,
+              autoscrollToTopThreshold: 10,
+            }}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            // Add loading indicator at the bottom
+            ListFooterComponent={
+              isFetchingMore ? (
+                <View style={{ padding: 20, alignItems: "center" }}>
+                  <ActivityIndicator size="small" color="white" />
+                </View>
+              ) : null
             }
-          }}
-          style={{ height: VIDEO_HEIGHT }}
-          maintainVisibleContentPosition={{
-            minIndexForVisible: 0,
-            autoscrollToTopThreshold: 10,
-          }}
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          // Add loading indicator at the bottom
-          ListFooterComponent={
-            isFetchingMore ? (
-              <View style={{ padding: 20, alignItems: "center" }}>
-                <ActivityIndicator size="small" color="white" />
-              </View>
-            ) : null
-          }
-          // incoming changes
-          snapToInterval={VIDEO_HEIGHT}
-          snapToAlignment="start"
-          decelerationRate="normal"
-          bounces={true} // Disable bouncing to prevent content bleeding
-          scrollEventThrottle={16}
-          disableIntervalMomentum={true} // Prevent momentum scrolling past snap points
-          onScrollEndDrag={onScrollEndDrag}
-          onMomentumScrollEnd={onMomentumScrollEnd}
-          contentContainerStyle={{ backgroundColor: "#000" }}
-          overScrollMode="never" // Android: prevent over-scrolling
-          alwaysBounceVertical={false} // iOS: prevent bouncing
-        />
-
-      </ThemedView>
-    </SafeAreaView>
+            // incoming changes
+            snapToInterval={VIDEO_HEIGHT}
+            snapToAlignment="start"
+            decelerationRate="normal"
+            bounces={true} // Disable bouncing to prevent content bleeding
+            scrollEventThrottle={16}
+            disableIntervalMomentum={true} // Prevent momentum scrolling past snap points
+            onScrollEndDrag={onScrollEndDrag}
+            onMomentumScrollEnd={onMomentumScrollEnd}
+            contentContainerStyle={{ backgroundColor: "#000" }}
+            overScrollMode="never" // Android: prevent over-scrolling
+            alwaysBounceVertical={false} // iOS: prevent bouncing
+          />
+        </ThemedView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
