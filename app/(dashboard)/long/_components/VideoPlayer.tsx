@@ -31,6 +31,7 @@ import { useOrientationStore } from "@/store/useOrientationStore";
 import VideoProgressBar from "./VideoProgressBar";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import {
+  SafeAreaProvider,
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
@@ -109,22 +110,6 @@ const VideoPlayer = ({
   const { setOrientation, isLandscape } = useOrientationStore();
 
   const insets = useSafeAreaInsets();
-  // const bottomOffset =
-  //   screenHeight < 700
-  //     ? insets.bottom != 0
-  //       ? isGlobalPlayer
-  //         ? insets.bottom / 10 - 16
-  //         : insets.bottom - 16
-  //       : isGlobalPlayer
-  //         ? 15
-  //         : 45
-  //     : insets.bottom != 0
-  //       ? isGlobalPlayer
-  //         ? insets.bottom / 10 - 16
-  //         : insets.bottom - 16
-  //       : isGlobalPlayer
-  //         ? 5
-  //         : 28;
 
   const bottomOffset =
     screenHeight < 700
@@ -717,184 +702,190 @@ const VideoPlayer = ({
   }
 
   return (
-    <View style={dynamicStyles.container}>
-      {player && canPlayVideo ? (
-        <View className="relative items-center justify-center">
-          <VideoView
-            player={player}
-            nativeControls={false}
-            style={dynamicStyles.video}
-            contentFit="cover"
-          />
-          {isBuffering && (
-            <ActivityIndicator
-              size="large"
-              color="white"
-              style={dynamicStyles.spinner}
-            />
-          )}
-        </View>
-      ) : (
-        <View className="relative">
-          <Image
-            source={{ uri: videoData.thumbnailUrl }}
-            style={dynamicStyles.thumbnail}
-          />
-        </View>
-      )}
-
-      <View className="h-full absolute w-full">
-        {showWallet && accessCheckedAPI && (
-          <View
-            className={`absolute left-0 right-0 z-10`}
-            style={
-              !isGlobalPlayer
-                ? isLandscape
-                  ? { bottom: "25%" }
-                  : {
-                      bottom: 0,
-                    }
-                : isLandscape
-                  ? { bottom: "25%" }
-                  : {
-                      bottom: 0,
-                    }
-            }
-          >
-            <VideoProgressBar
+    <SafeAreaProvider>
+      <SafeAreaView style={dynamicStyles.container} edges={["bottom"]}>
+        {/* <View style={dynamicStyles.container}> */}
+        {player && canPlayVideo ? (
+          <View className="relative items-center justify-center">
+            <VideoView
               player={player}
-              isActive={isActive}
-              videoId={videoData._id}
-              duration={videoData.duration || 0}
-              access={videoData.access}
-              showBuyOption={setShowBuyOption}
-              hasCreatorPassOfVideoOwner={videoData.hasCreatorPassOfVideoOwner}
-              onInitialSeekComplete={handleInitialSeekComplete}
-              isVideoOwner={videoData.created_by._id === user?.id}
-              haveAccess={haveAccess}
-              haveCreator={haveCreator}
-              accessVersion={accessVersion}
+              nativeControls={false}
+              style={dynamicStyles.video}
+              contentFit="cover"
+            />
+            {isBuffering && (
+              <ActivityIndicator
+                size="large"
+                color="white"
+                style={dynamicStyles.spinner}
+              />
+            )}
+          </View>
+        ) : (
+          <View className="relative">
+            <Image
+              source={{ uri: videoData.thumbnailUrl }}
+              style={dynamicStyles.thumbnail}
             />
           </View>
         )}
 
-        <VideoControls
-          haveCreatorPass={haveCreator}
-          haveAccess={setHaveAccess}
-          haveCreator={setCheckCreatorPass}
-          checkAccess={setAccessCheckedAPI}
-          isPurchasedVideo={isVideoPurchased}
-          isPurchasedSeries={isPurchasedSeries}
-          showBuyOption={showBuyOption}
-          setShowBuyOption={setShowBuyOption}
-          showWallet={setShowWallet}
-          player={player}
-          videoData={{
-            ...videoData,
-            likes: localStats.likes,
-            gifts: localStats.gifts,
-            shares: localStats.shares,
-            comments: { length: localStats.comments },
-          }}
-          isGlobalPlayer={isGlobalPlayer}
-          setShowCommentsModal={setShowCommentsModal}
-          onCommentsModalOpen={() => {
-            console.log("💰 Comments modal opened, triggering refresh");
-            setCommentsRefreshTrigger((prev) => prev + 1);
-          }}
-          onEpisodeChange={onEpisodeChange}
-          onToggleFullScreen={onToggleFullScreen}
-          onStatsUpdate={handleStatsUpdate}
-        />
-      </View>
+        <View className="h-full absolute w-full">
+          {showWallet && accessCheckedAPI && (
+            <View
+              className={`absolute bottom-0 left-0 right-0 z-10`}
+              style={
+                !isGlobalPlayer
+                  ? isLandscape
+                    ? { bottom: "25%" }
+                    : {
+                        bottom: 0,
+                      }
+                  : isLandscape
+                    ? { bottom: "25%" }
+                    : {
+                        bottom: 0,
+                      }
+              }
+            >
+              <VideoProgressBar
+                player={player}
+                isActive={isActive}
+                videoId={videoData._id}
+                duration={videoData.duration || 0}
+                access={videoData.access}
+                showBuyOption={setShowBuyOption}
+                hasCreatorPassOfVideoOwner={
+                  videoData.hasCreatorPassOfVideoOwner
+                }
+                onInitialSeekComplete={handleInitialSeekComplete}
+                isVideoOwner={videoData.created_by._id === user?.id}
+                haveAccess={haveAccess}
+                haveCreator={haveCreator}
+                accessVersion={accessVersion}
+              />
+            </View>
+          )}
 
-      {showWallet && !isLandscape && (
-        <View
-          className={`z-10 absolute left-5 ${showWallet ? "top-10" : "top-14"}`}
-        >
-          <Pressable onPress={() => router.push("/(dashboard)/wallet")}>
-            <Image
-              source={require("../../../../assets/images/Wallet.png")}
-              className="size-10"
+          <VideoControls
+            haveCreatorPass={haveCreator}
+            haveAccess={setHaveAccess}
+            haveCreator={setCheckCreatorPass}
+            checkAccess={setAccessCheckedAPI}
+            isPurchasedVideo={isVideoPurchased}
+            isPurchasedSeries={isPurchasedSeries}
+            showBuyOption={showBuyOption}
+            setShowBuyOption={setShowBuyOption}
+            showWallet={setShowWallet}
+            player={player}
+            videoData={{
+              ...videoData,
+              likes: localStats.likes,
+              gifts: localStats.gifts,
+              shares: localStats.shares,
+              comments: { length: localStats.comments },
+            }}
+            isGlobalPlayer={isGlobalPlayer}
+            setShowCommentsModal={setShowCommentsModal}
+            onCommentsModalOpen={() => {
+              console.log("💰 Comments modal opened, triggering refresh");
+              setCommentsRefreshTrigger((prev) => prev + 1);
+            }}
+            onEpisodeChange={onEpisodeChange}
+            onToggleFullScreen={onToggleFullScreen}
+            onStatsUpdate={handleStatsUpdate}
+          />
+        </View>
+
+        {showWallet && !isLandscape && (
+          <View
+            className={`z-10 absolute left-5 ${showWallet ? "top-20" : "top-14"}`}
+          >
+            <Pressable onPress={() => router.push("/(dashboard)/wallet")}>
+              <Image
+                source={require("../../../../assets/images/Wallet.png")}
+                className="size-10"
+              />
+            </Pressable>
+          </View>
+        )}
+
+        {isGifted && (
+          <View className="z-10 absolute w-full">
+            <GiftingMessage
+              isVisible={true}
+              onClose={clearGiftingData}
+              creator={creator}
+              amount={giftSuccessMessage}
             />
-          </Pressable>
-        </View>
-      )}
+          </View>
+        )}
 
-      {isGifted && (
-        <View className="z-10 absolute w-full">
-          <GiftingMessage
-            isVisible={true}
-            onClose={clearGiftingData}
-            creator={creator}
-            amount={giftSuccessMessage}
+        {isVideoPurchased && (
+          <View className="absolute z-10">
+            <VideoBuyMessage
+              isVisible={true}
+              onClose={clearVideoAccessData}
+              creator={creator}
+              name={videoName}
+              amount={giftSuccessMessage}
+            />
+          </View>
+        )}
+
+        {isPurchasedPass && (
+          <View>
+            <CreatorPassBuyMessage
+              isVisible={true}
+              onClose={clearPassData}
+              creator={creator}
+              amount={giftSuccessMessage}
+            />
+          </View>
+        )}
+
+        {isPurchasedSeries && series && (
+          <View>
+            <SeriesPurchaseMessage
+              isVisible={true}
+              onClose={clearSeriesData}
+              series={series}
+            />
+          </View>
+        )}
+
+        {showCommentsModal && setShowCommentsModal && (
+          <CommentsSection
+            key={`comments-${videoData._id}`} // Stable key per video
+            onClose={() => setShowCommentsModal(false)}
+            videoId={videoData._id}
+            refreshTrigger={commentsRefreshTrigger} // Pass refresh trigger
+            onPressUsername={(userId) => {
+              try {
+                router.push(`/(dashboard)/profile/public/${userId}`);
+              } catch (error) {
+                console.error("Navigation error:", error);
+              }
+            }}
+            onPressTip={(commentId) => {
+              console.log("Open tip modal for comment:", commentId);
+            }}
+            onCommentAdded={() => {
+              const newCommentCount = localStats.comments + 1;
+              setLocalStats((prev) => ({
+                ...prev,
+                comments: newCommentCount,
+              }));
+              if (onStatsUpdate) {
+                onStatsUpdate({ comments: newCommentCount });
+              }
+            }}
           />
-        </View>
-      )}
-
-      {isVideoPurchased && (
-        <View className="absolute z-10">
-          <VideoBuyMessage
-            isVisible={true}
-            onClose={clearVideoAccessData}
-            creator={creator}
-            name={videoName}
-            amount={giftSuccessMessage}
-          />
-        </View>
-      )}
-
-      {isPurchasedPass && (
-        <View>
-          <CreatorPassBuyMessage
-            isVisible={true}
-            onClose={clearPassData}
-            creator={creator}
-            amount={giftSuccessMessage}
-          />
-        </View>
-      )}
-
-      {isPurchasedSeries && series && (
-        <View>
-          <SeriesPurchaseMessage
-            isVisible={true}
-            onClose={clearSeriesData}
-            series={series}
-          />
-        </View>
-      )}
-
-      {showCommentsModal && setShowCommentsModal && (
-        <CommentsSection
-          key={`comments-${videoData._id}`} // Stable key per video
-          onClose={() => setShowCommentsModal(false)}
-          videoId={videoData._id}
-          refreshTrigger={commentsRefreshTrigger} // Pass refresh trigger
-          onPressUsername={(userId) => {
-            try {
-              router.push(`/(dashboard)/profile/public/${userId}`);
-            } catch (error) {
-              console.error("Navigation error:", error);
-            }
-          }}
-          onPressTip={(commentId) => {
-            console.log("Open tip modal for comment:", commentId);
-          }}
-          onCommentAdded={() => {
-            const newCommentCount = localStats.comments + 1;
-            setLocalStats((prev) => ({
-              ...prev,
-              comments: newCommentCount,
-            }));
-            if (onStatsUpdate) {
-              onStatsUpdate({ comments: newCommentCount });
-            }
-          }}
-        />
-      )}
-      <View className="h-5"></View>
-    </View>
+        )}
+        <View className="h-5"></View>
+        {/* </View> */}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 

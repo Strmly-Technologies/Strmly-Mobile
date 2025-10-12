@@ -66,7 +66,7 @@ const WalletPage = () => {
   }, [error]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={['top']}>
       
       <ThemedView
         style={{
