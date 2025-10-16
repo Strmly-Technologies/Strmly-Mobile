@@ -23,8 +23,6 @@ const { height: screenHeight } = Dimensions.get("window");
 const VIDEO_HEIGHT = screenHeight;
 const PULL_THRESHOLD = 60;
 
-
-
 const VideosFeed: React.FC = () => {
   const [videos, setVideos] = useState<VideoItemType[]>([]);
   const [loading, setLoading] = useState(true);
