@@ -193,7 +193,7 @@ const handleSubmitReport = async () => {
           <FontAwesome name="arrow-left" size={20} color="white" />
         </TouchableOpacity>
         <Text className="text-white text-xl font-semibold flex-1">
-          Report Video
+          Report / Flag Video
         </Text>
       </View>
 

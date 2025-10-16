@@ -1,10 +1,12 @@
-import { Image, Pressable, Text, View } from "react-native";
+import { Alert, Image, Pressable, Text, Share ,View } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { useAuthStore } from "@/store/useAuthStore";
 import { CONFIG } from "@/Constants/config";
 import { router, useFocusEffect } from "expo-router";
 import { useGiftingStore } from "@/store/useGiftingStore";
+import { Share2Icon } from "lucide-react-native";
+import * as Linking from "expo-linking";
 
 type InteractOptionsProps = {
   onCommentPress?: () => void;
@@ -371,6 +373,26 @@ const InteractOptions = ({
     });
   };
 
+  // SHARE VIDEO FUNCTIONALITY
+  const shareVideo = async () => {
+    try {
+      // deep link to open in app
+       const appLink = `strmly://(dashboard)/ShareVideos/video/${videoId}`;
+      // fallback web link
+      // const webLink = `https://strmly.com/video/${videoId}`;
+
+      const message = `🎬 Check out this video on Strmly!\n\n${appLink}`;
+      console.log('App link', appLink)
+
+      await Share.share({
+        message,
+      });
+    } catch (error) {
+      console.error("Error sharing video:", error);
+      Alert.alert("Error", "Unable to share video. Please try again later.");
+    }
+  };
+
   return (
     <View className="px-1 py-5">
       <View className="gap-5 py-10">
@@ -424,6 +446,18 @@ const InteractOptions = ({
           <Text className="text-white text-sm">{gift}</Text>
         </View>
 
+        {/* Share Button */}
+        <View className="items-center gap-1">
+          <Pressable
+            onPress={shareVideo}
+            disabled={isReporting}
+            style={{ opacity: isReporting ? 0.5 : 1 }}
+          >
+            <Share2Icon size={22} color="white" />
+          </Pressable>
+          <Text className="text-white text-xs">Share</Text>
+        </View>
+        
         {/* NEW: Report Button */}
         <View className="items-center gap-1">
           <Pressable
