@@ -520,13 +520,13 @@ export const useUploadFlow = () => {
       });
 
       // append thumbnail if exists
-      // if (state.videoDetails.thumbnail) {
-      //   formData.append("thumbnail", {
-      //     uri: state.videoDetails.thumbnail.uri,
-      //     name: state.videoDetails.thumbnail.fileName ?? "thumbnail.jpg",
-      //     type: state.videoDetails.thumbnail.mimeType ?? "image/jpeg",
-      //   } as any);
-      // }
+      if (state.videoDetails.thumbnail) {
+        formData.append("thumbnail", {
+          uri: state.videoDetails.thumbnail.uri,
+          name: state.videoDetails.thumbnail.fileName ?? "thumbnail.jpg",
+          type: state.videoDetails.thumbnail.mimeType ?? "image/jpeg",
+        } as any);
+      }
 
       if (state.videoFormat === "episode" && state.selectedSeries) {
         // override what metadata already set

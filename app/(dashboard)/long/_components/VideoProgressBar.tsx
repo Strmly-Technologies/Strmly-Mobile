@@ -748,7 +748,7 @@ const styles = StyleSheet.create({
   progressBarContainer: {
     width: "100%",
     bottom: 0,
-    height: 10,
+    height: 5,
     justifyContent: "center",
     position: "absolute",
   },

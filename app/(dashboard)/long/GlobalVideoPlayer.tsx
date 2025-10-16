@@ -7,7 +7,11 @@ import {
   Pressable,
   View,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import ThemedView from "@/components/ThemedView";
 import { CONFIG } from "@/Constants/config";
 import { VideoItemType } from "@/types/VideosType";
@@ -39,6 +43,9 @@ const GlobalVideoPlayer: React.FC = () => {
   const { isLandscape } = useOrientationStore();
   const flatListRef = useRef<FlatList>(null);
   const debounceRef = useRef<NodeJS.Timeout | number | null>(null);
+
+  const insets = useSafeAreaInsets();
+  const bottomOffset = insets.bottom;
 
   useEffect(() => {
     if (storedVideos.length > 0 && videos.length == 0) {
@@ -174,8 +181,17 @@ const GlobalVideoPlayer: React.FC = () => {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
-        <View style={{ flex: 1, width: "100%", backgroundColor: "black" }}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "black", bottom: 0 }}
+        edges={[]}
+      >
+        <View
+          style={{
+            height: VIDEO_HEIGHT,
+            width: "100%",
+            backgroundColor: "black",
+          }}
+        >
           <FlatList
             ref={flatListRef}
             data={videos}
@@ -209,7 +225,6 @@ const GlobalVideoPlayer: React.FC = () => {
             overScrollMode="never"
             alwaysBounceVertical={false}
           />
-          {/* {!isLandscape && <BottomNavBar />} */}
         </View>
       </SafeAreaView>
     </SafeAreaProvider>

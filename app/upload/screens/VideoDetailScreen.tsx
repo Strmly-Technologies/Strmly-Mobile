@@ -6,7 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
-  Platform
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import FormField from "../components/FormField";
@@ -16,7 +16,7 @@ import { VideoDetailProps } from "../types";
 import { formatOptions, videoTypeOptions } from "../data/dropdownOptions";
 import { useCommunities } from "../hooks/useCommunities";
 import * as ImagePicker from "expo-image-picker";
-
+import { CircleQuestionMarkIcon } from "lucide-react-native";
 
 /**
  * Video Detail Screen
@@ -139,7 +139,7 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
           formData.videoType !== null;
 
         // Require thumbnail
-        // const hasThumbnail = !!formData.thumbnail;
+        const hasThumbnail = !!formData.thumbnail;
 
         // For episodes with selected series, validation is simpler since pricing is inherited
         // if (videoFormat === "episode" && selectedSeries) {
@@ -161,8 +161,8 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
           return basicValidation && hasValidAmount;
         }
 
-        // return basicValidation && hasThumbnail;
-        return basicValidation;
+        if (hasThumbnail) return basicValidation && hasThumbnail;
+        else return basicValidation;
       default:
         return false;
     }
@@ -170,10 +170,10 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
 
   return (
     <View className="flex-1 bg-black">
-
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 "
-      style={{ marginTop: Platform.OS === 'ios' ? 8 : 30 }}
+      <View
+        className="flex-row items-center justify-between px-4 py-3 "
+        style={{ marginTop: Platform.OS === "ios" ? 8 : 30 }}
       >
         <TouchableOpacity onPress={onBack}>
           <Ionicons name="chevron-back" size={24} color="white" />
@@ -305,10 +305,10 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
               </View>
             )}
 
-            {/* <View className="mb-8">
-              <Text className="text-white text-lg font-medium mb-3">
-                Thumbnail
-              </Text>
+            <View className="mb-8">
+                <Text className="text-white text-lg font-medium mb-3">
+                  Thumbnail <CircleQuestionMarkIcon size={12} color={"white"} />
+                </Text>
               {formData.thumbnail ? (
                 <TouchableOpacity onPress={pickThumbnail}>
                   <Image
@@ -327,12 +327,12 @@ const VideoDetailScreen: React.FC<VideoDetailProps> = ({
                 </TouchableOpacity>
               )}
 
-              {!formData.thumbnail && (
+              {/* {!formData.thumbnail && (
                 <Text className="text-red-400 mt-2 text-sm">
                   Thumbnail is required
                 </Text>
-              )}
-            </View> */}
+              )} */}
+            </View>
           </>
         )}
 
