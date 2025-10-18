@@ -520,7 +520,7 @@ const VideoContentGifting = ({
   // Wallet data is automatically fetched by useWallet hook
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={['top']}>
       <ThemedView style={{ flex: 1 }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}

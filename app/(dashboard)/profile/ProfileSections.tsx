@@ -368,7 +368,7 @@ export default function ProfileSections() {
 
         {/* Create Community Button (only for My Community tab) */}
         {activeSection === "myCommunity" && (
-          <View className="absolute bottom-10 left-0 right-0 px-4">
+          <View className="absolute bottom-16 left-0 right-0 px-4">
             <TouchableOpacity
               className="bg-white rounded-full py-4"
               onPress={() => router.push("/(communities)/CreateCommunityPage")}

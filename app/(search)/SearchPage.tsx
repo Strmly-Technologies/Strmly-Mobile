@@ -445,7 +445,7 @@ const SearchScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={{ height: page_height, backgroundColor: "black" }}>
+    <SafeAreaView style={{ height: page_height, backgroundColor: "black" }} edges={['top']}>
       <View style={{ ...styles.container, height: page_height }}>
         <TextInput
           placeholder="Search"
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
   // Container and basic layout
   container: {
     backgroundColor: "#000",
-    paddingTop: 0,
+    paddingTop: 10,
   },
   searchInput: {
     backgroundColor: "rgba(255,255,255,0.1)",

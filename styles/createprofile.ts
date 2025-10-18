@@ -8,6 +8,7 @@ export const CreateProfileStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
+    paddingTop: 10
   },
   TopBarTitle: {
     fontSize: 20,

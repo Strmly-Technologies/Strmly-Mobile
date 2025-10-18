@@ -633,7 +633,7 @@ const StrmlyStudio = () => {
         </ScrollView>
 
         {/* Bottom Section */}
-        <View className="absolute px-4 bottom-10 left-0 right-0">
+        <View className="absolute px-4 bottom-16 left-0 right-0">
           {/* Action Button */}
           <TouchableOpacity
             className="bg-gray-200 rounded-full py-4 items-center"

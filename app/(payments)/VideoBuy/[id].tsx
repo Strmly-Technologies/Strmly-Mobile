@@ -203,7 +203,7 @@ const VideoBuy = () => {
   }, [token]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={[]}>
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
       <ThemedView className="flex-1 bg-black">
         <View className="flex-1 justify-between pt-0 px-5">
           {/* Top section */}

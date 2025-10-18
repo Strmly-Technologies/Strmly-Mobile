@@ -60,7 +60,7 @@ const VideoAccess = () => {
   }, [id, token]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={['top']}>
       <View className="flex-1">
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 mt-12">

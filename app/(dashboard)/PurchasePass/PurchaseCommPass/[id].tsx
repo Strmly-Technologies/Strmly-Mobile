@@ -79,7 +79,7 @@ const CommunityAccessDemo = () => {
   }, [id, token]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={['top']}>
       <ThemedView style={{ flex: 1 }}>
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 pt-10">

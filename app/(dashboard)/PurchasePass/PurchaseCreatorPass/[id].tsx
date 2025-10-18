@@ -79,7 +79,7 @@ const CreatorPassDemo = () => {
   }, [token, id]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }} edges={['top']}>
       <View style={{ flex: 1 }}>
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 pt-10 py-3">
