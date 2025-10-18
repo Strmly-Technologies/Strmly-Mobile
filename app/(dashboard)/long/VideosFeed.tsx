@@ -326,8 +326,9 @@ const VideosFeed: React.FC = () => {
             initialNumToRender={1}
             maxToRenderPerBatch={1}
             windowSize={1}
-            removeClippedSubviews
+            removeClippedSubviews={true}
             showsVerticalScrollIndicator={false}
+            contentInsetAdjustmentBehavior="automatic"
             onEndReachedThreshold={0.8}
             onEndReached={() => {
               if (hasMore && !isFetchingMore && isScreenFocused) {
